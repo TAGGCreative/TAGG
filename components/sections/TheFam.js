@@ -7,15 +7,6 @@ import { useMediaQuery } from "react-responsive"
 const team = {
   extended: [
     {
-      given: "CAT",
-      sur: "MEDEIROS",
-      role: "Creative Director + Designer",
-      company: "SALLUA",
-      head: "/images/extended-fam/ExtendedFam_CatMedeiros - SALLUA.png",
-      mask: "/images/extended-fam/ExtendedFam_CatMedeiros - SALLUA copy.png",
-      bio: "We're not sure how, but she has a knack for clarifying the inexpressible, and forming it into some truly stunning designs. It might be magic. ",
-    },
-    {
       head: "/images/extended-fam/ExtendedFam_Baylee.png",
       mask: "/images/extended-fam/ExtendedFam_Baylee copy.png",
       given: "BAYLEE",
