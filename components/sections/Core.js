@@ -98,23 +98,21 @@ export default function Core() {
             justifyContent: "center",
           }}
         >
-          <PoppedHeader>LEAN. AGILE. FULLY DISTRIBUTED</PoppedHeader>
+          <PoppedHeader>PRETTY ISN'T THE POINT</PoppedHeader>
           <p>
-            Different places. Different people. All at the top of their game and
-            curated on a per-project basis.
-            <br />
-            <br />
-            We have a network of over 60,000 creative partners across the world,
-            all available on-demand and ready to make it work.
+            Nice shots are table stakes. Anyone can make something pretty. We
+            make pretty mean something. No one cares what camera you used—if it
+            got them out of bed on Monday.
           </p>
         </Text>
 
         <Text gridArea="b">
-          <PoppedHeader>Small by intention, not by necessity</PoppedHeader>
+          <PoppedHeader>LEAN, SMART, AND INDEPENDANT.</PoppedHeader>
           <p>
-            Having a centralized direction keeps the creative consistent, the
-            communication crystal clear and the quality high. No game of
-            telephone——everyone on our team is within earshot.
+            No hand-holding. No game of telephone. No endless CC threads. Just
+            give us the idea and let us run. We curate the right team—project by
+            project, from the best talent around the world. High standards, low
+            drama.
           </p>
         </Text>
 
