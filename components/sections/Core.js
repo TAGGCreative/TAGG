@@ -90,14 +90,7 @@ export default function Core() {
       )}
     >
       <Wrap>
-        <Text
-          gridArea="a"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
+        <Text gridArea="a">
           <PoppedHeader>PRETTY ISN'T THE POINT</PoppedHeader>
           <p>
             Nice shots are table stakes. Anyone can make something pretty. We
