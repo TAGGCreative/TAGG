@@ -92,7 +92,7 @@ const Frame = styled.div`
 
 const EmbedContainer = styled.div`
   position: relative;
-  padding-bottom: 56.25%;
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   overflow: hidden;
