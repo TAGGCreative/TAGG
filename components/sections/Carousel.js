@@ -26,6 +26,7 @@ const Frame = styled.div`
   align-items: center;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
 
   @media screen and (max-width: 425px) {
     height: 90%;
