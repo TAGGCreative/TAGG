@@ -27,7 +27,7 @@ const Frame = styled.div`
   align-items: center;
   position: relative;
   overflow: hidden;
-  box-sizing: border-box;
+  box-sizing: content-box;
 
   @media screen and (max-width: 425px) {
     max-height: 90vh;
@@ -93,7 +93,7 @@ const Frame = styled.div`
 
 const EmbedContainer = styled.div`
   position: relative;
-  box-sizing: border-box;
+  box-sizing: content-box;
   width: 100%;
   height: 100%;
   overflow: hidden;
