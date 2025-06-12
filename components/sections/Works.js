@@ -2,44 +2,12 @@ import HomeSection from "./HomeSection"
 import Link from "next/link"
 import styled from "styled-components"
 import WorkThumb from "../WorkThumb"
+import { StaggerBox } from "../elements/StaggerBox"
 import { AnimatedHeader } from "../elements/AnimatedHeader"
 import { forwardRef } from "react"
 import PoppedHeader from "../PoppedHeader"
 import { useMediaQuery } from "react-responsive"
 
-const WorksBox = styled.div`
-  display: grid;
-  width: 50%;
-  margin: 0 auto;
-  grid-template-columns: repeat(2, 1fr);
-  column-gap: 4%;
-  row-gap: 1em;
-
-  & > div {
-    width: 100%;
-    &:not(:first-child) {
-      margin-top: ${({ marginTop }) => marginTop};
-    }
-  }
-
-  & > :nth-child(odd) {
-    justify-self: end;
-  }
-
-  & > :nth-child(even) {
-    justify-self: start;
-  }
-
-  @media screen and (max-width: 425px) {
-    display: block;
-    width: 95%;
-    margin-bottom: 2em;
-    & > div {
-      margin-top: 0;
-      margin-bottom: 0;
-    }
-  }
-`
 
 const Work = styled.div`
   display: initial;
@@ -139,7 +107,7 @@ const Works = forwardRef(({ videoList }, ref) => {
         </AnimatedHeader>
       )}
     >
-      <WorksBox marginTop="-100px">
+      <StaggerBox marginTop="-100px">
         {videoList.map((video, i) => {
           const videoId = video.uri.split("/")[2]
           try {
@@ -165,7 +133,7 @@ const Works = forwardRef(({ videoList }, ref) => {
             return null
           }
         })}
-      </WorksBox>
+      </StaggerBox>
     </HomeSection>
   )
 })
