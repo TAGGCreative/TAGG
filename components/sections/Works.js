@@ -9,7 +9,7 @@ import { useMediaQuery } from "react-responsive"
 
 const WorksBox = styled.div`
   display: grid;
-  width: 100%;
+  width: 70%;
   margin: 0 auto;
   grid-template-columns: repeat(2, 1fr);
   column-gap: 4%;
