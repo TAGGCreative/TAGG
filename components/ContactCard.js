@@ -55,9 +55,11 @@ export default function ContactCard({ style }) {
       </a>
       <a href="https://goo.gl/maps/YuozNgimFFpJ6Wdv5" target="_blank">
         <p>
-          #400 - 22 E 5th AVE
+          128 W Pender St, Suite 1607
           <br />
-          VANCOUVER, BC, CANADA
+          Vancouver, BC, Canada
+          <br />
+          V6B 1R8
         </p>
       </a>
       <div id="icons">
