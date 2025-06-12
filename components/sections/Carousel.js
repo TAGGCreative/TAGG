@@ -20,7 +20,8 @@ const Section = styled.section`
 
 const Frame = styled.div`
   width: 100%;
-  height: 80vh;
+  aspect-ratio: 16 / 9;
+  max-height: 80vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -29,7 +30,7 @@ const Frame = styled.div`
   box-sizing: border-box;
 
   @media screen and (max-width: 425px) {
-    height: 90%;
+    max-height: 90vh;
   }
 
   .carousel-root a {
@@ -112,6 +113,7 @@ const Static = styled.img`
   position: absolute;
   width: 100%;
   height: 100%;
+  object-fit: cover;
   opacity: ${({ opacity }) => opacity};
   transition: opacity 300ms ease-in;
 `
