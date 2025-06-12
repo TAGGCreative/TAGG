@@ -21,7 +21,7 @@ const PrivacyPolicy = () => {
           <p>Privacy Policy</p>
         </a>
       </Link>
-      <p>&nbsp; | &nbsp;© TAGG Creative 2022</p>
+      <p>&nbsp; | &nbsp;© TAGG Creative 2025</p>
     </Quiet>
   )
 }

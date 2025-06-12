@@ -3,10 +3,17 @@ import Link from "next/link"
 import styled from "styled-components"
 import WorkThumb from "../WorkThumb"
 import { StaggerBox } from "../elements/StaggerBox"
+
+const WorksBox = styled(StaggerBox)`
+  & > div {
+    max-width: 45%;
+  }
+`
 import { AnimatedHeader } from "../elements/AnimatedHeader"
 import { forwardRef } from "react"
 import PoppedHeader from "../PoppedHeader"
 import { useMediaQuery } from "react-responsive"
+
 
 const Work = styled.div`
   display: initial;
@@ -106,7 +113,7 @@ const Works = forwardRef(({ videoList }, ref) => {
         </AnimatedHeader>
       )}
     >
-      <StaggerBox marginTop="-100px">
+      <WorksBox marginTop="-100px">
         {videoList.map((video, i) => {
           const videoId = video.uri.split("/")[2]
           try {
@@ -132,7 +139,7 @@ const Works = forwardRef(({ videoList }, ref) => {
             return null
           }
         })}
-      </StaggerBox>
+      </WorksBox>
     </HomeSection>
   )
 })

@@ -87,39 +87,48 @@ export default function OurArena() {
     >
       <Wrap>
         <Text gridArea="a">
-          <PoppedHeader>Video Branding</PoppedHeader>
+          <PoppedHeader>DOCUMENTARY BY DESIGN</PoppedHeader>
           <p>
-            We create a unique video aeshetic consistent with your company's
-            ethos. Whether that means aligning with your current brand or
-            creating an entirely new one, we work with you to develop a unified
-            signature that can be applied across platforms.
+            We tell real stories. Docu-style. No actors. No scripts. No staged
+            moments pretending to be something they’re not. We work with
+            founders, teams, and companies with something to say—and say it in a
+            way that actually lands. This isn’t content for content’s sake. It’s
+            story with a day job.
           </p>
         </Text>
         <Text gridArea="b">
-          <PoppedHeader>Creative</PoppedHeader>
+          <PoppedHeader>EDITORIAL BY NATURE</PoppedHeader>
           <p>
-            This is the incubation process. We determine the end goal of your
-            video and implement all the necessary tools to achieve it. This
-            includes copywriting, scripting, storyboarding and anything that
-            enriches the blueprint of your video.
+            We’re editors first. Always have been. That means we see the end at
+            the beginning. We think in structure, rhythm, timing—what actually
+            works in the cut. So when we produce, we produce on purpose.
+            <br />
+            <br />
+            We also offer edit only services if that’s your jam.
           </p>
         </Text>
         <Text gridArea="c">
-          <PoppedHeader>Production</PoppedHeader>
+          <PoppedHeader>CAMERAS OPTIONAL</PoppedHeader>
           <p>
-            We bring the concept to life. With our extensive network in the film
-            and commercial industry - we're able to put the right people in the
-            right places to shoot the content at an exceptionally high level.
-            All while remaining in-house.
+            Not everything needs a camera crew. Some stories can be built
+            without setting foot on set. With generative AI, stock footage, and
+            archival gems, we can craft the story without ever rolling a frame.
+            Just faster, leaner, and often, way more efficient.
+            <br />
+            <br />
+            We’ll miss crafty, though.
           </p>
         </Text>
         <Text gridArea="d">
-          <PoppedHeader>Post</PoppedHeader>
+          <PoppedHeader>CREATIVE INCLUDED</PoppedHeader>
           <p>
-            To maximize the consistency between the concept and end product, all
-            of our editing is done in-house. Other post-production services such
-            as colour timing, sound design and motion graphics are offered to
-            give content that extra pop and definition.
+            We don’t wait for the boards. We shape the creative from day one.
+            Ideas, angles, formats, hooks. It’s all part of the work. We find the
+            angle, craft the story, and build the thing from the ground up. Some
+            folks think you need an agency to crack the concept.
+            <br />
+            <br />
+            We don’t.
           </p>
         </Text>
       </Wrap>

@@ -102,13 +102,15 @@ const WhoWeAre = forwardRef((props, ref) => {
 
       <div className="centerframe">
         <div className={inView ? "textpos appear" : "textpos hidden"}>
-          <PoppedHeader>A VIDEO-FIRST CREATIVE AGENCY</PoppedHeader>
+          <PoppedHeader>A SOLUTION-FIRST NARRATIVE STUDIO</PoppedHeader>
           <p>
-            We solve creative problems with video. It’s not an afterthought,
-            it’s not the cherry on top, it’s the whole motherf%^$ing sundae. It
-            doesn’t matter whether that’s a slick TVC spot, a docu-style brand
-            story, or a UGC campaign shot exclusively on iPhone. No tool, style,
-            or deliverable is out of the picture.
+            We’re not here for branded navel-gazing. We’re here to solve sh*t.
+            Story is the tool, not the trophy. We build narratives that do
+            work—raise capital, rally teams, distill complexities. No matter the
+            medium, format or deliverable;
+            <br />
+            <br />
+            We lead with solutions, arrive with story, and end in goosebumps.
           </p>
         </div>
       </div>
