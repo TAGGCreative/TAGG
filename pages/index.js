@@ -10,7 +10,7 @@ import OurRep from "../components/sections/OurRep"
 import Contact from "../components/sections/Contact"
 import { PrivacyPolicy } from "../components/elements/PrivacyPolicy"
 import {
-  getMostRecentAnimatedThumb,
+  getPreviewVideo,
   getClipsMobile,
   getClipsDesktop,
   getWorks,
@@ -25,7 +25,7 @@ export async function getStaticProps(context) {
 
   let videoList = await getWorks()
   for (let video of videoList) {
-    video["thumb"] = await getMostRecentAnimatedThumb(video?.uri)
+    video["thumb"] = await getPreviewVideo(video?.uri)
   }
 
   return {

@@ -41,7 +41,7 @@ const Work = styled.div`
       opacity: 0;
     }
 
-    .gif {
+    .preview {
       opacity: 1;
     }
   }

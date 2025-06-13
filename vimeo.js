@@ -123,8 +123,8 @@ export const getWorks = async (album_id = "8478566") => {
 // Create a new set: Go to the advanced settings of a video from vimeo.com to create
 // The site will use the most recently created thumbnail.
 // https://vimeo.com/blog/post/how-to-turn-your-videos-into-gifs/
-export const getMostRecentAnimatedThumb = async (uri) => {
-  const gifs = await new Promise((resolve, reject) => {
+export const getPreviewVideo = async (uri) => {
+  const previews = await new Promise((resolve, reject) => {
     vimeoClient.request(
       {
         method: "GET",
@@ -144,15 +144,25 @@ export const getMostRecentAnimatedThumb = async (uri) => {
     )
   })
 
-  const mostRecent = gifs?.sort(
+  const mostRecent = previews?.sort(
     (thumbA, thumbB) => thumbB.created_on - thumbA.created_on,
   )[0]
 
-  if (!gifs.length) {
+  if (!previews.length) {
     console.log(uri, "missing animated thumb!")
   }
 
-  return mostRecent ?? null
+  if (!mostRecent) return null
+
+  const mp4 = mostRecent?.sizes?.find(
+    (size) => size.link?.endsWith(".mp4") || size.type === "video/mp4",
+  )?.link
+
+  const gif = mostRecent?.sizes?.find(
+    (size) => size.link?.endsWith(".gif") || size.type === "image/gif",
+  )?.link
+
+  return { mp4, gif }
 }
 
 export function tryToParseJSONdescription(jsonString) {
