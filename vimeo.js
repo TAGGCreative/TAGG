@@ -124,33 +124,42 @@ export const getWorks = async (album_id = "8478566") => {
 // The site will use the most recently created thumbnail.
 // https://vimeo.com/blog/post/how-to-turn-your-videos-into-gifs/
 export const getPreviewVideo = async (uri) => {
-  const previews = await new Promise((resolve, reject) => {
-    vimeoClient.request(
-      {
-        method: "GET",
-        path: `${uri}/animated_thumbsets`,
-        userId: TAGG_ID,
-      },
-      (error, body, status_code, headers) => {
-        console.log("getAnimatedThumbs:", uri, status_code)
+  let previews
+  try {
+    previews = await new Promise((resolve, reject) => {
+      vimeoClient.request(
+        {
+          method: "GET",
+          path: `${uri}/animated_thumbsets`,
+          userId: TAGG_ID,
+        },
+        (error, body, status_code, headers) => {
+          console.log("getAnimatedThumbs:", uri, status_code)
 
-        if (error) {
-          console.error(error)
-          reject(error)
-        }
+          if (error) {
+            console.error(error)
+            reject(error)
+            return
+          }
 
-        resolve(body?.data)
-      },
-    )
-  })
+          resolve(body?.data)
+        },
+      )
+    })
+  } catch (error) {
+    console.error("failed to get preview", uri)
+    console.error(error)
+    return null
+  }
 
-  const mostRecent = previews?.sort(
+  if (!previews || previews.length === 0) {
+    console.log(uri, "missing animated thumb!")
+    return null
+  }
+
+  const mostRecent = previews.sort(
     (thumbA, thumbB) => thumbB.created_on - thumbA.created_on,
   )[0]
-
-  if (!previews.length) {
-    console.log(uri, "missing animated thumb!")
-  }
 
   if (!mostRecent) return null
 
