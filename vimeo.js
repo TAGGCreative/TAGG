@@ -1,5 +1,16 @@
 import { Vimeo } from "vimeo"
 import { config } from "dotenv"
+// --- TEMP OVERRIDES (kill broken thumb) ---
+// If a video ID is listed here, we bypass Vimeo's animated lookup
+// and hand back this object instead (same shape your code expects).
+const TEMP_GIF_OVERRIDES = {
+  "/videos/1123017366": {
+    // Use a working animated GIF/WebP URL if you have one.
+    // For now, we point to the 1920x1080 POSTER so it never breaks.
+    link: "https://i.vimeocdn.com/video/2064552800-45cdc1ccefb61cd9b3a5519df92c64b309bd86e6fd34b374f195657b666661cc-d_1920x1080?&r=pad&region=us",
+    created_on: Math.floor(Date.now() / 1000)
+  }
+};
 
 // add .env file to process in dev
 config()
@@ -124,6 +135,10 @@ export const getWorks = async (album_id = "8478566") => {
 // The site will use the most recently created thumbnail.
 // https://vimeo.com/blog/post/how-to-turn-your-videos-into-gifs/
 export const getMostRecentAnimatedThumb = async (uri) => {
+  if (TEMP_GIF_OVERRIDES[uri]) {
+    return TEMP_GIF_OVERRIDES[uri];
+  }
+  // (rest of the function stays the same)
   const gifs = await new Promise((resolve, reject) => {
     vimeoClient.request(
       {
