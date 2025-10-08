@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import styled from "styled-components"
 
 const Image = styled.img`
@@ -49,11 +50,46 @@ const WorkThumb = ({ images, thumb }) => {
   const desktopSizeGif =
     rawDesktopGif && rawDesktopGif !== imageSrc ? rawDesktopGif : null
 
+  const [animatedSrc, setAnimatedSrc] = useState(null)
+
+  useEffect(() => {
+    let isMounted = true
+    setAnimatedSrc(null)
+
+    if (!desktopSizeGif) {
+      return () => {
+        isMounted = false
+      }
+    }
+
+    const controller = new AbortController()
+
+    fetch(desktopSizeGif, { method: "HEAD", signal: controller.signal })
+      .then((response) => {
+        if (response.ok && isMounted) {
+          setAnimatedSrc(desktopSizeGif)
+        }
+      })
+      .catch(() => {
+        // keep poster image when animated asset fails to load
+      })
+
+    return () => {
+      isMounted = false
+      controller.abort()
+    }
+  }, [desktopSizeGif])
+
   return (
     <Frame>
-      {desktopSizeGif ? (
+      {animatedSrc ? (
         <>
-          <Gif src={desktopSizeGif} alt={altText} className="gif" />
+          <Gif
+            src={animatedSrc}
+            alt={altText}
+            className="gif"
+            onError={() => setAnimatedSrc(null)}
+          />
           <Image src={imageSrc} alt={altText} className="image" />
         </>
       ) : (
