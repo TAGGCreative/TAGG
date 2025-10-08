@@ -33,9 +33,21 @@ const WorkThumb = ({ images, thumb }) => {
   const altText = thumb?.alt ?? "Work thumbnail"
 
   const thumbSizes = Array.isArray(thumb?.sizes) ? thumb.sizes : []
-  const rawDesktopGif =
-    thumbSizes[thumbSizes.length - 1]?.link ?? thumb?.link ?? null
-  const desktopSizeGif = rawDesktopGif && rawDesktopGif !== imageSrc ? rawDesktopGif : null
+  const validAnimatedLink = [...thumbSizes]
+    .reverse()
+    .map((size) => size?.link)
+    .find((link) =>
+      typeof link === "string" && /\.(gif|webp)(\?|$)/i.test(link),
+    )
+
+  const fallbackAnimatedLink =
+    typeof thumb?.link === "string" && /\.(gif|webp)(\?|$)/i.test(thumb.link)
+      ? thumb.link
+      : null
+
+  const rawDesktopGif = validAnimatedLink ?? fallbackAnimatedLink
+  const desktopSizeGif =
+    rawDesktopGif && rawDesktopGif !== imageSrc ? rawDesktopGif : null
 
   return (
     <Frame>
