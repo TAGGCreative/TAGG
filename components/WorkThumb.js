@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import styled from "styled-components"
 
 const Image = styled.img`
@@ -25,13 +26,75 @@ const Frame = styled.div`
 `
 
 const WorkThumb = ({ images, thumb }) => {
-  const imageSrc = images[3]?.link
-  const desktopSizeGif = thumb?.sizes[2].link
+  const imageSizes = Array.isArray(images) ? images : []
+  const lastImageSize = imageSizes[imageSizes.length - 1]?.link
+  const fallbackImageSize = imageSizes[0]?.link
+
+  const imageSrc = lastImageSize ?? fallbackImageSize ?? thumb?.link ?? null
+  const altText = thumb?.alt ?? "Work thumbnail"
+
+  const thumbSizes = Array.isArray(thumb?.sizes) ? thumb.sizes : []
+  const validAnimatedLink = [...thumbSizes]
+    .reverse()
+    .map((size) => size?.link)
+    .find((link) =>
+      typeof link === "string" && /\.(gif|webp)(\?|$)/i.test(link),
+    )
+
+  const fallbackAnimatedLink =
+    typeof thumb?.link === "string" && /\.(gif|webp)(\?|$)/i.test(thumb.link)
+      ? thumb.link
+      : null
+
+  const rawDesktopGif = validAnimatedLink ?? fallbackAnimatedLink
+  const desktopSizeGif =
+    rawDesktopGif && rawDesktopGif !== imageSrc ? rawDesktopGif : null
+
+  const [animatedSrc, setAnimatedSrc] = useState(null)
+
+  useEffect(() => {
+    let isMounted = true
+    setAnimatedSrc(null)
+
+    if (!desktopSizeGif) {
+      return () => {
+        isMounted = false
+      }
+    }
+
+    const controller = new AbortController()
+
+    fetch(desktopSizeGif, { method: "HEAD", signal: controller.signal })
+      .then((response) => {
+        if (response.ok && isMounted) {
+          setAnimatedSrc(desktopSizeGif)
+        }
+      })
+      .catch(() => {
+        // keep poster image when animated asset fails to load
+      })
+
+    return () => {
+      isMounted = false
+      controller.abort()
+    }
+  }, [desktopSizeGif])
 
   return (
     <Frame>
-      <Gif src={desktopSizeGif} alt={imageSrc} className="gif" />
-      <Image src={imageSrc} className="image" />
+      {animatedSrc ? (
+        <>
+          <Gif
+            src={animatedSrc}
+            alt={altText}
+            className="gif"
+            onError={() => setAnimatedSrc(null)}
+          />
+          <Image src={imageSrc} alt={altText} className="image" />
+        </>
+      ) : (
+        <Image src={imageSrc} alt={altText} />
+      )}
     </Frame>
   )
 }
