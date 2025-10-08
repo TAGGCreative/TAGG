@@ -24,17 +24,49 @@ const Frame = styled.div`
   width: 100%;
 `
 
+const normaliseThumbSizes = (thumb) => {
+  if (!thumb) return []
+
+  if (Array.isArray(thumb)) {
+    return thumb
+  }
+
+  if (Array.isArray(thumb?.sizes)) {
+    return thumb.sizes
+  }
+
+  if (Array.isArray(thumb?.pictures?.sizes)) {
+    return thumb.pictures.sizes
+  }
+
+  return []
+}
+
 const getBestAnimatedThumb = (thumb) => {
   if (!thumb) return null
 
-  const sizes = thumb?.sizes ?? []
+  const sizes = normaliseThumbSizes(thumb)
 
   if (sizes.length) {
-    const sortedByWidth = [...sizes].sort((a, b) => (a.width || 0) - (b.width || 0))
-    const largestWithLink = [...sortedByWidth].reverse().find((size) => size?.link)
+    const preferredWidths = [640, 720, 540]
+    for (const width of preferredWidths) {
+      const match = sizes.find((size) => size?.width === width && size?.link)
+      if (match?.link) {
+        return match.link
+      }
+    }
 
-    if (largestWithLink?.link) {
-      return largestWithLink.link
+    const fallbackByIndex = sizes[2]?.link
+    if (fallbackByIndex) {
+      return fallbackByIndex
+    }
+
+    const sortedByWidth = [...sizes]
+      .filter((size) => size?.link)
+      .sort((a, b) => (b.width || 0) - (a.width || 0))
+
+    if (sortedByWidth.length) {
+      return sortedByWidth[0].link
     }
   }
 
@@ -57,7 +89,7 @@ const WorkThumb = ({ images, thumb }) => {
   return (
     <Frame>
       {desktopSizeGif && (
-        <Gif src={desktopSizeGif} alt={imageSrc || "Work thumbnail"} className="gif" />
+        <Gif src={desktopSizeGif} alt="Animated work preview" className="gif" />
       )}
       {imageSrc && <Image src={imageSrc} className="image" />}
     </Frame>
