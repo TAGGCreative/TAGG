@@ -24,14 +24,42 @@ const Frame = styled.div`
   width: 100%;
 `
 
+const getBestAnimatedThumb = (thumb) => {
+  if (!thumb) return null
+
+  const sizes = thumb?.sizes ?? []
+
+  if (sizes.length) {
+    const sortedByWidth = [...sizes].sort((a, b) => (a.width || 0) - (b.width || 0))
+    const largestWithLink = [...sortedByWidth].reverse().find((size) => size?.link)
+
+    if (largestWithLink?.link) {
+      return largestWithLink.link
+    }
+  }
+
+  return thumb?.link ?? null
+}
+
+const getLargestImage = (images) => {
+  if (!images?.length) return null
+
+  const sortedByWidth = [...images].sort((a, b) => (a.width || 0) - (b.width || 0))
+  const largestWithLink = [...sortedByWidth].reverse().find((size) => size?.link)
+
+  return largestWithLink?.link ?? sortedByWidth.pop()?.link ?? null
+}
+
 const WorkThumb = ({ images, thumb }) => {
-  const imageSrc = images[3]?.link
-  const desktopSizeGif = thumb?.sizes[2].link
+  const imageSrc = getLargestImage(images)
+  const desktopSizeGif = getBestAnimatedThumb(thumb)
 
   return (
     <Frame>
-      <Gif src={desktopSizeGif} alt={imageSrc} className="gif" />
-      <Image src={imageSrc} className="image" />
+      {desktopSizeGif && (
+        <Gif src={desktopSizeGif} alt={imageSrc || "Work thumbnail"} className="gif" />
+      )}
+      {imageSrc && <Image src={imageSrc} className="image" />}
     </Frame>
   )
 }
