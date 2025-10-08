@@ -31,12 +31,26 @@ const normaliseThumbSizes = (thumb) => {
     return thumb
   }
 
-  if (Array.isArray(thumb?.sizes)) {
-    return thumb.sizes
+  const coerceToArray = (maybeArrayLike) => {
+    if (!maybeArrayLike) return []
+    if (Array.isArray(maybeArrayLike)) return maybeArrayLike
+
+    return Object.values(maybeArrayLike)
   }
 
-  if (Array.isArray(thumb?.pictures?.sizes)) {
-    return thumb.pictures.sizes
+  const directSizes = coerceToArray(thumb?.sizes)
+  if (directSizes.length) {
+    return directSizes
+  }
+
+  const pictureSizes = coerceToArray(thumb?.pictures?.sizes)
+  if (pictureSizes.length) {
+    return pictureSizes
+  }
+
+  const fileSizes = coerceToArray(thumb?.files)
+  if (fileSizes.length) {
+    return fileSizes
   }
 
   return []
@@ -47,26 +61,31 @@ const getBestAnimatedThumb = (thumb) => {
 
   const sizes = normaliseThumbSizes(thumb)
 
+  const getSizeLink = (size) => size?.link || size?.link_with_play_button
+
   if (sizes.length) {
     const preferredWidths = [640, 720, 540]
     for (const width of preferredWidths) {
-      const match = sizes.find((size) => size?.width === width && size?.link)
-      if (match?.link) {
-        return match.link
+      const match = sizes.find(
+        (size) => Number(size?.width) === width && getSizeLink(size),
+      )
+      const matchLink = getSizeLink(match)
+      if (matchLink) {
+        return matchLink
       }
     }
 
-    const fallbackByIndex = sizes[2]?.link
+    const fallbackByIndex = getSizeLink(sizes[2])
     if (fallbackByIndex) {
       return fallbackByIndex
     }
 
     const sortedByWidth = [...sizes]
-      .filter((size) => size?.link)
-      .sort((a, b) => (b.width || 0) - (a.width || 0))
+      .filter((size) => getSizeLink(size))
+      .sort((a, b) => Number(b?.width || 0) - Number(a?.width || 0))
 
     if (sortedByWidth.length) {
-      return sortedByWidth[0].link
+      return getSizeLink(sortedByWidth[0])
     }
   }
 
