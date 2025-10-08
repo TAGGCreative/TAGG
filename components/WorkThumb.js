@@ -25,13 +25,28 @@ const Frame = styled.div`
 `
 
 const WorkThumb = ({ images, thumb }) => {
-  const imageSrc = images[3]?.link
-  const desktopSizeGif = thumb?.sizes[2].link
+  const imageSizes = Array.isArray(images) ? images : []
+  const lastImageSize = imageSizes[imageSizes.length - 1]?.link
+  const fallbackImageSize = imageSizes[0]?.link
+
+  const imageSrc = lastImageSize ?? fallbackImageSize ?? thumb?.link ?? null
+  const altText = thumb?.alt ?? "Work thumbnail"
+
+  const thumbSizes = Array.isArray(thumb?.sizes) ? thumb.sizes : []
+  const rawDesktopGif =
+    thumbSizes[thumbSizes.length - 1]?.link ?? thumb?.link ?? null
+  const desktopSizeGif = rawDesktopGif && rawDesktopGif !== imageSrc ? rawDesktopGif : null
 
   return (
     <Frame>
-      <Gif src={desktopSizeGif} alt={imageSrc} className="gif" />
-      <Image src={imageSrc} className="image" />
+      {desktopSizeGif ? (
+        <>
+          <Gif src={desktopSizeGif} alt={altText} className="gif" />
+          <Image src={imageSrc} alt={altText} className="image" />
+        </>
+      ) : (
+        <Image src={imageSrc} alt={altText} />
+      )}
     </Frame>
   )
 }
