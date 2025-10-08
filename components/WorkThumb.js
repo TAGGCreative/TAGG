@@ -41,14 +41,7 @@ const Frame = styled.div`
   align-items: center;
   background-color: rgba(0, 0, 0, 0);
   width: 100%;
-  /* keep title/outline/etc. on hover for ALL cards */
-  &:hover .overlay {
-    outline-color: var(--red);
-  }
-  /* only fade the GIF in when this card actually has animation */
-  &:hover .gif {
-    opacity: ${(props) => (props.$hasAnimated ? 1 : 0)};
-  }
+  /* title/outline still handled by .overlay; we’ll toggle GIF in JS */
 `
 
 const getBestStaticImage = (images = []) => {
@@ -127,8 +120,15 @@ const WorkThumb = ({ images, thumb }) => {
     }
   }, [animatedCandidate, staticImageSrc])
 
+  const [isHovering, setIsHovering] = useState(false)
+  const showAnimated = hasAnimated && isHovering
+
   return (
-    <Frame $hasAnimated={hasAnimated}>
+    <Frame
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      $hasAnimated={hasAnimated}
+    >
       {/* poster underneath */}
       <Image src={staticImageSrc} alt="" className="image" style={{ zIndex: 1 }} />
       {/* hover animation layer (only shows when hasAnimated) */}
@@ -137,11 +137,16 @@ const WorkThumb = ({ images, thumb }) => {
         alt=""
         aria-hidden="true"
         className="gif"
-        $hasAnimated={hasAnimated}
-        style={{ pointerEvents: "none" }}
+        style={{
+          pointerEvents: "none",
+          opacity: showAnimated ? 1 : 0,
+        }}
       />
       {/* always-on hover chrome: outline (and you can add title here too if needed) */}
-      <Overlay className="overlay" />
+      <Overlay
+        className="overlay"
+        style={{ outlineColor: isHovering ? "var(--red)" : "transparent" }}
+      />
     </Frame>
   )
 }
