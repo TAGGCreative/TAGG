@@ -2,12 +2,21 @@ import HomeSection from "./HomeSection"
 import ContactCard from "../ContactCard"
 import { AnimatedHeader } from "../elements/AnimatedHeader"
 import { forwardRef } from "react"
-import { useMediaQuery } from "react-responsive"
+import styled from "styled-components"
+
+const ContactSection = styled(HomeSection)`
+  margin-top: 25vh;
+  margin-bottom: 15vh;
+
+  @media screen and (max-width: 425px) {
+    margin-top: 20vh;
+    margin-bottom: 10vh;
+  }
+`
 
 const Contact = forwardRef((props, ref) => {
-  const isMobile = useMediaQuery({ query: "(max-width: 425px)" })
   return (
-    <HomeSection
+    <ContactSection
       id="contact"
       ref={ref}
       HeaderComponent={() => (
@@ -70,11 +79,12 @@ const Contact = forwardRef((props, ref) => {
           </svg>
         </AnimatedHeader>
       )}
-      sectionStyle={{ marginTop: isMobile ? "30vh" : "20vh" }}
     >
       <ContactCard />
-    </HomeSection>
+    </ContactSection>
   )
 })
+
+Contact.displayName = "Contact"
 
 export default Contact

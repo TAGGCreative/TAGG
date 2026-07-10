@@ -15,14 +15,12 @@ const TitleContainer = styled.div`
   a {
     transition: background-color 0.2s ease-in-out;
   }
-  a:hover {
-    background-color: var(--lightgrey);
-  }
 `
 
 const WatchButton = () => (
   <ActiveCorners
     active={true}
+    enableHover={true}
     style={{
       width: "calc(9ch + 1em)",
       cursor: "pointer",
@@ -47,14 +45,14 @@ export const Slide = ({ client, title, href }) => {
     <TitleContainer>
       <PoppedHeader style={{ margin: 0 }}>{client}</PoppedHeader>
       <p>{title}</p>
-      <Link href={href} passHref>
-        <a
-          style={{
-            width: "fit-content",
-          }}
-        >
-          <WatchButton />
-        </a>
+      <Link
+        href={href}
+        aria-label={`Watch ${client}: ${title}`}
+        style={{
+          width: "fit-content",
+        }}
+      >
+        <WatchButton />
       </Link>
     </TitleContainer>
   )

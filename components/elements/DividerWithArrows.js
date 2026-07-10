@@ -1,6 +1,6 @@
 import styled from "styled-components"
 
-export const TriangleButton = styled.div`
+export const TriangleButton = styled.button`
   height: 40px;
   width: 40px;
   border: 1px solid var(--lightgrey);
@@ -9,9 +9,11 @@ export const TriangleButton = styled.div`
   margin-bottom: -1px;
   transition: background-color 0.2s ease-in-out;
   cursor: pointer;
+  padding: 0;
+  background-color: transparent;
 
   &:hover {
-    background-color: var(--lightgrey);
+    background-color: rgba(237, 26, 98, 0.15);
   }
   &:active {
     background-color: var(--red);
@@ -19,6 +21,10 @@ export const TriangleButton = styled.div`
       border-left: 2px solid var(--white);
       border-bottom: 2px solid var(--white);
     }
+  }
+  &:focus-visible {
+    outline: 2px solid var(--white);
+    outline-offset: 2px;
   }
   &::after {
     content: "";
@@ -46,8 +52,18 @@ const Divider = styled.div`
 export const DividerWithArrows = ({ onLeft, onRight }) => {
   return (
     <Divider>
-      <TriangleButton onClick={onLeft} left />
-      <TriangleButton onClick={onRight} right />
+      <TriangleButton
+        type="button"
+        aria-label="Previous project"
+        onClick={onLeft}
+        left
+      />
+      <TriangleButton
+        type="button"
+        aria-label="Next project"
+        onClick={onRight}
+        right
+      />
     </Divider>
   )
 }

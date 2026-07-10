@@ -5,7 +5,7 @@ const Section = styled.section`
   min-height: 30vh;
   width: 100%;
   position: relative;
-  margin-bottom: 10vh;
+  margin-bottom: 15vh;
 
   display: flex;
   flex-direction: column;
@@ -17,6 +17,7 @@ const Section = styled.section`
 
   @media screen and (max-width: 425px) {
     margin: 2em 0;
+    margin-bottom: 8vh;
   }
   /* sectionStyle */
 `
@@ -42,5 +43,7 @@ const HomeSection = forwardRef((props, ref) => {
     </Section>
   )
 })
+
+HomeSection.displayName = "HomeSection"
 
 export default HomeSection

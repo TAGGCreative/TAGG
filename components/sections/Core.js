@@ -2,14 +2,13 @@ import styled from "styled-components"
 import HomeSection from "./HomeSection"
 import PoppedHeader from "../PoppedHeader"
 import { AnimatedHeader } from "../elements/AnimatedHeader"
-import { useMediaQuery } from "react-responsive"
 
 export const Wrap = styled.div`
   display: grid;
   max-width: 100%;
   padding: 0 5%;
   padding-bottom: 0;
-  margin-top: -45px;
+  margin-top: 0;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   grid-gap: 5% 10%;
@@ -39,13 +38,21 @@ export const Text = styled.div`
   }
 `
 
+const CoreSection = styled(HomeSection)`
+  margin-top: 20vh;
+  margin-bottom: 15vh;
+
+  @media screen and (max-width: 425px) {
+    margin-top: 10vh;
+    margin-bottom: 10vh;
+  }
+`
+
 export default function Core() {
-  const isMobile = useMediaQuery({ query: "(max-width: 425px)" })
   return (
-    <HomeSection
+    <CoreSection
       id="core"
       header="core"
-      sectionStyle={{ marginTop: !isMobile ? "15vh" : 0 }}
       HeaderComponent={() => (
         <AnimatedHeader id="core-header">
           <svg
@@ -116,11 +123,11 @@ export default function Core() {
             <span style={{ fontStyle: "italic" }}>
               same team, different office
             </span>
-            . Just because we aren’t in the same place, doesn’t mean we can’t
+            . Just because we aren't in the same place, doesn't mean we can't
             build a relationship like we are.
             <br />
             <br />
-            It’s simple——when we have each other’s back we’ll make better
+            It's simple——when we have each other's back we'll make better
             content together.
             <br />
             <br />
@@ -128,6 +135,6 @@ export default function Core() {
           </p>
         </Text>
       </Wrap>
-    </HomeSection>
+    </CoreSection>
   )
 }

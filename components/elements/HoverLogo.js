@@ -21,9 +21,15 @@ const HoverLogo = styled.img`
   }
 `
 
-const Client = ({ src, href, id }) => (
-  <a href={href} target="_blank" id={id}>
-    <HoverLogo src={"/clients/" + src} />
+const Client = ({ src, href, id, label }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noreferrer"
+    id={id}
+    aria-label={`${label} website`}
+  >
+    <HoverLogo src={"/clients/" + src} alt={label} />
   </a>
 )
 

@@ -4,8 +4,6 @@ import styled from "styled-components"
 import { FullPlayer } from "./elements/Player"
 import { DividerWithArrows } from "./elements/DividerWithArrows"
 import { useRouter } from "next/router"
-import { useState } from "react"
-import { indexOf } from "lodash"
 
 const Content = styled.section`
   background-color: var(--black);
@@ -40,12 +38,16 @@ const Credits = styled.div`
     flex-direction: column;
   }
 `
-const CloseButton = styled.div`
+const CloseButton = styled.button`
   position: absolute;
   right: 32px;
   top: 32px;
   width: 32px;
   height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 
   &::before,
   &::after {
@@ -69,6 +71,11 @@ const CloseButton = styled.div`
     &::after {
       background-color: var(--white);
     }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--white);
+    outline-offset: 8px;
   }
 
   &:active {
@@ -96,73 +103,86 @@ const Credit = styled.div`
   }
 `
 
-export default function WorkPage({ videos, videoId }) {
-  const [video, setVideo] = useState(
-    videos.find((video) => video.uri == `/videos/${videoId}`),
-  )
+export default function WorkPage({ videos, videoId, cloudflareCustomerCode }) {
+  const router = useRouter()
+  const activeVideoId = String(router.query.videoId || videoId)
+  const video = videos.find((candidate) => candidate.id === activeVideoId)
 
-  try {
-    const desc = JSON.parse(video?.description)
-    const router = useRouter()
-
-    return (
-      <>
-        <Head>
-          <title>{desc.title}</title>
-        </Head>
-        <Content>
-          <CloseButton onClick={() => router.push("/#works")} />
-          <FullPlayer uri={video.uri} />
-          <PoppedHeader style={{ marginTop: "2em", marginBottom: 0 }}>
-            {desc.client ?? desc.Client}
-          </PoppedHeader>
-          <p style={{ marginBottom: "-20px" }}>{desc.title ?? desc.Title}</p>
-          <DividerWithArrows
-            onLeft={() => {
-              const currentIndex = indexOf(videos, video)
-              const newIndex =
-                currentIndex - 1 < 0 ? videos.length - 1 : currentIndex - 1
-              setVideo(videos[newIndex])
-
-              const newVideoId = video.uri.split("/")[2]
-              router.push(`/works/[videoId]`, `/works/${newVideoId}`, {
-                shallow: true,
-              })
-            }}
-            onRight={() => {
-              const currentIndex = indexOf(videos, video)
-              const newIndex =
-                currentIndex + 1 > videos.length - 1 ? 0 : currentIndex + 1
-              setVideo(videos[newIndex])
-
-              const newVideoId = video.uri.split("/")[2]
-              router.push(`/works/[videoId]`, `/works/${newVideoId}`, {
-                shallow: true,
-              })
-            }}
-          />
-          <Credits>
-            {desc &&
-              Object.entries(desc).map(([key, value]) => {
-                if (!["id", "title", "client"].includes(key)) {
-                  return (
-                    <Credit key={key}>
-                      <SmallRedHeader>{key}</SmallRedHeader>
-                      <p>{value}</p>
-                    </Credit>
-                  )
-                }
-              })}
-          </Credits>
-        </Content>
-      </>
-    )
-  } catch (error) {
-    console.log(
-      "WORKPAGE Problem with video named: ",
-      videos[currentIndex].name,
-    )
-    console.error(error)
-    return <></>
+  if (!video) {
+    console.error(`Unable to locate video for id ${videoId}`)
+    return null
   }
+
+  const clientName = video.client || "Unknown Client"
+  const title = video.title || "Untitled"
+
+  const navigateRelative = (offset) => {
+    if (!Array.isArray(videos) || videos.length === 0) {
+      return
+    }
+
+    const currentIndex = videos.findIndex(({ id }) => id === video.id)
+    if (currentIndex === -1) {
+      return
+    }
+
+    const newIndex = (currentIndex + offset + videos.length) % videos.length
+    const nextVideo = videos[newIndex]
+
+    if (!nextVideo) {
+      return
+    }
+
+    if (nextVideo.id) {
+      router.push(`/works/[videoId]`, `/works/${nextVideo.id}`, {
+        shallow: true,
+      })
+    }
+  }
+
+  return (
+    <>
+      <Head>
+        <title>{`${clientName} — ${title} | TAGG Creative`}</title>
+        <meta
+          name="description"
+          content={`${title}, created for ${clientName} by TAGG Creative.`}
+        />
+      </Head>
+      <Content>
+        <CloseButton
+          type="button"
+          aria-label="Close project"
+          onClick={() => router.push("/#works")}
+        />
+        <FullPlayer
+          source={video.source}
+          customerCode={cloudflareCustomerCode}
+          title={`${clientName} — ${title}`}
+        />
+        <PoppedHeader style={{ marginTop: "2em", marginBottom: 0 }}>
+          {clientName}
+        </PoppedHeader>
+        <p style={{ marginBottom: "-20px" }}>{title}</p>
+        <DividerWithArrows
+          onLeft={() => navigateRelative(-1)}
+          onRight={() => navigateRelative(1)}
+        />
+        <Credits>
+          {Object.entries(video.credits || {}).map(([key, value]) => {
+            if (value) {
+              return (
+                <Credit key={key}>
+                  <SmallRedHeader>{key}</SmallRedHeader>
+                  <p>{value}</p>
+                </Credit>
+              )
+            }
+
+            return null
+          })}
+        </Credits>
+      </Content>
+    </>
+  )
 }

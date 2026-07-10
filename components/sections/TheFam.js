@@ -2,7 +2,18 @@ import HomeSection from "./HomeSection"
 import RosterCard from "../RosterCard"
 import { StaggerBox } from "../elements/StaggerBox"
 import { AnimatedHeader } from "../elements/AnimatedHeader"
-import { useMediaQuery } from "react-responsive"
+import styled from "styled-components"
+
+const FamStaggerBox = styled(StaggerBox)`
+  & > div:nth-child(2) {
+    margin-top: -8em !important;
+    transform: translateY(-2em);
+  }
+  & > div:nth-child(3) {
+    margin-top: -4em !important;
+    transform: translateY(-1em);
+  }
+`
 
 const team = {
   extended: [
@@ -28,18 +39,26 @@ const team = {
       given: "HEIN",
       sur: "HAMERS",
       role: "Visual Artist",
-      bio: "It’s not everyday that you meet a professional who perfectly blends technical prowess and unbridled creativity, but Hein is certainly one of them. He’s Multi-disciplined, inventive, cerebral, but most importantly; he  takes our ideas, places them beautifully in the VFX realm and pushes them beyond our imagination.",
+      bio: "It's not everyday that you meet a professional who perfectly blends technical prowess and unbridled creativity, but Hein is certainly one of them. He's Multi-disciplined, inventive, cerebral, but most importantly; he  takes our ideas, places them beautifully in the VFX realm and pushes them beyond our imagination.",
     },
   ],
 }
 
+const TheFamSection = styled(HomeSection)`
+  margin-top: -35vh;
+  margin-bottom: 15vh;
+
+  @media screen and (max-width: 425px) {
+    margin-top: -20vh;
+    margin-bottom: 10vh;
+  }
+`
+
 export default function TheFam() {
-  const isMobile = useMediaQuery({ query: "(max-width: 425px)" })
   return (
-    <HomeSection
+    <TheFamSection
       id="the-fam"
       header="the family"
-      sectionStyle={{ marginTop: isMobile ? 0 : "-10vh" }}
       HeaderComponent={() => (
         <AnimatedHeader id="the-fam-header">
           <svg
@@ -96,7 +115,7 @@ export default function TheFam() {
         </AnimatedHeader>
       )}
     >
-      <StaggerBox marginTop="-250px">
+      <FamStaggerBox>
         {team.extended.map(
           ({ given, sur, role, company, bio, head, mask }, i) => (
             <RosterCard
@@ -107,11 +126,12 @@ export default function TheFam() {
               bio={bio}
               head={head}
               mask={mask}
+              overlayOpacity={given === "BAYLEE" ? 0.98 : undefined}
               key={i}
             />
           ),
         )}
-      </StaggerBox>
-    </HomeSection>
+      </FamStaggerBox>
+    </TheFamSection>
   )
 }

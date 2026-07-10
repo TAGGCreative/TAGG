@@ -5,6 +5,15 @@ const Corners = styled.div`
   background-color: transparent;
   display: flex;
   margin: 0 0.5em;
+  transition: background-color 0.2s ease-in-out;
+
+  ${({ enableHover }) =>
+    enableHover &&
+    `
+    &:hover {
+      background-color: rgba(237, 26, 98, 0.15);
+    }
+  `}
 
   .top,
   .bottom {
@@ -39,9 +48,9 @@ const Corners = styled.div`
     justify-self: right;
   }
 `
-export const ActiveCorners = ({ children, active, style }) => {
+export const ActiveCorners = ({ children, active, style, enableHover }) => {
   return (
-    <Corners active={active} style={style}>
+    <Corners active={active} style={style} enableHover={enableHover}>
       <div className="top left" />
       <div className="top right" />
       <div className="bottom left" />

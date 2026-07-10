@@ -1,0 +1,806 @@
+{
+  "version": 1,
+  "generatedAt": "2026-07-10T18:31:01.995Z",
+  "cloudflare": {
+    "customerCode": "",
+    "allowedOrigins": ["taggcreative.com", "www.taggcreative.com"]
+  },
+  "works": [
+    {
+      "id": "1123017366",
+      "source": {
+        "provider": "vimeo",
+        "id": "1123017366"
+      },
+      "client": "Amazon Business",
+      "title": "DamnFine Pizza",
+      "credits": {
+        "Production": "Bright Bay Creative",
+        "Post-Production": "TAGG Creative",
+        "Director / Producer": "Baylee Sinner",
+        "Editorial": "TAGG Creative"
+      },
+      "poster": {
+        "src": "/media/posters/1123017366.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_1123017366.mp4",
+        "webm": "/media/previews/preview_1123017366.webm"
+      }
+    },
+    {
+      "id": "807636078",
+      "source": {
+        "provider": "vimeo",
+        "id": "807636078"
+      },
+      "client": "Microsoft Advertising",
+      "title": "Digital Nomad",
+      "credits": {
+        "Agency / Production": "TAGG Creative",
+        "Director / Producer": "Baylee Sinner",
+        "Director of Photography": "Jordan McGrath",
+        "1st AC": "Bob Webeck",
+        "Gaffer": "Jacob Aaron",
+        "Grip": "Papa Ibrahima Diop",
+        "Location Sound": "Josh Svare",
+        "Editorial": "TAGG Creative",
+        "Animation": "Hein Hamers",
+        "Post-Audio": "Dillon Wong",
+        "Colourist": "Leo Hynes",
+        "Graphic Design": "Sallua"
+      },
+      "poster": {
+        "src": "/media/posters/807636078.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_807636078.mp4",
+        "webm": "/media/previews/preview_807636078.webm"
+      }
+    },
+    {
+      "id": "819967719",
+      "source": {
+        "provider": "vimeo",
+        "id": "819967719"
+      },
+      "client": "NBA",
+      "title": "Something's Cooking in the Capital",
+      "credits": {
+        "Production": "LGR Productions",
+        "Editorial": "TAGG Creative Inc.",
+        "Director": "Lachlan Ross",
+        "Producer": "Dylan Simpson",
+        "Director of Photograph": "Ben Izzard",
+        "Editor": "Troy Adam Gordon",
+        "Graphics": "Sean Butler",
+        "Colourist": "Leo Hynes",
+        "Sound Design": "Hussain Hassan"
+      },
+      "poster": {
+        "src": "/media/posters/819967719.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_819967719.mp4",
+        "webm": "/media/previews/preview_819967719.webm"
+      }
+    },
+    {
+      "id": "1051365848",
+      "source": {
+        "provider": "vimeo",
+        "id": "1051365848"
+      },
+      "client": "Amazon Business",
+      "title": "Smarter Deliveries",
+      "credits": {
+        "Editorial": "TAGG Creative",
+        "Production": "Bright Bay Creative"
+      },
+      "poster": {
+        "src": "/media/posters/1051365848.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_1051365848.mp4",
+        "webm": "/media/previews/preview_1051365848.webm"
+      }
+    },
+    {
+      "id": "849236701",
+      "source": {
+        "provider": "vimeo",
+        "id": "849236701"
+      },
+      "client": "Teekay",
+      "title": "50 Years Strong",
+      "credits": {
+        "Agency / Production": "TAGG Creative",
+        "Producer": "Cat Medeiros",
+        "Director of Photography": "Leo Hynes",
+        "Editorial": "TAGG Creative",
+        "Grip / Gaff": "John Kelly",
+        "Location Sound": "Tim Kubbinga",
+        "Colourist": "Leo Hynes"
+      },
+      "poster": {
+        "src": "/media/posters/849236701.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_849236701.mp4",
+        "webm": "/media/previews/preview_849236701.webm"
+      }
+    },
+    {
+      "id": "807636852",
+      "source": {
+        "provider": "vimeo",
+        "id": "807636852"
+      },
+      "client": "Zappos",
+      "title": "The Tony Hsieh Experience",
+      "credits": {
+        "Agency": "CULT x TAGG Creative",
+        "CGI / Animation": "Hein Hamers",
+        "Editorial": "TAGG Creative"
+      },
+      "poster": {
+        "src": "/media/posters/807636852.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_807636852.mp4",
+        "webm": "/media/previews/preview_807636852.webm"
+      }
+    },
+    {
+      "id": "1051355137",
+      "source": {
+        "provider": "vimeo",
+        "id": "1051355137"
+      },
+      "client": "Manning Ventures",
+      "title": "Bet On Boring",
+      "credits": {
+        "Production": "TAGG Creative"
+      },
+      "poster": {
+        "src": "/media/posters/1051355137.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_1051355137.mp4",
+        "webm": "/media/previews/preview_1051355137.webm"
+      }
+    },
+    {
+      "id": "658838914",
+      "source": {
+        "provider": "vimeo",
+        "id": "658838914"
+      },
+      "client": "Under Armour",
+      "title": "The Gathering 2020",
+      "credits": {
+        "Agency": "Cult Collective",
+        "Production": "TAGG Creative X Dabu Media",
+        "Editorial": "TAGG Creative"
+      },
+      "poster": {
+        "src": "/media/posters/658838914.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_658838914.mp4",
+        "webm": "/media/previews/preview_658838914.webm"
+      }
+    },
+    {
+      "id": "658838775",
+      "source": {
+        "provider": "vimeo",
+        "id": "658838775"
+      },
+      "client": "Seattle Seahawks",
+      "title": " eSports: Jordan Babineaux",
+      "credits": {
+        "Agency": "Seven2",
+        "Director / Producer": "Baylee Sinner ",
+        "Editorial": "TAGG Creative ",
+        "DP": "Kyle McCarty",
+        "Cam Op": "Justin Brown",
+        "Grip": "Norman Tumolva",
+        "Graphics": "Sean Murphy",
+        "Animation": "Nick Tibbs",
+        "Composer (intro)": "Chris Cunningham",
+        "Colourist & Online": "Silver Lining ",
+        "Sound Design": "Astronomic Audio"
+      },
+      "poster": {
+        "src": "/media/posters/658838775.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_658838775.mp4",
+        "webm": "/media/previews/preview_658838775.webm"
+      }
+    },
+    {
+      "id": "805408384",
+      "source": {
+        "provider": "vimeo",
+        "id": "805408384"
+      },
+      "client": "Rothenberg Wealth Management",
+      "title": "Why Rothenberg?",
+      "credits": {
+        "Agency / Production": "TAGG Creative",
+        "Director of Photography": "Max Lapointe",
+        "Post-Production": "TAGG Creative"
+      },
+      "poster": {
+        "src": "/media/posters/805408384.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_805408384.mp4",
+        "webm": "/media/previews/preview_805408384.webm"
+      }
+    },
+    {
+      "id": "658838647",
+      "source": {
+        "provider": "vimeo",
+        "id": "658838647"
+      },
+      "client": "Makara",
+      "title": "People You Know Who Crypto",
+      "credits": {
+        "Producer/Director": "Baylee Sinner",
+        "Producer": "Ashley Genevieve",
+        "Post-Production": "TAGG Creative"
+      },
+      "poster": {
+        "src": "/media/posters/658838647.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_658838647.mp4",
+        "webm": "/media/previews/preview_658838647.webm"
+      }
+    },
+    {
+      "id": "658838629",
+      "source": {
+        "provider": "vimeo",
+        "id": "658838629"
+      },
+      "client": "First United",
+      "title": "A New Home",
+      "credits": {
+        "Creative": "Swoon Creative X TAGG Creative",
+        "Production": "TAGG Creative",
+        "Post-Production": "TAGG Creative"
+      },
+      "poster": {
+        "src": "/media/posters/658838629.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_658838629.mp4",
+        "webm": "/media/previews/preview_658838629.webm"
+      }
+    },
+    {
+      "id": "660724223",
+      "source": {
+        "provider": "vimeo",
+        "id": "660724223"
+      },
+      "client": "LifeBooster",
+      "title": "Everyday",
+      "credits": {
+        "Created & Produced by": "TAGG Creative"
+      },
+      "poster": {
+        "src": "/media/posters/660724223.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_660724223.mp4",
+        "webm": "/media/previews/preview_660724223.webm"
+      }
+    },
+    {
+      "id": "828419346",
+      "source": {
+        "provider": "vimeo",
+        "id": "828419346"
+      },
+      "client": "The Leukemia & Lymphoma Society",
+      "title": "Christians's Story",
+      "credits": {
+        "Agency": "Tane",
+        "Post-Production": "TAGG Creative",
+        "Producer": "Sophia Conger & Keely Bochicchio-Sipos",
+        "Director": "Sophia Conger",
+        "Director of Photography": "Jordyn Gatti",
+        "1st AC": "Aaron Zimmerman",
+        "Gaffer": "Sunny Liu",
+        "Location Sound": "Christian Guinanzaca",
+        "Original Music": "Evan Dibbs"
+      },
+      "poster": {
+        "src": "/media/posters/828419346.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_828419346.mp4",
+        "webm": "/media/previews/preview_828419346.webm"
+      }
+    },
+    {
+      "id": "658838893",
+      "source": {
+        "provider": "vimeo",
+        "id": "658838893"
+      },
+      "client": "Spotify",
+      "title": "The Gathering 2020",
+      "credits": {
+        "Agency": "Cult Collective",
+        "Production": "TAGG Creative X Dabu Media",
+        "Editorial": "TAGG Creative"
+      },
+      "poster": {
+        "src": "/media/posters/658838893.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_658838893.mp4",
+        "webm": "/media/previews/preview_658838893.webm"
+      }
+    },
+    {
+      "id": "658838751",
+      "source": {
+        "provider": "vimeo",
+        "id": "658838751"
+      },
+      "client": "Teekay",
+      "title": "'Future Of' Summit - Recap'",
+      "credits": {
+        "Agency": "TAGG Creative",
+        "Graphic Design": "Sallua",
+        "VFX/Animation": "RENDRD",
+        "Virtual Production": "Jumbo"
+      },
+      "poster": {
+        "src": "/media/posters/658838751.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_658838751.mp4",
+        "webm": "/media/previews/preview_658838751.webm"
+      }
+    },
+    {
+      "id": "658838676",
+      "source": {
+        "provider": "vimeo",
+        "id": "658838676"
+      },
+      "client": "Modo",
+      "title": "Carshare 101",
+      "credits": {
+        "Animator": "Nick Grossman",
+        "Music & Sound Design": "Kevin Madden",
+        "Production": "TAGG Creative"
+      },
+      "poster": {
+        "src": "/media/posters/658838676.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_658838676.mp4",
+        "webm": "/media/previews/preview_658838676.webm"
+      }
+    },
+    {
+      "id": "658838860",
+      "source": {
+        "provider": "vimeo",
+        "id": "658838860"
+      },
+      "client": "Coca-Cola",
+      "title": "The Gathering 2020",
+      "credits": {
+        "Agency": "Cult Collective",
+        "Production": "TAGG Creative X Dabu Media",
+        "Editorial": "TAGG Creative"
+      },
+      "poster": {
+        "src": "/media/posters/658838860.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_658838860.mp4",
+        "webm": "/media/previews/preview_658838860.webm"
+      }
+    },
+    {
+      "id": "658838813",
+      "source": {
+        "provider": "vimeo",
+        "id": "658838813"
+      },
+      "client": "Seattle Seahawks",
+      "title": "eSports: Tyler Lockett & Quandre Diggs",
+      "credits": {
+        "Agency": "Seven2",
+        "Director / Producer": "Baylee Sinner",
+        "Editorial": "TAGG Creative",
+        "DP": "Kyle McCarty",
+        "Cam Op": "Justin Brown",
+        "Grip": "Norman Tumolva",
+        "Graphics": "Sean Murphy",
+        "Animation": "Nick Tibbs",
+        "Composer (intro)": "Chris Cunningham",
+        "Colourist & Online": "Silver Lining",
+        "Sound Design": "Astronomic Audio"
+      },
+      "poster": {
+        "src": "/media/posters/658838813.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_658838813.mp4",
+        "webm": "/media/previews/preview_658838813.webm"
+      }
+    },
+    {
+      "id": "662480133",
+      "source": {
+        "provider": "vimeo",
+        "id": "662480133"
+      },
+      "client": "Seattle Seahawks",
+      "title": "eSports: Griffin Brothers",
+      "credits": {
+        "Agency": "Seven2",
+        "Director / Producer": "Baylee Sinner",
+        "Editorial / Post Sup.": "TAGG Creative",
+        "DP": "Kyle McCarty",
+        "Cam Op": "Justin Brown",
+        "Grip": "Norman Tumolva",
+        "Graphics": "Sean Murphy",
+        "Animation": "Nick Tibbs",
+        "Composer (intro)": "Chris Cunningham",
+        "Colourist & Online": "Silver Lining",
+        "Sound Design": "Astronomic Audio"
+      },
+      "poster": {
+        "src": "/media/posters/662480133.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_662480133.mp4",
+        "webm": "/media/previews/preview_662480133.webm"
+      }
+    },
+    {
+      "id": "658838698",
+      "source": {
+        "provider": "vimeo",
+        "id": "658838698"
+      },
+      "client": "AGLC",
+      "title": "Do I Need A Licence?",
+      "credits": {
+        "Agency": "ZGM",
+        "Animation & Post": "TAGG Creative / Nick Grossman",
+        "Post-Audio": "Six Degrees"
+      },
+      "poster": {
+        "src": "/media/posters/658838698.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_658838698.mp4",
+        "webm": "/media/previews/preview_658838698.webm"
+      }
+    }
+  ],
+  "carousels": {
+    "desktop": [
+      {
+        "id": "571461797",
+        "projectId": "658838914",
+        "source": {
+          "provider": "vimeo",
+          "id": "571461797"
+        },
+        "client": "Under Armour",
+        "title": "The Gathering 2020",
+        "poster": {
+          "src": "/media/posters/571461797.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "571461663",
+        "projectId": "658838775",
+        "source": {
+          "provider": "vimeo",
+          "id": "571461663"
+        },
+        "client": "Seattle Seahawks",
+        "title": "eSports: Jordan Babineaux",
+        "poster": {
+          "src": "/media/posters/571461663.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "658467184",
+        "projectId": "658838629",
+        "source": {
+          "provider": "vimeo",
+          "id": "658467184"
+        },
+        "client": "First United",
+        "title": "A New Home",
+        "poster": {
+          "src": "/media/posters/658467184.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "658467192",
+        "projectId": "658838647",
+        "source": {
+          "provider": "vimeo",
+          "id": "658467192"
+        },
+        "client": "Makara",
+        "title": "People You Know Who Crypto",
+        "poster": {
+          "src": "/media/posters/658467192.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "571461592",
+        "projectId": "660724223",
+        "source": {
+          "provider": "vimeo",
+          "id": "571461592"
+        },
+        "client": "LifeBooster",
+        "title": "Everyday",
+        "poster": {
+          "src": "/media/posters/571461592.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "571461532",
+        "projectId": "658838698",
+        "source": {
+          "provider": "vimeo",
+          "id": "571461532"
+        },
+        "client": "AGLC",
+        "title": "Do I Need a Licence?",
+        "poster": {
+          "src": "/media/posters/571461532.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "571461779",
+        "projectId": "658838893",
+        "source": {
+          "provider": "vimeo",
+          "id": "571461779"
+        },
+        "client": "Spotify",
+        "title": "The Gathering 2020",
+        "poster": {
+          "src": "/media/posters/571461779.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "658467177",
+        "projectId": "658838602",
+        "source": {
+          "provider": "vimeo",
+          "id": "658467177"
+        },
+        "client": "Amazon AWS x Intel",
+        "title": "15 Year Anniversary",
+        "poster": {
+          "src": "/media/posters/658467177.jpg",
+          "width": 960,
+          "height": 540
+        }
+      }
+    ],
+    "mobile": [
+      {
+        "id": "629599794",
+        "projectId": "658838914",
+        "source": {
+          "provider": "vimeo",
+          "id": "629599794"
+        },
+        "client": "Under Armour",
+        "title": "The Gathering 2020",
+        "poster": {
+          "src": "/media/posters/629599794.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "629599714",
+        "projectId": "658838775",
+        "source": {
+          "provider": "vimeo",
+          "id": "629599714"
+        },
+        "client": "Seattle Seahawks",
+        "title": "eSports: Jordan Babineaux",
+        "poster": {
+          "src": "/media/posters/629599714.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "658467129",
+        "projectId": "658838629",
+        "source": {
+          "provider": "vimeo",
+          "id": "658467129"
+        },
+        "client": "First United",
+        "title": "A New Home",
+        "poster": {
+          "src": "/media/posters/658467129.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "658467138",
+        "projectId": "658838647",
+        "source": {
+          "provider": "vimeo",
+          "id": "658467138"
+        },
+        "client": "Makara",
+        "title": "People You Know Who Crypto",
+        "poster": {
+          "src": "/media/posters/658467138.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "629599676",
+        "projectId": "660724223",
+        "source": {
+          "provider": "vimeo",
+          "id": "629599676"
+        },
+        "client": "LifeBooster",
+        "title": "Everyday",
+        "poster": {
+          "src": "/media/posters/629599676.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "629599660",
+        "projectId": "658838698",
+        "source": {
+          "provider": "vimeo",
+          "id": "629599660"
+        },
+        "client": "AGLC",
+        "title": "Do I Need a Licence?",
+        "poster": {
+          "src": "/media/posters/629599660.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "629599782",
+        "projectId": "658838893",
+        "source": {
+          "provider": "vimeo",
+          "id": "629599782"
+        },
+        "client": "Spotify",
+        "title": "The Gathering 2020",
+        "poster": {
+          "src": "/media/posters/629599782.jpg",
+          "width": 960,
+          "height": 540
+        }
+      },
+      {
+        "id": "658467122",
+        "projectId": "658838602",
+        "source": {
+          "provider": "vimeo",
+          "id": "658467122"
+        },
+        "client": "Amazon AWS x Intel",
+        "title": "15 Year Anniversary",
+        "poster": {
+          "src": "/media/posters/658467122.jpg",
+          "width": 960,
+          "height": 540
+        }
+      }
+    ]
+  }
+}

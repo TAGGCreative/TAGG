@@ -1,18 +1,11 @@
 import styled from "styled-components"
+import Image from "next/image"
+import InstantVideoPreview from "./InstantVideoPreview"
 
-const Image = styled.img`
-  width: 100%;
+// Optimized lazy-loading approach
+const StyledImage = styled(Image)`
   border-radius: 5px;
   transition: opacity 0.2s ease-in-out;
-`
-
-const Gif = styled.img`
-  position: absolute;
-  width: 100%;
-  border-radius: 5px;
-  transition: opacity 0.2s ease-in-out;
-  outline: 1px solid var(--red);
-  opacity: 0;
 `
 
 const Frame = styled.div`
@@ -21,17 +14,40 @@ const Frame = styled.div`
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 0);
-  width: 100%;
 `
 
-const WorkThumb = ({ images, thumb }) => {
-  const imageSrc = images[3]?.link
-  const desktopSizeGif = thumb?.sizes[2].link
+const WorkThumb = ({ poster, preview, alt, priority = false }) => {
+  const imageSrc = poster?.src
+  const width = poster?.width || 960
+  const height = poster?.height || 540
 
+  if (preview) {
+    return (
+      <InstantVideoPreview
+        staticImageSrc={imageSrc}
+        videoSources={preview}
+        alt={alt}
+        width={width}
+        height={height}
+        priority={priority}
+      />
+    )
+  }
+
+  // Fallback to static image if no video available
   return (
     <Frame>
-      <Gif src={desktopSizeGif} alt={imageSrc} className="gif" />
-      <Image src={imageSrc} className="image" />
+      <StyledImage
+        src={imageSrc}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={priority ? "eager" : "lazy"}
+        priority={priority}
+        quality={75}
+        placeholder="blur"
+        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+      />
     </Frame>
   )
 }

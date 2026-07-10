@@ -1,4 +1,5 @@
 import styled from "styled-components"
+import Image from "next/image"
 
 const Card = styled.div`
   display: flex;
@@ -37,7 +38,7 @@ const Card = styled.div`
     width: 100%;
     height: 100%;
     color: #fff;
-    opacity: 0.98;
+    opacity: ${({ overlayOpacity }) => overlayOpacity || 0.93};
   }
 
   h3 {
@@ -129,12 +130,27 @@ export default function RosterCard({
   bio,
   head,
   mask,
+  overlayOpacity,
 }) {
   return (
-    <Card>
+    <Card overlayOpacity={overlayOpacity}>
       <div className="image-container">
-        <img src={head} alt={`profile picture of ${given} ${sur}`} />
-        <img src={mask} className="after"></img>
+        <Image
+          src={head}
+          alt={`Profile of ${given} ${sur}`}
+          width={500}
+          height={400}
+          sizes="(max-width: 425px) 95vw, 35vw"
+        />
+        <Image
+          src={mask}
+          className="after"
+          alt=""
+          aria-hidden="true"
+          width={500}
+          height={400}
+          sizes="(max-width: 425px) 95vw, 35vw"
+        />
       </div>
       <div className="text">
         <h3>

@@ -1,16 +1,20 @@
 import styled from "styled-components"
 import WhiteStrokeHeader from "../WhiteStrokeHeader"
 import PoppedHeader from "../PoppedHeader"
-import { useInView } from "react-intersection-observer"
+import { useInView } from "../../utils/useInView"
 import { forwardRef } from "react"
+import Image from "next/image"
 
 const Section = styled.section`
   position: relative;
   padding: 0;
   height: 100vh;
-  margin-top: 10vh;
+  margin-top: 20vh;
+  margin-bottom: 15vh;
   @media screen and (max-width: 425px) {
     height: 110vh;
+    margin-top: 10vh;
+    margin-bottom: 10vh;
   }
 
   .centerframe {
@@ -63,11 +67,7 @@ const Section = styled.section`
 `
 
 const WhoWeAre = forwardRef((props, ref) => {
-  const {
-    ref: refAnimation,
-    inView,
-    entry,
-  } = useInView({
+  const { ref: refAnimation, inView } = useInView({
     threshold: 0.5,
     // triggerOnce: true,
   })
@@ -75,9 +75,14 @@ const WhoWeAre = forwardRef((props, ref) => {
   return (
     <Section id="about" ref={ref}>
       <div className="centerframe graphic" ref={refAnimation}>
-        <img
+        <Image
           src="/images/TAGG_webbanner5.png"
           id="logo"
+          alt=""
+          aria-hidden="true"
+          width={1920}
+          height={1080}
+          sizes="100vw"
           className={inView ? "img appear" : "img hidden"}
         />
         <WhiteStrokeHeader
@@ -104,7 +109,7 @@ const WhoWeAre = forwardRef((props, ref) => {
         <div className={inView ? "textpos appear" : "textpos hidden"}>
           <PoppedHeader>A SOLUTION-FIRST NARRATIVE STUDIO</PoppedHeader>
           <p>
-            We’re not here for branded navel-gazing. We’re here to solve sh*t.
+            We're not here for branded navel-gazing. We're here to solve sh*t.
             Story is the tool, not the trophy. We build narratives that do
             work—raise capital, rally teams, distill complexities. No matter the
             medium, format or deliverable;
@@ -117,5 +122,7 @@ const WhoWeAre = forwardRef((props, ref) => {
     </Section>
   )
 })
+
+WhoWeAre.displayName = "WhoWeAre"
 
 export default WhoWeAre

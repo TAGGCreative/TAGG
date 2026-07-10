@@ -3,16 +3,26 @@ import HomeSection from "./HomeSection"
 import Client from "../elements/HoverLogo"
 import { AnimatedHeader } from "../elements/AnimatedHeader"
 
+const OurRepSection = styled(HomeSection)`
+  margin-top: -35vh;
+  margin-bottom: 15vh;
+
+  @media screen and (max-width: 425px) {
+    margin-top: -20vh;
+    margin-bottom: 10vh;
+  }
+`
+
 const Flow = styled.div`
   padding: 0 10%;
-  margin-top: -30px;
+  margin-top: 0;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
 
   a {
-    margin-top: -50px;
+    margin-top: 0;
   }
 
   a:first-of-type {
@@ -26,7 +36,7 @@ const Flow = styled.div`
   @media screen and (max-width: 425px) {
     padding: 0 0;
     max-height: 90vh;
-    margin-top: -95px;
+    margin-top: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -45,7 +55,7 @@ const Flow = styled.div`
 
 export default function OurRep() {
   return (
-    <HomeSection
+    <OurRepSection
       id="our-rep"
       header="our rep"
       HeaderComponent={() => (
@@ -104,24 +114,61 @@ export default function OurRep() {
       )}
     >
       <Flow>
-        <Client src="amazon.svg" href="https://aws.amazon.com/" />
-        <Client src="cocacola.svg" href="https://www.coca-cola.com/" />
-        <Client src="cult.svg" href="https://cultideas.com/" />
-        <Client src="espn.svg" href="https://www.espn.com/" />
-        <Client src="hotwheels.svg" href="https://hotwheels.mattel.com/" />
-        <Client src="intel.svg" href="https://www.intel.com" />
-        <Client src="monstercat.svg" href="https://www.monstercat.com/" />
-        <Client src="seahawks.svg" href="http://www.seahawks.com/" />
-        <Client src="spotify.svg" href="https://www.spotify.com/" />
-        <Client src="teekay.svg" href="https://www.teekay.com/" />
-        <Client src="troyboi.svg" href="https://troyboimusic.com/" />
+        <Client
+          label="Amazon"
+          src="amazon.svg"
+          href="https://aws.amazon.com/"
+        />
+        <Client
+          label="Coca-Cola"
+          src="cocacola.svg"
+          href="https://www.coca-cola.com/"
+        />
+        <Client label="Cult" src="cult.svg" href="https://cultideas.com/" />
+        <Client label="ESPN" src="espn.svg" href="https://www.espn.com/" />
+        <Client
+          label="Hot Wheels"
+          src="hotwheels.svg"
+          href="https://hotwheels.mattel.com/"
+        />
+        <Client label="Intel" src="intel.svg" href="https://www.intel.com" />
+        <Client
+          label="Monstercat"
+          src="monstercat.svg"
+          href="https://www.monstercat.com/"
+        />
+        <Client
+          label="Seattle Seahawks"
+          src="seahawks.svg"
+          href="https://www.seahawks.com/"
+        />
+        <Client
+          label="Spotify"
+          src="spotify.svg"
+          href="https://www.spotify.com/"
+        />
+        <Client
+          label="Teekay"
+          src="teekay.svg"
+          href="https://www.teekay.com/"
+        />
+        <Client
+          label="TroyBoi"
+          src="troyboi.svg"
+          href="https://troyboimusic.com/"
+        />
         <Client
           src="uclahealth.svg"
           href="https://www.uclahealth.org/"
           id="ucla"
+          label="UCLA Health"
         />
-        <Client src="underarmour.svg" href="https://www.underarmour.com/" />
+        <Client
+          label="Under Armour"
+          src="underarmour.svg"
+          href="https://www.underarmour.com/"
+        />
       </Flow>
-    </HomeSection>
+    </OurRepSection>
   )
 }

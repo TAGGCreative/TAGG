@@ -2,7 +2,7 @@ import PoppedHeader from "../PoppedHeader"
 import HomeSection from "./HomeSection"
 import { Wrap, Text } from "./Core"
 import { AnimatedHeader } from "../elements/AnimatedHeader"
-import { useMediaQuery } from "react-responsive"
+import { useMediaQuery } from "../../utils/useMediaQuery"
 
 export default function OurArena() {
   const isMobile = useMediaQuery({ query: "(max-width: 425px)" })
@@ -123,9 +123,9 @@ export default function OurArena() {
           <PoppedHeader>CREATIVE INCLUDED</PoppedHeader>
           <p>
             We don’t wait for the boards. We shape the creative from day one.
-            Ideas, angles, formats, hooks. It’s all part of the work. We find the
-            angle, craft the story, and build the thing from the ground up. Some
-            folks think you need an agency to crack the concept.
+            Ideas, angles, formats, hooks. It’s all part of the work. We find
+            the angle, craft the story, and build the thing from the ground up.
+            Some folks think you need an agency to crack the concept.
             <br />
             <br />
             We don’t.

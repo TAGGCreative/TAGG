@@ -50,10 +50,14 @@ const CardStyles = styled.div`
 export default function ContactCard({ style }) {
   return (
     <CardStyles style={style}>
-      <a href="mailto:info@taggcreative.com" target="_blank">
+      <a href="mailto:info@taggcreative.com">
         <PoppedHeader>info@taggcreative.com</PoppedHeader>
       </a>
-      <a href="https://goo.gl/maps/YuozNgimFFpJ6Wdv5" target="_blank">
+      <a
+        href="https://goo.gl/maps/YuozNgimFFpJ6Wdv5"
+        target="_blank"
+        rel="noreferrer"
+      >
         <p>
           128 W Pender St, Suite 1607
           <br />
@@ -66,6 +70,8 @@ export default function ContactCard({ style }) {
         <a
           href="https://www.linkedin.com/company/tagg-creative-inc./about/"
           target="_blank"
+          rel="noreferrer"
+          aria-label="TAGG Creative on LinkedIn"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -78,7 +84,12 @@ export default function ContactCard({ style }) {
             <path d="M72.164 56.4114a4.418 4.418 0 10.085 0h-.085m0 8.33a3.874 3.874 0 113.809-3.938v.065a3.791 3.791 0 01-3.708 3.871h-.1"></path>
           </svg>
         </a>
-        <a href="https://www.instagram.com/taggcreative/" target="_blank">
+        <a
+          href="https://www.instagram.com/taggcreative/"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="TAGG Creative on Instagram"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
             <path
               d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9
@@ -99,7 +110,12 @@ export default function ContactCard({ style }) {
             />
           </svg>
         </a>
-        <a href="https://vimeo.com/taggcreative" target="_blank">
+        <a
+          href="https://vimeo.com/taggcreative"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="TAGG Creative on Vimeo"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
             <path
               d="M447.8 153.6c-2 43.6-32.4 103.3-91.4 179.1-60.9 79.2-112.4

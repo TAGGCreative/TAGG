@@ -58,8 +58,19 @@ export const Controls = ({ next, prev, selected, selectedClips }) => {
           selectedClips?.map((clip, i) => (
             <Dot key={i} isActive={selected == i} />
           ))}
-        <TriangleButton left onClick={prev} style={{ marginTop: "10px" }} />
-        <TriangleButton right onClick={next} />
+        <TriangleButton
+          type="button"
+          aria-label="Previous featured project"
+          left
+          onClick={prev}
+          style={{ marginTop: "10px" }}
+        />
+        <TriangleButton
+          type="button"
+          aria-label="Next featured project"
+          right
+          onClick={next}
+        />
       </ButtonStack>
     </Overlay>
   )

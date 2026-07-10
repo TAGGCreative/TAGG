@@ -25,7 +25,7 @@ const Nav = styled.nav`
   
   #logo {
     position: relative;
-    margin-left: -1em;
+    margin-left: -1.25em;
     margin-top: .5em;
     outline: 1px solid var(--red);
     /* box-shadow: 4px 4px var(--red), 0 4px var(--red); */
@@ -65,19 +65,37 @@ const Logo = styled.img`
   margin-bottom: 0.35em;
   margin-left: 1em;
   height: 35px;
-  transition: filter 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out;
   filter: invert(20%) sepia(45%) saturate(6941%) hue-rotate(329deg)
     brightness(95%) contrast(94%);
 
+  @keyframes overshoot {
+    0% {
+      transform: scale(1);
+    }
+    20% {
+      transform: scale(1.06);
+    }
+    40% {
+      transform: scale(1.04);
+    }
+    60% {
+      transform: scale(1.055);
+    }
+    80% {
+      transform: scale(1.045);
+    }
+    100% {
+      transform: scale(1.05);
+    }
+  }
+
   :hover {
-    /* to colour var(--grey) */
-    filter: invert(100%) sepia(8%) saturate(316%) hue-rotate(229deg)
-      brightness(79%) contrast(87%);
+    animation: overshoot 0.5s ease-out;
+    transform: scale(1.05);
   }
   :active {
-    /* to colour var(--white) */
-    filter: invert(97%) sepia(4%) saturate(700%) hue-rotate(287deg)
-      brightness(118%) contrast(94%);
+    transform: scale(0.95);
   }
 
   @media screen and (max-width: 425px) {
@@ -90,14 +108,17 @@ export const NavBar = ({ visibleSection }) => {
   return (
     <Nav>
       <a id="logo" href="#">
-        <Logo src="/images/taggSpray.png" />
+        <Logo src="/images/taggSpray.png" alt="TAGG Creative — back to top" />
       </a>
       <Links>
+        <NavLink href="/#about" active={visibleSection === "about"}>
+          WHO WE ARE
+        </NavLink>
         <NavLink href="/#works" active={visibleSection === "works"}>
           WORKS
         </NavLink>
-        <NavLink href="/#about" active={visibleSection === "about"}>
-          ABOUT
+        <NavLink href="/#people" active={visibleSection === "people"}>
+          PEOPLE
         </NavLink>
         <NavLink href="/#contact" active={visibleSection === "contact"}>
           CONTACT

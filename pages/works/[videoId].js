@@ -2,43 +2,52 @@ import { useEffect } from "react"
 import { useRouter } from "next/router"
 import Modal from "react-modal"
 import WorkPage from "../../components/WorkPage"
-import { getWorks } from "../../vimeo"
+import {
+  getCloudflareCustomerCode,
+  getWork,
+  getWorks,
+} from "../../lib/mediaCatalog"
 
 // because this is a dynamic route, get all possible routes at build
 export async function getStaticPaths() {
-  const videolist = await getWorks()
+  const videolist = getWorks()
 
   const paths = videolist.map((video) => {
-    const videoId = video.uri.split("/")[2]
     return {
       params: {
-        videoId,
+        videoId: video.id,
       },
     }
   })
 
   return {
     paths,
-    fallback: false,
+    fallback: "blocking",
   }
 }
 
 export async function getStaticProps({ params }) {
   const { videoId } = params
-  const videos = await getWorks()
+  const work = getWork(videoId)
+
+  if (!work) {
+    return { notFound: true }
+  }
 
   return {
-    props: { videos, videoId },
-    revalidate: 60,
+    props: {
+      videos: getWorks(),
+      videoId,
+      cloudflareCustomerCode: getCloudflareCustomerCode(),
+    },
   }
 }
 
-Modal.setAppElement("#__next")
-
-const WorkPageModal = ({ videos, videoId }) => {
+const WorkPageModal = ({ videos, videoId, cloudflareCustomerCode }) => {
   const router = useRouter()
 
   useEffect(() => {
+    Modal.setAppElement("#__next")
     router.prefetch("/")
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -62,7 +71,11 @@ const WorkPageModal = ({ videos, videoId }) => {
         },
       }}
     >
-      <WorkPage videos={videos} videoId={videoId} />
+      <WorkPage
+        videos={videos}
+        videoId={videoId}
+        cloudflareCustomerCode={cloudflareCustomerCode}
+      />
     </Modal>
   )
 }

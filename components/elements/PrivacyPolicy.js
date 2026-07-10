@@ -16,12 +16,10 @@ const Quiet = styled.div`
 const PrivacyPolicy = () => {
   return (
     <Quiet>
-      <Link href="/privacy-policy" passHref>
-        <a>
-          <p>Privacy Policy</p>
-        </a>
+      <Link href="/privacy-policy">
+        <p>Privacy Policy</p>
       </Link>
-      <p>&nbsp; | &nbsp;© TAGG Creative 2025</p>
+      <p>&nbsp; | &nbsp;© TAGG Creative {new Date().getFullYear()}</p>
     </Quiet>
   )
 }

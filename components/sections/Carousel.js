@@ -1,12 +1,12 @@
 import { Carousel } from "react-responsive-carousel"
 import "react-responsive-carousel/lib/styles/carousel.min.css"
-import VimeoPlayer from "react-player/vimeo"
 import styled from "styled-components"
-import { forwardRef, useEffect, useState } from "react"
-import { useMediaQuery } from "react-responsive"
+import { forwardRef, useState } from "react"
+import { useMediaQuery } from "../../utils/useMediaQuery"
 import { Overlay } from "../elements/Controls"
 import { Slide } from "../elements/Slide"
 import { Controls } from "../elements/Controls"
+import { MediaPlayer } from "../elements/MediaPlayer"
 
 const Section = styled.section`
   width: 100vw;
@@ -114,108 +114,114 @@ const Static = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: ${({ opacity }) => opacity};
-  transition: opacity 300ms ease-in;
+  opacity: ${({ $opacity }) => $opacity};
+  transition: none; /* Instant cut, no fade */
 `
 
-const ClipCarousel = forwardRef(({ clipsDesktop, clipsMobile }, ref) => {
-  const [staticOpacity, setStaticOpacity] = useState(0.6)
-  const [current, setCurrent] = useState(0)
+const ClipCarousel = forwardRef(
+  ({ clipsDesktop, clipsMobile, cloudflareCustomerCode }, ref) => {
+    const [staticOpacity, setStaticOpacity] = useState(0.6)
+    const [current, setCurrent] = useState(0)
 
-  const isMobile = useMediaQuery({ query: "(max-width: 425px)" })
-  const selectedClips = isMobile ? clipsMobile : clipsDesktop
+    const isMobile = useMediaQuery({ query: "(max-width: 425px)" })
+    const selectedClips = isMobile ? clipsMobile : clipsDesktop
 
-  const next = () => {
-    const next = current + 1 > selectedClips.length - 1 ? 0 : current + 1
-    setCurrent(next)
-    setStaticOpacity(0.6)
-  }
+    const next = () => {
+      const next = current + 1 > selectedClips.length - 1 ? 0 : current + 1
+      setCurrent(next)
+      setStaticOpacity(0.6)
+    }
 
-  const prev = () => {
-    const prev = current - 1 < 0 ? selectedClips.length - 1 : current - 1
-    setCurrent(prev)
-    setStaticOpacity(0.6)
-  }
+    const prev = () => {
+      const prev = current - 1 < 0 ? selectedClips.length - 1 : current - 1
+      setCurrent(prev)
+      setStaticOpacity(0.6)
+    }
 
-  const url = `https://player.vimeo.com/video/${
-    selectedClips[current]?.uri?.split("/")[2]
-  }`
+    // Hide static overlay immediately when video starts - no fade
+    const handlePlayerReady = () => {
+      if (selectedClips[current]?.source?.provider === "cloudflare") {
+        setStaticOpacity(0)
+      }
+    }
 
-  return (
-    <Section ref={ref}>
-      <Frame>
-        {/* static blip between video loads */}
-        <Static src="/images/static.gif" opacity={staticOpacity} />
+    const handlePlayerStart = () => {
+      setStaticOpacity(0) // Immediately cut out static when video starts
+    }
 
-        {/* player stays loaded, loads new url */}
-        <EmbedContainer>
-          <VimeoPlayer
-            height="100%"
-            width="100%"
-            url={url}
-            // static be gone
-            onPlay={() => setStaticOpacity(0)}
-            config={{
-              vimeo: {
-                playerOptions: {
-                  autoplay: true,
-                  muted: true,
-                  controls: false,
-                  playsinline: true,
-                  keyboard: false,
-                  loop: true,
-                  portrait: false,
-                },
-              },
-            }}
+    return (
+      <Section ref={ref}>
+        {/* DNS prefetch for faster Vimeo connections */}
+        <link rel="dns-prefetch" href="//player.vimeo.com" />
+        <link rel="dns-prefetch" href="//vimeo.com" />
+        <link rel="preconnect" href="https://player.vimeo.com" />
+        <link rel="preconnect" href="https://vimeo.com" />
+
+        <Frame>
+          {/* static blip between video loads */}
+          <Static src="/images/static.gif" alt="" $opacity={staticOpacity} />
+
+          {/* player stays loaded, loads new url */}
+          <EmbedContainer>
+            <MediaPlayer
+              key={`${selectedClips[current]?.source?.provider}-${selectedClips[current]?.source?.id}`}
+              source={selectedClips[current]?.source}
+              customerCode={cloudflareCustomerCode}
+              title={`${selectedClips[current]?.client} — ${selectedClips[current]?.title}`}
+              width="100%"
+              height="100%"
+              autoplay
+              muted
+              loop
+              controls={false}
+              onReady={handlePlayerReady}
+              onPlay={handlePlayerStart}
+            />
+          </EmbedContainer>
+
+          {/* external controls overlay for carousel */}
+          <Controls
+            prev={prev}
+            next={next}
+            selected={current}
+            selectedClips={selectedClips}
           />
-        </EmbedContainer>
 
-        {/* external controls overlay for carousel */}
-        <Controls
-          prev={prev}
-          next={next}
-          selected={current}
-          selectedClips={selectedClips}
-        />
-
-        {/* carousel changes title/watch button */}
-        <Overlay style={{ width: "50%" }}>
-          <Carousel
-            width="100%"
-            height="100%"
-            infiniteLoop
-            // autoPlay ?
-            selectedItem={current}
-            showIndicators={false}
-            showArrows={false}
-            showThumbs={false}
-            showStatus={false}
-            swipeable={false}
-            onChange={(index, item) => {
-              setCurrent(index)
-            }}
-          >
-            {selectedClips.map((video, i) => {
-              try {
-                // get the matching featured-work id (separate video)
-                const { id, client, title } = JSON.parse(video.description)
-                const path = `/works/${id}`
-
+          {/* carousel changes title/watch button */}
+          <Overlay style={{ width: "50%" }}>
+            <Carousel
+              width="100%"
+              height="100%"
+              infiniteLoop
+              // autoPlay ?
+              selectedItem={current}
+              showIndicators={false}
+              showArrows={false}
+              showThumbs={false}
+              showStatus={false}
+              swipeable={false}
+              onChange={(index, item) => {
+                setCurrent(index)
+              }}
+            >
+              {selectedClips.map((video) => {
                 return (
-                  <Slide client={client} title={title} href={path} key={i} />
+                  <Slide
+                    client={video.client}
+                    title={video.title}
+                    href={`/works/${video.projectId}`}
+                    key={video.id}
+                  />
                 )
-              } catch (error) {
-                console.log("CAROUSEL Problem with video named: ", video.name)
-                console.error(error)
-                return null
-              }
-            })}
-          </Carousel>
-        </Overlay>
-      </Frame>
-    </Section>
-  )
-})
+              })}
+            </Carousel>
+          </Overlay>
+        </Frame>
+      </Section>
+    )
+  },
+)
+
+ClipCarousel.displayName = "ClipCarousel"
 
 export default ClipCarousel

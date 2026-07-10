@@ -1,19 +1,16 @@
-import HomeSection from "./HomeSection"
+import { forwardRef } from "react"
 import Link from "next/link"
 import styled from "styled-components"
+
 import WorkThumb from "../WorkThumb"
+import PoppedHeader from "../PoppedHeader"
+import HomeSection from "./HomeSection"
 import { StaggerBox } from "../elements/StaggerBox"
+import { AnimatedHeader } from "../elements/AnimatedHeader"
 
 const WorksBox = styled(StaggerBox)`
-  & > div {
-    max-width: 45%;
-  }
+  margin-top: 2em;
 `
-import { AnimatedHeader } from "../elements/AnimatedHeader"
-import { forwardRef } from "react"
-import PoppedHeader from "../PoppedHeader"
-import { useMediaQuery } from "react-responsive"
-
 
 const Work = styled.div`
   display: initial;
@@ -36,14 +33,6 @@ const Work = styled.div`
     h2 {
       text-shadow: -0.1em 0.1em var(--red);
     }
-
-    .image {
-      opacity: 0;
-    }
-
-    .gif {
-      opacity: 1;
-    }
   }
 
   @media screen and (max-width: 425px) {
@@ -57,13 +46,21 @@ const Work = styled.div`
   }
 `
 
+const WorksSection = styled(HomeSection)`
+  margin-top: 25vh;
+  margin-bottom: 20vh;
+
+  @media screen and (max-width: 425px) {
+    margin-top: 10vh;
+    margin-bottom: 10vh;
+  }
+`
+
 const Works = forwardRef(({ videoList }, ref) => {
-  const isMobile = useMediaQuery({ query: "(max-width: 425px)" })
   return (
-    <HomeSection
+    <WorksSection
       id="works"
       ref={ref}
-      sectionStyle={{ marginTop: isMobile ? 0 : "15vh" }}
       HeaderComponent={() => (
         <AnimatedHeader id="works-header">
           <svg
@@ -113,35 +110,28 @@ const Works = forwardRef(({ videoList }, ref) => {
         </AnimatedHeader>
       )}
     >
-      <WorksBox marginTop="-100px">
-        {videoList.map((video, i) => {
-          const videoId = video.uri.split("/")[2]
-          try {
-            const desc = JSON.parse(video.description)
-            return (
-              <Link href="/works/[videoId]" as={`/works/${videoId}`} key={i}>
-                <Work key={i}>
-                  <WorkThumb
-                    images={video.pictures.sizes}
-                    thumb={video?.thumb}
-                    key={i}
-                  />
-                  <PoppedHeader className="works-client" noShadow>
-                    {desc?.client ?? desc?.Client}
-                  </PoppedHeader>
-                  <p>{desc?.title ?? desc?.Title}</p>
-                </Work>
-              </Link>
-            )
-          } catch (error) {
-            console.log("WORKS Problem with video named: ", video.name)
-            console.error(error)
-            return null
-          }
-        })}
+      <WorksBox>
+        {videoList.map((video, i) => (
+          <Link href={`/works/${video.id}`} key={video.id}>
+            <Work>
+              <WorkThumb
+                poster={video.poster}
+                preview={video.preview}
+                alt={`${video.client} — ${video.title}`}
+                priority={i < 2}
+              />
+              <PoppedHeader className="works-client" noShadow>
+                {video.client}
+              </PoppedHeader>
+              <p>{video.title}</p>
+            </Work>
+          </Link>
+        ))}
       </WorksBox>
-    </HomeSection>
+    </WorksSection>
   )
 })
+
+Works.displayName = "Works"
 
 export default Works

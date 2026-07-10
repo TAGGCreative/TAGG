@@ -1,28 +1,15 @@
-import React from "react"
-import VimeoPlayer from "react-player/vimeo"
+import { MediaPlayer } from "./MediaPlayer"
 
-export const FullPlayer = ({ uri }) => {
-  const url = `https://player.vimeo.com/video/${uri?.split("/")[2]}`
-
+export const FullPlayer = ({ source, customerCode, title }) => {
   return (
-    <VimeoPlayer
-      url={url}
+    <MediaPlayer
+      source={source}
+      customerCode={customerCode}
+      title={title}
       width="100%"
       height="80%"
-      style={{ alignSelf: "center" }}
       controls
-      config={{
-        vimeo: {
-          playerOptions: {
-            controls: true,
-            color: "#ed1a62",
-            playsinline: false,
-            keyboard: false,
-            loop: false,
-            portrait: false,
-          },
-        },
-      }}
+      style={{ alignSelf: "center" }}
     />
   )
 }

@@ -9,35 +9,35 @@ import TheFam from "../components/sections/TheFam"
 import OurRep from "../components/sections/OurRep"
 import Contact from "../components/sections/Contact"
 import { PrivacyPolicy } from "../components/elements/PrivacyPolicy"
-import {
-  getMostRecentAnimatedThumb,
-  getClipsMobile,
-  getClipsDesktop,
-  getWorks,
-} from "../vimeo"
-import { useInView } from "react-intersection-observer"
+import { getMediaCatalog } from "../lib/mediaCatalog"
+import { useInView } from "../utils/useInView"
 import { BackgroundStatic1 } from "../components/elements/BackgroundStatic1"
 
-// Fetch all video content
-export async function getStaticProps(context) {
-  const clipsMobile = await getClipsMobile()
-  const clipsDesktop = await getClipsDesktop()
-
-  let videoList = await getWorks()
-  for (let video of videoList) {
-    video["thumb"] = await getMostRecentAnimatedThumb(video?.uri)
-  }
+export function getStaticProps() {
+  const catalog = getMediaCatalog()
 
   return {
-    props: { videoList, clipsMobile, clipsDesktop },
-    revalidate: 60, // seconds before the site updates after Vimeo content changes
+    props: {
+      videoList: catalog.works,
+      clipsMobile: catalog.carousels.mobile,
+      clipsDesktop: catalog.carousels.desktop,
+      cloudflareCustomerCode: catalog.cloudflare?.customerCode || "",
+    },
   }
 }
 
-export default function Home({ videoList, clipsMobile, clipsDesktop }) {
+export default function Home({
+  videoList,
+  clipsMobile,
+  clipsDesktop,
+  cloudflareCustomerCode,
+}) {
   // Nav targeting
   const { ref: refCarousel, inView: inViewCarousel } = useInView()
   const { ref: refWorks, inView: inViewWorks } = useInView()
+  const { ref: refPeople, inView: inViewPeople } = useInView({
+    threshold: 0.25,
+  })
   const { ref: refContact, inView: inViewContact } = useInView({
     threshold: 0.25,
   })
@@ -48,23 +48,27 @@ export default function Home({ videoList, clipsMobile, clipsDesktop }) {
         visibleSection={
           inViewCarousel || inViewWorks
             ? "works"
-            : inViewContact
-            ? "contact"
-            : "about"
+            : inViewPeople
+              ? "people"
+              : inViewContact
+                ? "contact"
+                : "about"
         }
       />
       <main>
+        <h1 className="sr-only">TAGG Creative — Vancouver production studio</h1>
         <BackgroundStatic1 />
         <Carousel
           clipsDesktop={clipsDesktop}
           clipsMobile={clipsMobile}
+          cloudflareCustomerCode={cloudflareCustomerCode}
           ref={refCarousel}
         />
-        <Works videoList={videoList} id="works" ref={refWorks} />
         <WhoWeAre id="about" />
         <Core id="core" />
         <OurArena id="our-arena" />
-        <People id="people" />
+        <Works videoList={videoList} id="works" ref={refWorks} />
+        <People id="people" ref={refPeople} />
         <TheFam id="the-fam" />
         <OurRep id="our-rep" />
         <Contact id="contact" ref={refContact} />

@@ -3,6 +3,14 @@ import RosterCard from "../RosterCard"
 import { AnimatedHeader } from "../elements/AnimatedHeader"
 import { StaggerBox } from "../elements/StaggerBox"
 import { css } from "styled-components"
+import styled from "styled-components"
+
+const PeopleStaggerBox = styled(StaggerBox)`
+  & > div:nth-child(2) {
+    margin-top: -8em !important;
+    transform: translateY(-2em);
+  }
+`
 
 const leadership = [
   {
@@ -81,7 +89,7 @@ export default function People() {
         </AnimatedHeader>
       )}
     >
-      <StaggerBox marginTop="-350px">
+      <PeopleStaggerBox>
         {leadership.map(({ given, sur, role, bio, head, mask }, i) => (
           <RosterCard
             given={given}
@@ -93,7 +101,7 @@ export default function People() {
             key={i}
           />
         ))}
-      </StaggerBox>
+      </PeopleStaggerBox>
     </HomeSection>
   )
 }
