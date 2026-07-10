@@ -39,6 +39,7 @@ const Section = styled.section`
     position: absolute;
     overflow: hidden;
     height: 100%;
+    width: auto;
     transition: all 1000ms ease-in;
     z-index: 0;
   }

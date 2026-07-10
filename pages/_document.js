@@ -32,14 +32,15 @@ export default class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
-          {/* Instanly Pixel Script */}
-          <script
-            id="vtag-ai-js"
-            async
-            src="https://r2.leadsy.ai/tag.js"
-            data-pid="eGQc8oUqUH92xQ1a"
-            data-version="062024"
-          ></script>
+          {process.env.NODE_ENV === "production" && (
+            <script
+              id="vtag-ai-js"
+              async
+              src="https://r2.leadsy.ai/tag.js"
+              data-pid="eGQc8oUqUH92xQ1a"
+              data-version="062024"
+            />
+          )}
         </Head>
         <body>
           <Main />

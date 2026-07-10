@@ -1,4 +1,6 @@
 import Head from "next/head"
+import isPropValid from "@emotion/is-prop-valid"
+import { StyleSheetManager } from "styled-components"
 import { GlobalStyle } from "../styles/Global"
 
 function MyApp({ Component, pageProps }) {
@@ -47,7 +49,13 @@ function MyApp({ Component, pageProps }) {
         />
       </Head>
       <GlobalStyle />
-      <Component {...pageProps} />
+      <StyleSheetManager
+        shouldForwardProp={(propName, target) =>
+          typeof target === "string" ? isPropValid(propName) : true
+        }
+      >
+        <Component {...pageProps} />
+      </StyleSheetManager>
     </>
   )
 }

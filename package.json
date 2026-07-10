@@ -19,6 +19,7 @@
     "media:migrate:check": "node scripts/migrate-vimeo-to-cloudflare.mjs --dry-run --check-source --limit=1"
   },
   "dependencies": {
+    "@emotion/is-prop-valid": "^1.4.0",
     "dotenv": "^17.4.2",
     "next": "^16.2.10",
     "react": "^19.2.7",

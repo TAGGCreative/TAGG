@@ -35,7 +35,7 @@ const team = {
     },
     {
       head: "/images/extended-fam/TAGG-WEB-TeamPhotos-Pink-Hein-.png",
-      mask: "images/extended-fam/TAGG-WEB-TeamPhotos-Pink-Hein-copy.png",
+      mask: "/images/extended-fam/TAGG-WEB-TeamPhotos-Pink-Hein-copy.png",
       given: "HEIN",
       sur: "HAMERS",
       role: "Visual Artist",
