@@ -22,17 +22,10 @@ const Work = styled.div`
     margin: 0;
     margin-top: 1em;
     font-size: 1.3em;
-    transition: text-shadow 0.2s ease-in-out;
   }
 
   & p {
     margin: 0;
-  }
-
-  &:hover {
-    h2 {
-      text-shadow: -0.1em 0.1em var(--red);
-    }
   }
 
   @media screen and (max-width: 425px) {

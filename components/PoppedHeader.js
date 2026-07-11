@@ -23,9 +23,8 @@ const Popped = styled.h2`
   ${({ noShadow }) => {
     if (noShadow)
       return css`
-        &:hover {
-          text-shadow: -0.1em 0.1em var(--red);
-        }
+        text-shadow: none;
+        transition: none;
       `
   }}
 
