@@ -49,6 +49,30 @@ function run(command, args) {
   })
 }
 
+async function probeVideo(source) {
+  let output = ""
+  await new Promise((resolve, reject) => {
+    const child = spawn("ffprobe", [
+      "-v",
+      "error",
+      "-select_streams",
+      "v:0",
+      "-show_entries",
+      "stream=width,height",
+      "-of",
+      "json",
+      source,
+    ])
+    child.stdout.on("data", (chunk) => (output += chunk))
+    child.stderr.pipe(process.stderr)
+    child.on("error", reject)
+    child.on("exit", (code) =>
+      code === 0 ? resolve() : reject(new Error("ffprobe failed")),
+    )
+  })
+  return JSON.parse(output).streams[0]
+}
+
 async function walk(directory) {
   const files = []
   for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -136,6 +160,7 @@ async function encode360(item, directory) {
     path.join(directory, "segment_%05d.m4s"),
     path.join(directory, "index.m3u8"),
   ])
+  return probeVideo(path.join(directory, "index.m3u8"))
 }
 
 async function upload360(item, directory) {
@@ -160,14 +185,16 @@ async function upload360(item, directory) {
   }
 }
 
-async function updateMaster(item) {
+async function updateMaster(item, dimensions) {
   const response = await fetch(item.source.url, { cache: "no-store" })
   if (!response.ok)
     throw new Error(`Master playlist request failed (${response.status})`)
   let master = await response.text()
-  if (!master.includes("360p/index.m3u8")) {
-    master = `${master.trim()}\n#EXT-X-STREAM-INF:BANDWIDTH=1600000,RESOLUTION=640x360\n360p/index.m3u8\n`
-  }
+  master = master.replace(
+    /#EXT-X-STREAM-INF:[^\n]*\n360p\/index\.m3u8\n?/g,
+    "",
+  )
+  master = `${master.trim()}\n#EXT-X-STREAM-INF:BANDWIDTH=1600000,RESOLUTION=${dimensions.width}x${dimensions.height}\n360p/index.m3u8\n`
   await s3.send(
     new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
@@ -201,13 +228,19 @@ async function main() {
   for (const [index, item] of items.entries()) {
     console.log(`[${index + 1}/${items.length}] ${item.name} (${item.id})`)
     if (progress.completed[item.id]) {
-      console.log("  Already complete; skipping.")
+      const source360 = item.source.url.replace(
+        /master\.m3u8$/,
+        "360p/index.m3u8",
+      )
+      const dimensions = await probeVideo(source360)
+      await updateMaster(item, dimensions)
+      console.log("  Rendition complete; master dimensions verified.")
       continue
     }
     const directory = path.join(WORK_DIR, item.id, "360p")
-    await encode360(item, directory)
+    const dimensions = await encode360(item, directory)
     await upload360(item, directory)
-    await updateMaster(item)
+    await updateMaster(item, dimensions)
     progress.completed[item.id] = { completedAt: new Date().toISOString() }
     await saveProgress(progress)
     await rm(path.join(WORK_DIR, item.id), { recursive: true, force: true })
