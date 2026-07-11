@@ -140,7 +140,9 @@ const ClipCarousel = forwardRef(
 
     // Hide static overlay immediately when video starts - no fade
     const handlePlayerReady = () => {
-      if (selectedClips[current]?.source?.provider === "cloudflare") {
+      if (
+        ["cloudflare", "hls"].includes(selectedClips[current]?.source?.provider)
+      ) {
         setStaticOpacity(0)
       }
     }
@@ -151,12 +153,6 @@ const ClipCarousel = forwardRef(
 
     return (
       <Section ref={ref}>
-        {/* DNS prefetch for faster Vimeo connections */}
-        <link rel="dns-prefetch" href="//player.vimeo.com" />
-        <link rel="dns-prefetch" href="//vimeo.com" />
-        <link rel="preconnect" href="https://player.vimeo.com" />
-        <link rel="preconnect" href="https://vimeo.com" />
-
         <Frame>
           {/* static blip between video loads */}
           <Static src="/images/static.gif" alt="" $opacity={staticOpacity} />

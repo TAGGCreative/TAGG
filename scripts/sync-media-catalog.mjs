@@ -145,7 +145,7 @@ function preserveSource(existingCatalog, collection, vimeoId) {
       (entry.source?.provider === "vimeo" && entry.source.id === vimeoId),
   )
 
-  return existing?.source?.provider === "cloudflare"
+  return ["cloudflare", "hls"].includes(existing?.source?.provider)
     ? existing.source
     : { provider: "vimeo", id: vimeoId }
 }
@@ -222,10 +222,7 @@ async function main() {
   const catalog = {
     version: 1,
     generatedAt: new Date().toISOString(),
-    cloudflare: existingCatalog?.cloudflare || {
-      customerCode: "",
-      allowedOrigins: ["taggcreative.com", "www.taggcreative.com"],
-    },
+    cloudflare: existingCatalog?.cloudflare || { customerCode: "" },
     works,
     carousels: { desktop, mobile },
   }

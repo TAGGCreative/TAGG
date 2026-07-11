@@ -37,3 +37,6 @@ yarn-error.log*
 
 # converted video previews (generated at build time)
 /public/converted-previews/
+
+# resumable local video migration workspace
+/.media-work/

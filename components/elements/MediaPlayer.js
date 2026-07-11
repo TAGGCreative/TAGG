@@ -6,6 +6,11 @@ const VimeoPlayer = dynamic(() => import("react-player/vimeo"), {
   loading: () => <div style={{ width: "100%", height: "100%" }} />,
 })
 
+const HlsPlayer = dynamic(() => import("./HlsPlayer"), {
+  ssr: false,
+  loading: () => <div style={{ width: "100%", height: "100%" }} />,
+})
+
 const CloudflareFrame = styled.iframe`
   border: 0;
   width: 100%;
@@ -39,6 +44,22 @@ export function MediaPlayer({
   onPlay,
   style,
 }) {
+  if (source?.provider === "hls" && source.url) {
+    return (
+      <HlsPlayer
+        url={source.url}
+        title={title}
+        controls={controls}
+        autoplay={autoplay}
+        muted={muted}
+        loop={loop}
+        onReady={onReady}
+        onPlay={onPlay}
+        style={{ width, height, ...style }}
+      />
+    )
+  }
+
   if (source?.provider === "cloudflare") {
     const url = getCloudflarePlayerUrl(source, customerCode, {
       autoplay,

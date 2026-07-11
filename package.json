@@ -14,13 +14,16 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "media:sync": "node scripts/sync-media-catalog.mjs",
-    "media:migrate": "node scripts/migrate-vimeo-to-cloudflare.mjs",
-    "media:migrate:dry": "node scripts/migrate-vimeo-to-cloudflare.mjs --dry-run",
-    "media:migrate:check": "node scripts/migrate-vimeo-to-cloudflare.mjs --dry-run --check-source --limit=1"
+    "media:migrate": "node scripts/migrate-vimeo-to-r2.mjs",
+    "media:migrate:dry": "node scripts/migrate-vimeo-to-r2.mjs --dry-run",
+    "media:migrate:check": "node scripts/migrate-vimeo-to-r2.mjs --dry-run --check-source --limit=1"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1085.0",
+    "@aws-sdk/lib-storage": "^3.1085.0",
     "@emotion/is-prop-valid": "^1.4.0",
     "dotenv": "^17.4.2",
+    "hls.js": "^1.6.16",
     "next": "^16.2.10",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
