@@ -83,14 +83,15 @@ const WhoWeAre = forwardRef((props, ref) => {
     <Section id="about" ref={ref}>
       <div className="centerframe graphic" ref={refAnimation}>
         <Image
-          src="/images/TAGG_webbanner5.svg"
+          src="/images/TAGG_webbanner5.png"
           id="logo"
           alt=""
           aria-hidden="true"
           loading="lazy"
           width={1920}
           height={1080}
-          unoptimized
+          sizes="(max-width: 425px) 180vh, 180vh"
+          quality={65}
           className={inView ? "img appear" : "img hidden"}
         />
         <WhiteStrokeHeader

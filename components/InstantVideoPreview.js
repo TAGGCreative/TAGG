@@ -13,6 +13,16 @@ const Frame = styled.div`
   contain: paint;
   isolation: isolate;
 
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--red);
+    border-radius: 5px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
   /* Grid overlay for all thumbnails */
   &::after {
     content: "";

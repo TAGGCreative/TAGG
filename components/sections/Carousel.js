@@ -1,7 +1,7 @@
 import { Carousel } from "react-responsive-carousel"
 import "react-responsive-carousel/lib/styles/carousel.min.css"
 import styled from "styled-components"
-import { forwardRef, useRef, useState } from "react"
+import { forwardRef, useEffect, useRef, useState } from "react"
 import { useMediaQuery } from "../../utils/useMediaQuery"
 import { Overlay } from "../elements/Controls"
 import { Slide } from "../elements/Slide"
@@ -131,7 +131,7 @@ const Static = styled.video`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: ${({ $opacity }) => $opacity};
+  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
   transition: none; /* Instant cut, no fade */
   pointer-events: none;
   z-index: 2;
@@ -139,47 +139,51 @@ const Static = styled.video`
 
 const ClipCarousel = forwardRef(
   ({ clipsDesktop, clipsMobile, cloudflareCustomerCode }, ref) => {
-    const [staticOpacity, setStaticOpacity] = useState(0)
+    const [isStaticVisible, setIsStaticVisible] = useState(false)
+    const [isTransitioning, setIsTransitioning] = useState(false)
     const [current, setCurrent] = useState(0)
     const staticRef = useRef(null)
+    const transitionTimerRef = useRef(null)
 
     const isMobile = useMediaQuery({ query: "(max-width: 425px)" })
     const selectedClips = isMobile ? clipsMobile : clipsDesktop
     const viewportResolved = typeof isMobile === "boolean"
 
-    const showStatic = () => {
+    useEffect(
+      () => () => {
+        if (transitionTimerRef.current)
+          clearTimeout(transitionTimerRef.current)
+      },
+      [],
+    )
+
+    const transitionTo = (nextIndex) => {
+      if (isTransitioning) return
+      setIsTransitioning(true)
+      setIsStaticVisible(true)
       const staticVideo = staticRef.current
       if (staticVideo) {
         staticVideo.currentTime = 0
         staticVideo.play().catch(() => {})
       }
-      setStaticOpacity(0.6)
+      transitionTimerRef.current = setTimeout(() => {
+        setCurrent(nextIndex)
+      }, 220)
     }
 
     const next = () => {
       const next = current + 1 > selectedClips.length - 1 ? 0 : current + 1
-      setCurrent(next)
-      showStatic()
+      transitionTo(next)
     }
 
     const prev = () => {
       const prev = current - 1 < 0 ? selectedClips.length - 1 : current - 1
-      setCurrent(prev)
-      showStatic()
-    }
-
-    // Hide static overlay immediately when video starts - no fade
-    const handlePlayerReady = () => {
-      if (
-        ["cloudflare", "hls"].includes(selectedClips[current]?.source?.provider)
-      ) {
-        setStaticOpacity(0)
-        staticRef.current?.pause()
-      }
+      transitionTo(prev)
     }
 
     const handlePlayerStart = () => {
-      setStaticOpacity(0) // Immediately cut out static when video starts
+      setIsStaticVisible(false)
+      setIsTransitioning(false)
       staticRef.current?.pause()
     }
 
@@ -190,7 +194,7 @@ const ClipCarousel = forwardRef(
           <Static
             ref={staticRef}
             src="/videos/static-transition.mp4"
-            $opacity={staticOpacity}
+            $isVisible={isStaticVisible}
             muted
             loop
             playsInline
@@ -217,7 +221,6 @@ const ClipCarousel = forwardRef(
                 poster={selectedClips[current]?.poster?.src}
                 controls={false}
                 style={{ objectFit: "cover" }}
-                onReady={handlePlayerReady}
                 onPlay={handlePlayerStart}
               />
             )}
