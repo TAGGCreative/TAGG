@@ -26,8 +26,8 @@ const Nav = styled.nav`
 
   #logo {
     position: relative;
-    margin-left: -1.25em;
-    margin-top: 0.5em;
+    margin-left: -0.75em;
+    margin-top: 0.25em;
     outline: 1px solid var(--red);
     /* box-shadow: 4px 4px var(--red), 0 4px var(--red); */
     background-color: var(--black);
@@ -56,10 +56,8 @@ const Links = styled.div`
 `
 
 const Logo = styled.img`
-  margin: 0.75em;
-  margin-bottom: 0.35em;
-  margin-left: 1em;
-  height: 35px;
+  margin: 0.45em 0.65em 0.3em 0.75em;
+  height: 30px;
   width: auto;
   transition: transform 0.2s ease-in-out;
   filter: invert(20%) sepia(45%) saturate(6941%) hue-rotate(329deg)
@@ -95,9 +93,9 @@ const Logo = styled.img`
   }
 
   @media screen and (max-width: 425px) {
-    height: 25px;
+    height: 23px;
     width: auto;
-    margin-left: 1em;
+    margin-left: 0.75em;
   }
 `
 

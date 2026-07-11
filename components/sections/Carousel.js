@@ -13,31 +13,35 @@ const Section = styled.section`
   height: 100vh;
   height: 100svh;
   padding: 10em 2% 2% 2%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  box-sizing: border-box;
 
   @media screen and (max-width: 425px) {
     padding: 4em 2% 2% 2%;
+    height: auto;
+    min-height: 100svh;
   }
 `
 
 const Frame = styled.div`
-  width: auto;
-  height: calc(100vh - 12em);
-  height: calc(100dvh - 12em);
-  max-width: 100%;
-  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: clamp(8px, 0.8vw, 16px);
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
+  background: var(--black);
+  border: 10px solid var(--red);
 
   @media screen and (max-width: 425px) {
     width: 100%;
     height: auto;
+    aspect-ratio: 16 / 9;
+    padding: 6px;
+    border-width: 6px;
   }
 
   .carousel-root a {
@@ -97,17 +101,15 @@ const Frame = styled.div`
       background-position: 0 50%;
     }
   }
-
-  /* frame */
-  border: 10px solid var(--red);
 `
 
 const EmbedContainer = styled.div`
   position: relative;
-  box-sizing: content-box;
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   overflow: hidden;
+  background: var(--black);
 
   & iframe,
   & object,

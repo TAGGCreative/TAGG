@@ -4,13 +4,14 @@ import Image from "next/image"
 
 const Frame = styled.div`
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: block;
+  width: 100%;
+  aspect-ratio: ${({ $width, $height }) => `${$width} / ${$height}`};
   background-color: rgba(0, 0, 0, 0);
   border-radius: 5px;
   overflow: hidden;
   contain: paint;
+  isolation: isolate;
 
   /* Grid overlay for all thumbnails */
   &::after {
@@ -32,9 +33,13 @@ const Frame = styled.div`
 `
 
 const StaticImage = styled(Image)`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
   border-radius: 5px;
-  transition: opacity 0.2s ease-in-out;
 `
 
 const VideoPreview = styled.video`
@@ -68,10 +73,23 @@ const InstantVideoPreview = ({
 
   useEffect(() => {
     if (isHovered && shouldLoad && videoRef.current) {
-      videoRef.current.currentTime = 0
       videoRef.current.play().catch(() => {})
     }
   }, [isHovered, shouldLoad])
+
+  const handleVideoReady = () => {
+    const video = videoRef.current
+    if (!video) return
+
+    const reveal = () => setIsVideoReady(true)
+    if (typeof video.requestVideoFrameCallback === "function") {
+      video.requestVideoFrameCallback(reveal)
+    } else {
+      reveal()
+    }
+
+    if (isHovered) video.play().catch(() => {})
+  }
 
   const handleMouseEnter = () => {
     setShouldLoad(true)
@@ -89,6 +107,8 @@ const InstantVideoPreview = ({
 
   return (
     <Frame
+      $width={width}
+      $height={height}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleMouseEnter}
@@ -117,8 +137,8 @@ const InstantVideoPreview = ({
           loop
           playsInline
           preload="auto"
-          onLoadedData={() => setIsVideoReady(true)}
-          onCanPlay={() => setIsVideoReady(true)}
+          onLoadedData={handleVideoReady}
+          onCanPlay={handleVideoReady}
           onError={() => setIsVideoReady(false)}
         >
           {/* WebM for better compression */}
