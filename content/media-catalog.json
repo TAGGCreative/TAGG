@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-10T18:31:01.995Z",
+  "generatedAt": "2026-07-11T04:04:16.466Z",
   "cloudflare": {
     "customerCode": "",
     "allowedOrigins": ["taggcreative.com", "www.taggcreative.com"]
@@ -9,8 +9,9 @@
     {
       "id": "1123017366",
       "source": {
-        "provider": "vimeo",
-        "id": "1123017366"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/1123017366/master.m3u8",
+        "legacyVimeoId": "1123017366"
       },
       "client": "Amazon Business",
       "title": "DamnFine Pizza",
@@ -34,8 +35,9 @@
     {
       "id": "807636078",
       "source": {
-        "provider": "vimeo",
-        "id": "807636078"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/807636078/master.m3u8",
+        "legacyVimeoId": "807636078"
       },
       "client": "Microsoft Advertising",
       "title": "Digital Nomad",
@@ -67,8 +69,9 @@
     {
       "id": "819967719",
       "source": {
-        "provider": "vimeo",
-        "id": "819967719"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/819967719/master.m3u8",
+        "legacyVimeoId": "819967719"
       },
       "client": "NBA",
       "title": "Something's Cooking in the Capital",
@@ -97,8 +100,9 @@
     {
       "id": "1051365848",
       "source": {
-        "provider": "vimeo",
-        "id": "1051365848"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/1051365848/master.m3u8",
+        "legacyVimeoId": "1051365848"
       },
       "client": "Amazon Business",
       "title": "Smarter Deliveries",
@@ -120,8 +124,9 @@
     {
       "id": "849236701",
       "source": {
-        "provider": "vimeo",
-        "id": "849236701"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/849236701/master.m3u8",
+        "legacyVimeoId": "849236701"
       },
       "client": "Teekay",
       "title": "50 Years Strong",
@@ -148,8 +153,9 @@
     {
       "id": "807636852",
       "source": {
-        "provider": "vimeo",
-        "id": "807636852"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/807636852/master.m3u8",
+        "legacyVimeoId": "807636852"
       },
       "client": "Zappos",
       "title": "The Tony Hsieh Experience",
@@ -172,8 +178,9 @@
     {
       "id": "1051355137",
       "source": {
-        "provider": "vimeo",
-        "id": "1051355137"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/1051355137/master.m3u8",
+        "legacyVimeoId": "1051355137"
       },
       "client": "Manning Ventures",
       "title": "Bet On Boring",
@@ -194,8 +201,9 @@
     {
       "id": "658838914",
       "source": {
-        "provider": "vimeo",
-        "id": "658838914"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/658838914/master.m3u8",
+        "legacyVimeoId": "658838914"
       },
       "client": "Under Armour",
       "title": "The Gathering 2020",
@@ -218,8 +226,9 @@
     {
       "id": "658838775",
       "source": {
-        "provider": "vimeo",
-        "id": "658838775"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/658838775/master.m3u8",
+        "legacyVimeoId": "658838775"
       },
       "client": "Seattle Seahawks",
       "title": " eSports: Jordan Babineaux",
@@ -250,8 +259,9 @@
     {
       "id": "805408384",
       "source": {
-        "provider": "vimeo",
-        "id": "805408384"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/805408384/master.m3u8",
+        "legacyVimeoId": "805408384"
       },
       "client": "Rothenberg Wealth Management",
       "title": "Why Rothenberg?",
@@ -274,8 +284,9 @@
     {
       "id": "658838647",
       "source": {
-        "provider": "vimeo",
-        "id": "658838647"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/658838647/master.m3u8",
+        "legacyVimeoId": "658838647"
       },
       "client": "Makara",
       "title": "People You Know Who Crypto",
@@ -298,8 +309,9 @@
     {
       "id": "658838629",
       "source": {
-        "provider": "vimeo",
-        "id": "658838629"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/658838629/master.m3u8",
+        "legacyVimeoId": "658838629"
       },
       "client": "First United",
       "title": "A New Home",
@@ -322,8 +334,9 @@
     {
       "id": "660724223",
       "source": {
-        "provider": "vimeo",
-        "id": "660724223"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/660724223/master.m3u8",
+        "legacyVimeoId": "660724223"
       },
       "client": "LifeBooster",
       "title": "Everyday",
@@ -344,8 +357,9 @@
     {
       "id": "828419346",
       "source": {
-        "provider": "vimeo",
-        "id": "828419346"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/828419346/master.m3u8",
+        "legacyVimeoId": "828419346"
       },
       "client": "The Leukemia & Lymphoma Society",
       "title": "Christians's Story",
@@ -374,8 +388,9 @@
     {
       "id": "658838893",
       "source": {
-        "provider": "vimeo",
-        "id": "658838893"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/658838893/master.m3u8",
+        "legacyVimeoId": "658838893"
       },
       "client": "Spotify",
       "title": "The Gathering 2020",
@@ -398,8 +413,9 @@
     {
       "id": "658838751",
       "source": {
-        "provider": "vimeo",
-        "id": "658838751"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/658838751/master.m3u8",
+        "legacyVimeoId": "658838751"
       },
       "client": "Teekay",
       "title": "'Future Of' Summit - Recap'",
@@ -423,8 +439,9 @@
     {
       "id": "658838676",
       "source": {
-        "provider": "vimeo",
-        "id": "658838676"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/658838676/master.m3u8",
+        "legacyVimeoId": "658838676"
       },
       "client": "Modo",
       "title": "Carshare 101",
@@ -447,8 +464,9 @@
     {
       "id": "658838860",
       "source": {
-        "provider": "vimeo",
-        "id": "658838860"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/658838860/master.m3u8",
+        "legacyVimeoId": "658838860"
       },
       "client": "Coca-Cola",
       "title": "The Gathering 2020",
@@ -471,8 +489,9 @@
     {
       "id": "658838813",
       "source": {
-        "provider": "vimeo",
-        "id": "658838813"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/658838813/master.m3u8",
+        "legacyVimeoId": "658838813"
       },
       "client": "Seattle Seahawks",
       "title": "eSports: Tyler Lockett & Quandre Diggs",
@@ -503,8 +522,9 @@
     {
       "id": "662480133",
       "source": {
-        "provider": "vimeo",
-        "id": "662480133"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/662480133/master.m3u8",
+        "legacyVimeoId": "662480133"
       },
       "client": "Seattle Seahawks",
       "title": "eSports: Griffin Brothers",
@@ -535,8 +555,9 @@
     {
       "id": "658838698",
       "source": {
-        "provider": "vimeo",
-        "id": "658838698"
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/658838698/master.m3u8",
+        "legacyVimeoId": "658838698"
       },
       "client": "AGLC",
       "title": "Do I Need A Licence?",
@@ -563,8 +584,9 @@
         "id": "571461797",
         "projectId": "658838914",
         "source": {
-          "provider": "vimeo",
-          "id": "571461797"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/571461797/master.m3u8",
+          "legacyVimeoId": "571461797"
         },
         "client": "Under Armour",
         "title": "The Gathering 2020",
@@ -578,8 +600,9 @@
         "id": "571461663",
         "projectId": "658838775",
         "source": {
-          "provider": "vimeo",
-          "id": "571461663"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/571461663/master.m3u8",
+          "legacyVimeoId": "571461663"
         },
         "client": "Seattle Seahawks",
         "title": "eSports: Jordan Babineaux",
@@ -593,8 +616,9 @@
         "id": "658467184",
         "projectId": "658838629",
         "source": {
-          "provider": "vimeo",
-          "id": "658467184"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/658467184/master.m3u8",
+          "legacyVimeoId": "658467184"
         },
         "client": "First United",
         "title": "A New Home",
@@ -608,8 +632,9 @@
         "id": "658467192",
         "projectId": "658838647",
         "source": {
-          "provider": "vimeo",
-          "id": "658467192"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/658467192/master.m3u8",
+          "legacyVimeoId": "658467192"
         },
         "client": "Makara",
         "title": "People You Know Who Crypto",
@@ -623,8 +648,9 @@
         "id": "571461592",
         "projectId": "660724223",
         "source": {
-          "provider": "vimeo",
-          "id": "571461592"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/571461592/master.m3u8",
+          "legacyVimeoId": "571461592"
         },
         "client": "LifeBooster",
         "title": "Everyday",
@@ -638,8 +664,9 @@
         "id": "571461532",
         "projectId": "658838698",
         "source": {
-          "provider": "vimeo",
-          "id": "571461532"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/571461532/master.m3u8",
+          "legacyVimeoId": "571461532"
         },
         "client": "AGLC",
         "title": "Do I Need a Licence?",
@@ -653,8 +680,9 @@
         "id": "571461779",
         "projectId": "658838893",
         "source": {
-          "provider": "vimeo",
-          "id": "571461779"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/571461779/master.m3u8",
+          "legacyVimeoId": "571461779"
         },
         "client": "Spotify",
         "title": "The Gathering 2020",
@@ -668,8 +696,9 @@
         "id": "658467177",
         "projectId": "658838602",
         "source": {
-          "provider": "vimeo",
-          "id": "658467177"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/658467177/master.m3u8",
+          "legacyVimeoId": "658467177"
         },
         "client": "Amazon AWS x Intel",
         "title": "15 Year Anniversary",
@@ -685,8 +714,9 @@
         "id": "629599794",
         "projectId": "658838914",
         "source": {
-          "provider": "vimeo",
-          "id": "629599794"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/629599794/master.m3u8",
+          "legacyVimeoId": "629599794"
         },
         "client": "Under Armour",
         "title": "The Gathering 2020",
@@ -700,8 +730,9 @@
         "id": "629599714",
         "projectId": "658838775",
         "source": {
-          "provider": "vimeo",
-          "id": "629599714"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/629599714/master.m3u8",
+          "legacyVimeoId": "629599714"
         },
         "client": "Seattle Seahawks",
         "title": "eSports: Jordan Babineaux",
@@ -715,8 +746,9 @@
         "id": "658467129",
         "projectId": "658838629",
         "source": {
-          "provider": "vimeo",
-          "id": "658467129"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/658467129/master.m3u8",
+          "legacyVimeoId": "658467129"
         },
         "client": "First United",
         "title": "A New Home",
@@ -730,8 +762,9 @@
         "id": "658467138",
         "projectId": "658838647",
         "source": {
-          "provider": "vimeo",
-          "id": "658467138"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/658467138/master.m3u8",
+          "legacyVimeoId": "658467138"
         },
         "client": "Makara",
         "title": "People You Know Who Crypto",
@@ -745,8 +778,9 @@
         "id": "629599676",
         "projectId": "660724223",
         "source": {
-          "provider": "vimeo",
-          "id": "629599676"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/629599676/master.m3u8",
+          "legacyVimeoId": "629599676"
         },
         "client": "LifeBooster",
         "title": "Everyday",
@@ -760,8 +794,9 @@
         "id": "629599660",
         "projectId": "658838698",
         "source": {
-          "provider": "vimeo",
-          "id": "629599660"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/629599660/master.m3u8",
+          "legacyVimeoId": "629599660"
         },
         "client": "AGLC",
         "title": "Do I Need a Licence?",
@@ -775,8 +810,9 @@
         "id": "629599782",
         "projectId": "658838893",
         "source": {
-          "provider": "vimeo",
-          "id": "629599782"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/629599782/master.m3u8",
+          "legacyVimeoId": "629599782"
         },
         "client": "Spotify",
         "title": "The Gathering 2020",
@@ -790,8 +826,9 @@
         "id": "658467122",
         "projectId": "658838602",
         "source": {
-          "provider": "vimeo",
-          "id": "658467122"
+          "provider": "hls",
+          "url": "https://media.taggcreative.com/videos/658467122/master.m3u8",
+          "legacyVimeoId": "658467122"
         },
         "client": "Amazon AWS x Intel",
         "title": "15 Year Anniversary",

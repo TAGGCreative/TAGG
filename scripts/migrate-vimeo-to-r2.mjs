@@ -418,7 +418,11 @@ async function main() {
       await rm(path.dirname(source), { recursive: true, force: true })
   }
 
-  if (!DRY_RUN && !publicBaseUrl) {
+  if (!DRY_RUN && publicBaseUrl) {
+    catalog.generatedAt = new Date().toISOString()
+    await writeFile(CATALOG_PATH, `${JSON.stringify(catalog, null, 2)}\n`)
+    console.log(`Migration catalog switched to ${publicBaseUrl}.`)
+  } else if (!DRY_RUN) {
     console.log(
       "Uploads complete, but the catalog was not switched because R2_PUBLIC_BASE_URL is unset.",
     )

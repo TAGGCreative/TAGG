@@ -1,6 +1,5 @@
 import { useEffect } from "react"
 import { useRouter } from "next/router"
-import Modal from "react-modal"
 import WorkPage from "../../components/WorkPage"
 import {
   getCloudflareCustomerCode,
@@ -47,28 +46,30 @@ const WorkPageModal = ({ videos, videoId, cloudflareCustomerCode }) => {
   const router = useRouter()
 
   useEffect(() => {
-    Modal.setAppElement("#__next")
     router.prefetch("/")
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") router.push("/#works")
+    }
+    window.addEventListener("keydown", closeOnEscape)
+    return () => window.removeEventListener("keydown", closeOnEscape)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
-    <Modal
-      isOpen={true} // The modal should always be shown on page load, it is the 'page'
-      onRequestClose={() => router.push("/#works")}
-      contentLabel="Work modal"
-      shouldCloseOnEsc={true}
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Work modal"
       style={{
-        content: {
-          backgroundColor: "var(--black)",
-          border: "none",
-          borderRadius: 0,
-          margin: 0,
-          padding: 0,
-          inset: 0,
-          width: "100vw",
-          height: "100vh",
-        },
+        position: "fixed",
+        zIndex: 1000,
+        backgroundColor: "var(--black)",
+        margin: 0,
+        padding: 0,
+        inset: 0,
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
       }}
     >
       <WorkPage
@@ -76,7 +77,7 @@ const WorkPageModal = ({ videos, videoId, cloudflareCustomerCode }) => {
         videoId={videoId}
         cloudflareCustomerCode={cloudflareCustomerCode}
       />
-    </Modal>
+    </div>
   )
 }
 
