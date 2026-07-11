@@ -1,5 +1,5 @@
 import { forwardRef } from "react"
-import Link from "next/link"
+import { useRouter } from "next/router"
 import styled from "styled-components"
 
 import WorkThumb from "../WorkThumb"
@@ -13,7 +13,7 @@ const WorksBox = styled(StaggerBox)`
 `
 
 const Work = styled.div`
-  display: initial;
+  display: block;
   min-height: fit-content;
   cursor: pointer;
   max-width: 100%;
@@ -57,6 +57,23 @@ const WorksSection = styled(HomeSection)`
 `
 
 const Works = forwardRef(({ videoList }, ref) => {
+  const router = useRouter()
+
+  const navigateToWork = (event, href) => {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return
+
+    event.preventDefault()
+    router.push(href)
+  }
+
   return (
     <WorksSection
       id="works"
@@ -111,21 +128,28 @@ const Works = forwardRef(({ videoList }, ref) => {
       )}
     >
       <WorksBox>
-        {videoList.map((video) => (
-          <Link href={`/works/${video.id}`} key={video.id}>
-            <Work>
-              <WorkThumb
-                poster={video.poster}
-                preview={video.preview}
-                alt={`${video.client} — ${video.title}`}
-              />
-              <PoppedHeader className="works-client" noShadow>
-                {video.client}
-              </PoppedHeader>
-              <p>{video.title}</p>
-            </Work>
-          </Link>
-        ))}
+        {videoList.map((video) => {
+          const href = `/works/${video.id}`
+          return (
+            <a
+              href={href}
+              key={video.id}
+              onClick={(event) => navigateToWork(event, href)}
+            >
+              <Work>
+                <WorkThumb
+                  poster={video.poster}
+                  preview={video.preview}
+                  alt={`${video.client} — ${video.title}`}
+                />
+                <PoppedHeader className="works-client" noShadow>
+                  {video.client}
+                </PoppedHeader>
+                <p>{video.title}</p>
+              </Work>
+            </a>
+          )
+        })}
       </WorksBox>
     </WorksSection>
   )

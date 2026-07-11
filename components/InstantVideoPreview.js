@@ -52,23 +52,23 @@ const StaticImage = styled(Image)`
   object-fit: cover;
   display: block;
   border-radius: 5px;
+  z-index: 1;
+  opacity: ${({ $showPoster }) => ($showPoster ? 1 : 0)};
+  transition: ${({ $showPoster }) =>
+    $showPoster ? "none" : "opacity 0.35s ease-in-out"};
 `
 
 const VideoPreview = styled.video`
   position: absolute;
   inset: 0;
   border-radius: 5px;
-  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
-  visibility: ${({ $isVisible }) => ($isVisible ? "visible" : "hidden")};
-  transition: opacity 0.28s ease-in-out;
+  z-index: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
   pointer-events: none;
 `
-
-const PREVIEW_START_SECONDS = 1.5
 
 const InstantVideoPreview = ({
   staticImageSrc,
@@ -87,19 +87,7 @@ const InstantVideoPreview = ({
 
   const preparePreview = useCallback(() => {
     const video = videoRef.current
-    if (!video || !hoverRef.current || video.readyState < 1) return
-
-    const duration = Number.isFinite(video.duration) ? video.duration : 0
-    const startTime = Math.min(
-      PREVIEW_START_SECONDS,
-      Math.max(0, duration - 0.35),
-    )
-
-    if (Math.abs(video.currentTime - startTime) > 0.08) {
-      setIsVideoReady(false)
-      video.currentTime = startTime
-      return
-    }
+    if (!video || !hoverRef.current || video.readyState < 2) return
 
     video.play().catch(() => {})
     const reveal = () => {
@@ -108,7 +96,6 @@ const InstantVideoPreview = ({
     }
     if (typeof video.requestVideoFrameCallback === "function") {
       video.requestVideoFrameCallback(reveal)
-      setTimeout(reveal, 100)
     } else {
       reveal()
     }
@@ -120,7 +107,6 @@ const InstantVideoPreview = ({
 
   const handleMouseEnter = () => {
     hoverRef.current = true
-    setIsVideoReady(false)
     setShouldLoad(true)
     setIsHovered(true)
   }
@@ -128,7 +114,6 @@ const InstantVideoPreview = ({
   const handleMouseLeave = () => {
     hoverRef.current = false
     setIsHovered(false)
-    setIsVideoReady(false)
 
     // Pause video
     if (videoRef.current) {
@@ -156,6 +141,7 @@ const InstantVideoPreview = ({
         sizes="(max-width: 425px) 95vw, 31.5vw"
         loading={priority ? "eager" : "lazy"}
         priority={priority}
+        $showPoster={!isHovered || !isVideoReady}
         quality={75}
         placeholder="blur"
         blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
@@ -165,23 +151,18 @@ const InstantVideoPreview = ({
       {videoSources && (
         <VideoPreview
           ref={videoRef}
-          $isVisible={isHovered && isVideoReady}
           poster={staticImageSrc}
           muted
+          loop
           playsInline
           preload={shouldLoad ? "auto" : "none"}
-          onLoadedMetadata={preparePreview}
-          onSeeked={preparePreview}
-          onEnded={() => {
-            setIsVideoReady(false)
-            preparePreview()
-          }}
+          onLoadedData={preparePreview}
+          onCanPlay={preparePreview}
           onError={() => setIsVideoReady(false)}
         >
-          {/* WebM for better compression */}
-          <source src={videoSources.webm} type="video/webm" />
-          {/* MP4 fallback */}
+          {/* Prefer H.264 for reliable hardware decoding on desktop/mobile. */}
           <source src={videoSources.mp4} type="video/mp4" />
+          <source src={videoSources.webm} type="video/webm" />
         </VideoPreview>
       )}
     </Frame>
