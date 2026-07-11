@@ -14,6 +14,9 @@ const Section = styled.section`
   height: 100svh;
   padding: 10em 2% 2% 2%;
   box-sizing: border-box;
+  container-type: size;
+  display: grid;
+  place-items: center;
 
   @media screen and (max-width: 425px) {
     padding: 4em 2% 2% 2%;
@@ -23,10 +26,11 @@ const Section = styled.section`
 `
 
 const Frame = styled.div`
-  width: 100%;
-  height: 100%;
+  width: min(100cqw, 177.7778cqh);
+  height: auto;
+  aspect-ratio: 16 / 9;
   min-height: 0;
-  padding: clamp(8px, 0.8vw, 16px);
+  padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -34,14 +38,14 @@ const Frame = styled.div`
   overflow: hidden;
   box-sizing: border-box;
   background: var(--black);
-  border: 10px solid var(--red);
+  outline: 10px solid var(--red);
+  outline-offset: 0;
 
   @media screen and (max-width: 425px) {
     width: 100%;
     height: auto;
     aspect-ratio: 16 / 9;
-    padding: 6px;
-    border-width: 6px;
+    outline-width: 6px;
   }
 
   .carousel-root a {
@@ -92,7 +96,7 @@ const Frame = styled.div`
       transform: translate3d(0, -2px, 0);
     }
     100% {
-      transform: translate3d(0, calc(100dvh - 12em), 0);
+      transform: translate3d(0, 100cqh, 0);
     }
   }
 
@@ -191,6 +195,7 @@ const ClipCarousel = forwardRef(
                 loop
                 poster={selectedClips[current]?.poster?.src}
                 controls={false}
+                style={{ objectFit: "cover" }}
                 onReady={handlePlayerReady}
                 onPlay={handlePlayerStart}
               />

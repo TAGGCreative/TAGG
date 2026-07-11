@@ -26,25 +26,24 @@ const Nav = styled.nav`
 
   #logo {
     position: relative;
-    margin-left: -0.75em;
-    margin-top: 0.25em;
-    outline: 1px solid var(--red);
-    /* box-shadow: 4px 4px var(--red), 0 4px var(--red); */
-    background-color: var(--black);
+    display: block;
+    margin-left: -1.25em;
+    margin-top: 0.5em;
+    padding: 1px;
+    background-color: var(--red);
+    clip-path: polygon(0 0, 82% 0, 100% 50%, 82% 100%, 0 100%);
+    isolation: isolate;
     @media screen and (max-width: 425px) {
-      padding-left: 1em;
+      margin-left: -0.75em;
     }
 
-    ::before {
+    &::before {
       position: absolute;
       content: "";
-      height: calc(100% + 5px);
-      width: calc(100% + 5px);
-      top: 0;
-      left: 0;
-      background-color: var(--red);
-      clip-path: polygon(95% 0, 100% 10%, 100% 100%, 0 100%, 0 0);
-      z-index: -1;
+      inset: 1px;
+      background-color: var(--black);
+      clip-path: polygon(0 0, 82% 0, 100% 50%, 82% 100%, 0 100%);
+      z-index: 0;
     }
   }
 `
@@ -56,8 +55,10 @@ const Links = styled.div`
 `
 
 const Logo = styled.img`
-  margin: 0.45em 0.65em 0.3em 0.75em;
-  height: 30px;
+  position: relative;
+  z-index: 1;
+  margin: 0.65em 1.35em 0.4em 0.85em;
+  height: 35px;
   width: auto;
   transition: transform 0.2s ease-in-out;
   filter: invert(20%) sepia(45%) saturate(6941%) hue-rotate(329deg)
@@ -93,9 +94,9 @@ const Logo = styled.img`
   }
 
   @media screen and (max-width: 425px) {
-    height: 23px;
+    height: 25px;
     width: auto;
-    margin-left: 0.75em;
+    margin: 0.55em 1.15em 0.35em 0.75em;
   }
 `
 

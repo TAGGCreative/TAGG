@@ -129,14 +129,14 @@ const InstantVideoPreview = ({
       />
 
       {/* Pre-converted video preview - instant playback! */}
-      {videoSources && shouldLoad && (
+      {videoSources && (
         <VideoPreview
           ref={videoRef}
           $isVisible={isHovered && isVideoReady}
           muted
           loop
           playsInline
-          preload="auto"
+          preload={shouldLoad ? "auto" : "none"}
           onLoadedData={handleVideoReady}
           onCanPlay={handleVideoReady}
           onError={() => setIsVideoReady(false)}

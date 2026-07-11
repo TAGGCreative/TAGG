@@ -14,23 +14,25 @@ const OurRepSection = styled(HomeSection)`
 `
 
 const Flow = styled.div`
-  padding: 0 10%;
+  padding: 0 8%;
   margin-top: 0;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  align-content: center;
+  line-height: 0;
 
   a {
-    margin-top: 0;
+    margin: -10px -8px;
   }
 
   a:first-of-type {
-    margin-left: 50px;
+    margin-left: -8px;
   }
 
   #ucla {
-    padding-left: 20px;
+    padding-left: 0;
   }
 
   @media screen and (max-width: 425px) {
@@ -44,11 +46,11 @@ const Flow = styled.div`
     flex-flow: row wrap;
 
     a {
-      margin-top: 0;
+      margin: -5px -4px;
     }
 
     a:first-of-type {
-      margin-left: 0;
+      margin-left: -4px;
     }
   }
 `
