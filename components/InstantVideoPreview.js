@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useEffect, useRef, useState } from "react"
 import styled from "styled-components"
 import Image from "next/image"
 
@@ -7,11 +7,9 @@ const Frame = styled.div`
   display: block;
   width: 100%;
   aspect-ratio: ${({ $width, $height }) => `${$width} / ${$height}`};
-  background-color: rgba(0, 0, 0, 0);
+  background-color: transparent;
   border-radius: 5px;
   overflow: hidden;
-  contain: paint;
-  isolation: isolate;
 
   &::before {
     content: "";
@@ -25,14 +23,10 @@ const Frame = styled.div`
     transition: opacity 0.15s ease-in-out;
   }
 
-  /* Grid overlay for all thumbnails */
   &::after {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background-image:
       linear-gradient(rgba(0, 0, 0, 0.1) 2px, transparent 2px),
       linear-gradient(90deg, rgba(0, 0, 0, 0.1) 2px, transparent 2px);
@@ -58,17 +52,201 @@ const StaticImage = styled(Image)`
     $showPoster ? "none" : "opacity 0.35s ease-in-out"};
 `
 
-const VideoPreview = styled.video`
+const CanvasPreview = styled.canvas`
   position: absolute;
   inset: 0;
-  border-radius: 5px;
   z-index: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
+  border-radius: 5px;
   pointer-events: none;
 `
+
+// A single detached video decodes every preview. Canvas keeps native video
+// overlay planes out of the thumbnail grid and its compositor tree.
+let sharedVideo = null
+let sharedSource = ""
+let activeSession = null
+
+const getSharedVideo = () => {
+  if (sharedVideo || typeof document === "undefined") return sharedVideo
+
+  sharedVideo = document.createElement("video")
+  sharedVideo.muted = true
+  sharedVideo.defaultMuted = true
+  sharedVideo.loop = true
+  sharedVideo.playsInline = true
+  sharedVideo.preload = "auto"
+  sharedVideo.disablePictureInPicture = true
+  sharedVideo.setAttribute("playsinline", "")
+  sharedVideo.setAttribute("aria-hidden", "true")
+  return sharedVideo
+}
+
+const cancelFrame = (session) => {
+  if (!session) return
+
+  if (
+    session.videoFrameId !== null &&
+    typeof session.video.cancelVideoFrameCallback === "function"
+  ) {
+    session.video.cancelVideoFrameCallback(session.videoFrameId)
+  }
+  if (session.animationFrameId !== null)
+    window.cancelAnimationFrame(session.animationFrameId)
+
+  session.videoFrameId = null
+  session.animationFrameId = null
+}
+
+const stopPreview = (owner) => {
+  if (!activeSession || (owner && activeSession.owner !== owner)) return
+
+  cancelFrame(activeSession)
+  activeSession.video.pause()
+  activeSession.video.onerror = null
+  activeSession = null
+}
+
+const drawVideoCover = (context, video, width, height) => {
+  const sourceWidth = video.videoWidth
+  const sourceHeight = video.videoHeight
+  if (!sourceWidth || !sourceHeight) return false
+
+  const sourceRatio = sourceWidth / sourceHeight
+  const targetRatio = width / height
+  let sourceX = 0
+  let sourceY = 0
+  let cropWidth = sourceWidth
+  let cropHeight = sourceHeight
+
+  if (sourceRatio > targetRatio) {
+    cropWidth = sourceHeight * targetRatio
+    sourceX = (sourceWidth - cropWidth) / 2
+  } else if (sourceRatio < targetRatio) {
+    cropHeight = sourceWidth / targetRatio
+    sourceY = (sourceHeight - cropHeight) / 2
+  }
+
+  context.drawImage(
+    video,
+    sourceX,
+    sourceY,
+    cropWidth,
+    cropHeight,
+    0,
+    0,
+    width,
+    height,
+  )
+  return true
+}
+
+const scheduleFrame = (session) => {
+  if (activeSession !== session) return
+
+  const drawFrame = () => {
+    if (activeSession !== session) return
+
+    session.videoFrameId = null
+    session.animationFrameId = null
+
+    if (
+      session.video.readyState >= 2 &&
+      drawVideoCover(
+        session.context,
+        session.video,
+        session.width,
+        session.height,
+      )
+    ) {
+      if (!session.hasDrawnFrame) {
+        session.hasDrawnFrame = true
+        session.onReady()
+      }
+    }
+
+    scheduleFrame(session)
+  }
+
+  if (typeof session.video.requestVideoFrameCallback === "function") {
+    session.videoFrameId = session.video.requestVideoFrameCallback(drawFrame)
+  } else {
+    session.animationFrameId = window.requestAnimationFrame(drawFrame)
+  }
+}
+
+const playSession = (session) => {
+  if (activeSession !== session || session.isScheduled) return
+  session.isScheduled = true
+
+  scheduleFrame(session)
+  session.video.play().catch(() => {
+    if (activeSession !== session) return
+    cancelFrame(session)
+    session.isScheduled = false
+  })
+}
+
+const startPreview = ({ owner, canvas, sources, width, height, onReady }) => {
+  const video = getSharedVideo()
+  if (!video || !canvas) return
+
+  stopPreview()
+
+  const sourceList = [sources?.mp4, sources?.webm].filter(Boolean)
+  if (!sourceList.length) return
+
+  const context = canvas.getContext("2d", { alpha: false })
+  if (!context) return
+
+  const session = {
+    owner,
+    video,
+    context,
+    width,
+    height,
+    sources: sourceList,
+    sourceIndex: 0,
+    hasDrawnFrame: false,
+    isScheduled: false,
+    videoFrameId: null,
+    animationFrameId: null,
+    onReady,
+  }
+  activeSession = session
+
+  const loadSource = () => {
+    if (activeSession !== session) return
+
+    const source = session.sources[session.sourceIndex]
+    if (sharedSource !== source) {
+      sharedSource = source
+      video.src = source
+      video.load()
+    } else if (video.ended) {
+      video.currentTime = 0
+    }
+
+    session.isScheduled = false
+    playSession(session)
+  }
+
+  video.onerror = () => {
+    if (
+      activeSession !== session ||
+      session.sourceIndex >= session.sources.length - 1
+    )
+      return
+
+    cancelFrame(session)
+    session.sourceIndex += 1
+    loadSource()
+  }
+
+  loadSource()
+}
 
 const InstantVideoPreview = ({
   staticImageSrc,
@@ -80,45 +258,29 @@ const InstantVideoPreview = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-  const [shouldLoad, setShouldLoad] = useState(false)
   const [isVideoReady, setIsVideoReady] = useState(false)
-  const videoRef = useRef(null)
-  const hoverRef = useRef(false)
+  const canvasRef = useRef(null)
+  const ownerRef = useRef({})
 
-  const preparePreview = useCallback(() => {
-    const video = videoRef.current
-    if (!video || !hoverRef.current || video.readyState < 2) return
-
-    video.play().catch(() => {})
-    const reveal = () => {
-      if (hoverRef.current && videoRef.current === video)
-        setIsVideoReady(true)
-    }
-    if (typeof video.requestVideoFrameCallback === "function") {
-      video.requestVideoFrameCallback(reveal)
-    } else {
-      reveal()
-    }
-  }, [])
-
-  useEffect(() => {
-    if (isHovered && shouldLoad) preparePreview()
-  }, [isHovered, preparePreview, shouldLoad])
+  useEffect(() => () => stopPreview(ownerRef.current), [])
 
   const handleMouseEnter = () => {
-    hoverRef.current = true
-    setShouldLoad(true)
     setIsHovered(true)
+    setIsVideoReady(false)
+    startPreview({
+      owner: ownerRef.current,
+      canvas: canvasRef.current,
+      sources: videoSources,
+      width,
+      height,
+      onReady: () => setIsVideoReady(true),
+    })
   }
 
   const handleMouseLeave = () => {
-    hoverRef.current = false
     setIsHovered(false)
-
-    // Pause video
-    if (videoRef.current) {
-      videoRef.current.pause()
-    }
+    setIsVideoReady(false)
+    stopPreview(ownerRef.current)
   }
 
   return (
@@ -128,11 +290,14 @@ const InstantVideoPreview = ({
       $isHovered={isHovered}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onFocus={handleMouseEnter}
-      onBlur={handleMouseLeave}
       {...props}
     >
-      {/* Static thumbnail image - always visible */}
+      <CanvasPreview
+        ref={canvasRef}
+        width={width}
+        height={height}
+        aria-hidden="true"
+      />
       <StaticImage
         src={staticImageSrc}
         alt={alt}
@@ -146,25 +311,6 @@ const InstantVideoPreview = ({
         placeholder="blur"
         blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
       />
-
-      {/* Pre-converted video preview - instant playback! */}
-      {videoSources && (
-        <VideoPreview
-          ref={videoRef}
-          poster={staticImageSrc}
-          muted
-          loop
-          playsInline
-          preload={shouldLoad ? "auto" : "none"}
-          onLoadedData={preparePreview}
-          onCanPlay={preparePreview}
-          onError={() => setIsVideoReady(false)}
-        >
-          {/* Prefer H.264 for reliable hardware decoding on desktop/mobile. */}
-          <source src={videoSources.mp4} type="video/mp4" />
-          <source src={videoSources.webm} type="video/webm" />
-        </VideoPreview>
-      )}
     </Frame>
   )
 }
