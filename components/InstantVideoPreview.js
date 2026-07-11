@@ -21,6 +21,8 @@ const Frame = styled.div`
     border-radius: 5px;
     pointer-events: none;
     z-index: 2;
+    opacity: ${({ $isHovered }) => ($isHovered ? 1 : 0)};
+    transition: opacity 0.15s ease-in-out;
   }
 
   /* Grid overlay for all thumbnails */
@@ -119,6 +121,7 @@ const InstantVideoPreview = ({
     <Frame
       $width={width}
       $height={height}
+      $isHovered={isHovered}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleMouseEnter}
