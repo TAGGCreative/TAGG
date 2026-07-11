@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import styled from "styled-components"
 import Image from "next/image"
 
@@ -58,16 +58,17 @@ const VideoPreview = styled.video`
   position: absolute;
   inset: 0;
   border-radius: 5px;
-  box-shadow: inset 0 0 0 1px var(--red);
   opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
-  transition: opacity 0.2s ease-in-out;
+  visibility: ${({ $isVisible }) => ($isVisible ? "visible" : "hidden")};
+  transition: opacity 0.28s ease-in-out;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
   pointer-events: none;
-  will-change: opacity;
 `
+
+const PREVIEW_START_SECONDS = 1.5
 
 const InstantVideoPreview = ({
   staticImageSrc,
@@ -82,34 +83,52 @@ const InstantVideoPreview = ({
   const [shouldLoad, setShouldLoad] = useState(false)
   const [isVideoReady, setIsVideoReady] = useState(false)
   const videoRef = useRef(null)
+  const hoverRef = useRef(false)
 
-  useEffect(() => {
-    if (isHovered && shouldLoad && videoRef.current) {
-      videoRef.current.play().catch(() => {})
-    }
-  }, [isHovered, shouldLoad])
-
-  const handleVideoReady = () => {
+  const preparePreview = useCallback(() => {
     const video = videoRef.current
-    if (!video) return
+    if (!video || !hoverRef.current || video.readyState < 1) return
 
-    const reveal = () => setIsVideoReady(true)
+    const duration = Number.isFinite(video.duration) ? video.duration : 0
+    const startTime = Math.min(
+      PREVIEW_START_SECONDS,
+      Math.max(0, duration - 0.35),
+    )
+
+    if (Math.abs(video.currentTime - startTime) > 0.08) {
+      setIsVideoReady(false)
+      video.currentTime = startTime
+      return
+    }
+
+    video.play().catch(() => {})
+    const reveal = () => {
+      if (hoverRef.current && videoRef.current === video)
+        setIsVideoReady(true)
+    }
     if (typeof video.requestVideoFrameCallback === "function") {
       video.requestVideoFrameCallback(reveal)
+      setTimeout(reveal, 100)
     } else {
       reveal()
     }
+  }, [])
 
-    if (isHovered) video.play().catch(() => {})
-  }
+  useEffect(() => {
+    if (isHovered && shouldLoad) preparePreview()
+  }, [isHovered, preparePreview, shouldLoad])
 
   const handleMouseEnter = () => {
+    hoverRef.current = true
+    setIsVideoReady(false)
     setShouldLoad(true)
     setIsHovered(true)
   }
 
   const handleMouseLeave = () => {
+    hoverRef.current = false
     setIsHovered(false)
+    setIsVideoReady(false)
 
     // Pause video
     if (videoRef.current) {
@@ -147,12 +166,16 @@ const InstantVideoPreview = ({
         <VideoPreview
           ref={videoRef}
           $isVisible={isHovered && isVideoReady}
+          poster={staticImageSrc}
           muted
-          loop
           playsInline
           preload={shouldLoad ? "auto" : "none"}
-          onLoadedData={handleVideoReady}
-          onCanPlay={handleVideoReady}
+          onLoadedMetadata={preparePreview}
+          onSeeked={preparePreview}
+          onEnded={() => {
+            setIsVideoReady(false)
+            preparePreview()
+          }}
           onError={() => setIsVideoReady(false)}
         >
           {/* WebM for better compression */}
