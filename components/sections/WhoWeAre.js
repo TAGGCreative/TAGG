@@ -9,10 +9,12 @@ const Section = styled.section`
   position: relative;
   padding: 0;
   height: 100vh;
+  height: 100svh;
   margin-top: 20vh;
   margin-bottom: 15vh;
   @media screen and (max-width: 425px) {
     height: 110vh;
+    height: 110svh;
     margin-top: 10vh;
     margin-bottom: 10vh;
   }
@@ -23,6 +25,7 @@ const Section = styled.section`
     top: 0;
     left: 0;
     height: 100vh;
+    height: 100svh;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -40,25 +43,28 @@ const Section = styled.section`
     overflow: hidden;
     height: 100%;
     width: auto;
-    transition: all 1000ms ease-in;
+    transition:
+      opacity 700ms ease,
+      filter 700ms ease;
+    will-change: opacity, filter;
     z-index: 0;
   }
   .hidden {
     opacity: 0.01;
-    filter: grayscale(100%);
-    filter: blur(100%);
+    filter: grayscale(100%) blur(24px);
   }
   .appear {
     opacity: 1;
-    filter: grayscale(0%);
-    filter: blur(0%);
+    filter: grayscale(0%) blur(0);
   }
 
   .textpos {
     margin: 1em;
     margin-bottom: 5%;
     margin-top: auto;
-    transition: all 1.5s ease-in 0.3s;
+    transition:
+      opacity 700ms ease 150ms,
+      filter 700ms ease 150ms;
 
     @media screen and (min-width: 425px) {
       margin-left: 10em;
@@ -70,7 +76,7 @@ const Section = styled.section`
 const WhoWeAre = forwardRef((props, ref) => {
   const { ref: refAnimation, inView } = useInView({
     threshold: 0.5,
-    // triggerOnce: true,
+    triggerOnce: true,
   })
 
   return (
@@ -84,6 +90,7 @@ const WhoWeAre = forwardRef((props, ref) => {
           width={1920}
           height={1080}
           sizes="100vw"
+          priority
           className={inView ? "img appear" : "img hidden"}
         />
         <WhiteStrokeHeader

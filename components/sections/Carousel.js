@@ -9,9 +9,13 @@ import { Controls } from "../elements/Controls"
 import { MediaPlayer } from "../elements/MediaPlayer"
 
 const Section = styled.section`
-  width: 100vw;
+  width: 100%;
   height: 100vh;
+  height: 100svh;
   padding: 10em 2% 2% 2%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
   @media screen and (max-width: 425px) {
     padding: 4em 2% 2% 2%;
@@ -19,18 +23,21 @@ const Section = styled.section`
 `
 
 const Frame = styled.div`
-  width: 100%;
+  width: auto;
+  height: calc(100vh - 12em);
+  height: calc(100dvh - 12em);
+  max-width: 100%;
   aspect-ratio: 16 / 9;
-  max-height: 80vh;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
   overflow: hidden;
-  box-sizing: content-box;
+  box-sizing: border-box;
 
   @media screen and (max-width: 425px) {
-    max-height: 90vh;
+    width: 100%;
+    height: auto;
   }
 
   .carousel-root a {
@@ -55,6 +62,7 @@ const Frame = styled.div`
 
   // unique scanline
   &::before {
+    top: 0;
     width: 100%;
     height: 2px;
     z-index: 1;
@@ -77,7 +85,10 @@ const Frame = styled.div`
 
   @keyframes scanline {
     0% {
-      transform: translate3d(0, 200000%, 0);
+      transform: translate3d(0, -2px, 0);
+    }
+    100% {
+      transform: translate3d(0, calc(100dvh - 12em), 0);
     }
   }
 
@@ -116,6 +127,8 @@ const Static = styled.img`
   object-fit: cover;
   opacity: ${({ $opacity }) => $opacity};
   transition: none; /* Instant cut, no fade */
+  pointer-events: none;
+  z-index: 2;
 `
 
 const ClipCarousel = forwardRef(
@@ -125,6 +138,7 @@ const ClipCarousel = forwardRef(
 
     const isMobile = useMediaQuery({ query: "(max-width: 425px)" })
     const selectedClips = isMobile ? clipsMobile : clipsDesktop
+    const viewportResolved = typeof isMobile === "boolean"
 
     const next = () => {
       const next = current + 1 > selectedClips.length - 1 ? 0 : current + 1
@@ -151,6 +165,10 @@ const ClipCarousel = forwardRef(
       setStaticOpacity(0) // Immediately cut out static when video starts
     }
 
+    const handlePlayerWaiting = () => {
+      setStaticOpacity(0.6)
+    }
+
     return (
       <Section ref={ref}>
         <Frame>
@@ -159,20 +177,26 @@ const ClipCarousel = forwardRef(
 
           {/* player stays loaded, loads new url */}
           <EmbedContainer>
-            <MediaPlayer
-              key={`${selectedClips[current]?.source?.provider}-${selectedClips[current]?.source?.id}`}
-              source={selectedClips[current]?.source}
-              customerCode={cloudflareCustomerCode}
-              title={`${selectedClips[current]?.client} — ${selectedClips[current]?.title}`}
-              width="100%"
-              height="100%"
-              autoplay
-              muted
-              loop
-              controls={false}
-              onReady={handlePlayerReady}
-              onPlay={handlePlayerStart}
-            />
+            {viewportResolved && (
+              <MediaPlayer
+                key={
+                  selectedClips[current]?.source?.url ||
+                  selectedClips[current]?.source?.id
+                }
+                source={selectedClips[current]?.source}
+                customerCode={cloudflareCustomerCode}
+                title={`${selectedClips[current]?.client} — ${selectedClips[current]?.title}`}
+                width="100%"
+                height="100%"
+                autoplay
+                muted
+                loop
+                controls={false}
+                onReady={handlePlayerReady}
+                onPlay={handlePlayerStart}
+                onWaiting={handlePlayerWaiting}
+              />
+            )}
           </EmbedContainer>
 
           {/* external controls overlay for carousel */}

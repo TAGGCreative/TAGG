@@ -2,10 +2,8 @@ import PoppedHeader from "../PoppedHeader"
 import HomeSection from "./HomeSection"
 import { Wrap, Text } from "./Core"
 import { AnimatedHeader } from "../elements/AnimatedHeader"
-import { useMediaQuery } from "../../utils/useMediaQuery"
 
 export default function OurArena() {
-  const isMobile = useMediaQuery({ query: "(max-width: 425px)" })
   return (
     <HomeSection
       id="our-arena"
@@ -82,7 +80,8 @@ export default function OurArena() {
       contentStyle={{
         height: "fit-content",
         marginTop: "-10px",
-        marginBottom: !isMobile ? "10vh" : "-5vh",
+        "--content-margin-bottom": "10vh",
+        "--mobile-content-margin-bottom": "-5vh",
       }}
     >
       <Wrap>

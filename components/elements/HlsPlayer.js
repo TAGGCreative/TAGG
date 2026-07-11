@@ -9,6 +9,7 @@ export default function HlsPlayer({
   loop,
   onReady,
   onPlay,
+  onWaiting,
   style,
 }) {
   const videoRef = useRef(null)
@@ -22,16 +23,29 @@ export default function HlsPlayer({
     const attach = async () => {
       if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = url
-        onReady?.()
         return
       }
 
       const { default: Hls } = await import("hls.js")
       if (cancelled || !Hls.isSupported()) return
-      hls = new Hls({ enableWorker: true })
+      hls = new Hls({
+        enableWorker: true,
+        capLevelToPlayerSize: true,
+        maxBufferLength: 30,
+        backBufferLength: 30,
+      })
       hls.loadSource(url)
       hls.attachMedia(video)
-      hls.on(Hls.Events.MANIFEST_PARSED, () => onReady?.())
+      hls.on(Hls.Events.ERROR, (_, data) => {
+        if (!data.fatal) return
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+          hls.startLoad()
+        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+          hls.recoverMediaError()
+        } else {
+          hls.destroy()
+        }
+      })
     }
 
     attach()
@@ -41,7 +55,7 @@ export default function HlsPlayer({
       video.removeAttribute("src")
       video.load()
     }
-  }, [url, onReady])
+  }, [url])
 
   return (
     <video
@@ -53,7 +67,11 @@ export default function HlsPlayer({
       loop={loop}
       playsInline
       preload={autoplay ? "auto" : "metadata"}
+      onCanPlay={onReady}
       onPlay={onPlay}
+      onPlaying={onPlay}
+      onWaiting={onWaiting}
+      onStalled={onWaiting}
       style={{ width: "100%", height: "100%", objectFit: "contain", ...style }}
     />
   )

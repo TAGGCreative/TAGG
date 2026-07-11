@@ -41,12 +41,13 @@ export const GlobalStyle = createGlobalStyle`
     margin: 0;
     background-color: var(--black);
     box-sizing: border-box;
+    width: 100%;
+    overflow-x: clip;
   }
 
   html {
     overflow: auto;
     scroll-behavior: smooth;
-    min-width: 100vw;
   }
 
   html * {

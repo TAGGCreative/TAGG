@@ -29,12 +29,14 @@ const Frame = styled.div`
 `
 
 const StaticImage = styled(Image)`
+  display: block;
   border-radius: 5px;
   transition: opacity 0.2s ease-in-out;
 `
 
 const VideoPreview = styled.video`
   position: absolute;
+  inset: 0;
   border-radius: 5px;
   outline: 1px solid var(--red);
   opacity: ${({ $isHovered }) => ($isHovered ? 1 : 0)};
@@ -42,6 +44,7 @@ const VideoPreview = styled.video`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 `
 
 const InstantVideoPreview = ({

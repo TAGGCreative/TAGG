@@ -2,9 +2,14 @@ import styled from "styled-components"
 
 const Static = styled.div`
   position: fixed;
+  inset: 0;
   height: 100vh;
-  width: 100vw;
+  height: 100dvh;
+  width: 100%;
   opacity: 0.3;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
 
   .tv0 {
     width: 100%;
@@ -24,6 +29,7 @@ const Static = styled.div`
     width: 300%;
     animation: anim 1s steps(2, end) infinite both;
     transform: translate3d(0, 0, 0);
+    will-change: transform;
     filter: contrast(300%) brightness(50%);
   }
 
@@ -35,7 +41,7 @@ const Static = styled.div`
 
   @keyframes anim {
     0% {
-      transform: translateX(0px, 0px);
+      transform: translate(0, 0);
     }
     10% {
       transform: translate(-100px, 100px);
@@ -56,7 +62,7 @@ const Static = styled.div`
       transform: translate(-200px, -100px);
     }
     70% {
-      transform: translateY(50px, 100px);
+      transform: translate(50px, 100px);
     }
     80% {
       transform: translate(100px, -150px);
@@ -66,6 +72,13 @@ const Static = styled.div`
     }
     100% {
       transform: translate(-100px, 100px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tv-static0 {
+      animation: none;
+      will-change: auto;
     }
   }
 `

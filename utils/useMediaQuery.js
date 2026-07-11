@@ -4,8 +4,12 @@ export function useMediaQuery({ query }) {
   const subscribe = useCallback(
     (callback) => {
       const mediaQuery = window.matchMedia(query)
-      mediaQuery.addEventListener("change", callback)
-      return () => mediaQuery.removeEventListener("change", callback)
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener("change", callback)
+        return () => mediaQuery.removeEventListener("change", callback)
+      }
+      mediaQuery.addListener(callback)
+      return () => mediaQuery.removeListener(callback)
     },
     [query],
   )
@@ -14,7 +18,7 @@ export function useMediaQuery({ query }) {
     () => window.matchMedia(query).matches,
     [query],
   )
-  const getServerSnapshot = useCallback(() => false, [])
+  const getServerSnapshot = useCallback(() => undefined, [])
 
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }

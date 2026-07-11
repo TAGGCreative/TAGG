@@ -14,11 +14,11 @@ const H1 = styled.h1`
   z-index: 1;
   -webkit-text-fill-color: transparent;
   -webkit-text-stroke: 1px var(--white);
-  transition: all 2000ms ease-in 100ms;
+  transition: opacity 1200ms ease-in 100ms;
   overflow: hidden;
-  font-size: 30vh;
+  font-size: 30svh;
   @media screen and (max-width: 425px) {
-    font-size: 15vh;
+    font-size: 15svh;
   }
 `
 

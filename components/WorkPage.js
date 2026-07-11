@@ -9,7 +9,8 @@ const Content = styled.section`
   background-color: var(--black);
   width: 100%;
   height: 100vh;
-  max-width: 100vw;
+  min-height: 100svh;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   padding: 5%;

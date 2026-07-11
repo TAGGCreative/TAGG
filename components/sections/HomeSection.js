@@ -24,12 +24,13 @@ const Section = styled.section`
 
 const Content = styled.div`
   margin-top: -60px;
+  margin-bottom: var(--content-margin-bottom, 0);
   z-index: 1;
 
   @media screen and (max-width: 425px) {
     width: initial;
     margin: 0 5%;
-    margin-bottom: 0%;
+    margin-bottom: var(--mobile-content-margin-bottom, 0);
   }
 `
 

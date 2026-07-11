@@ -67,8 +67,8 @@ const WorkPageModal = ({ videos, videoId, cloudflareCustomerCode }) => {
         margin: 0,
         padding: 0,
         inset: 0,
-        width: "100vw",
-        height: "100vh",
+        width: "100%",
+        height: "100dvh",
         overflow: "auto",
       }}
     >

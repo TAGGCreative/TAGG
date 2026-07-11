@@ -10,7 +10,7 @@ const Nav = styled.nav`
   justify-content: space-between;
   position: fixed;
   top: 0;
-  width: 100vw;
+  width: 100%;
   z-index: 20;
   font-weight: 300;
   padding: 0 1em;
@@ -20,20 +20,21 @@ const Nav = styled.nav`
   @media screen and (max-width: 425px) {
     font-size: 75%;
     height: 7em;
-    width: calc(100vw + 1em);
+    width: 100%;
+    padding: 0 0.5em;
   }
-  
+
   #logo {
     position: relative;
     margin-left: -1.25em;
-    margin-top: .5em;
+    margin-top: 0.5em;
     outline: 1px solid var(--red);
     /* box-shadow: 4px 4px var(--red), 0 4px var(--red); */
     background-color: var(--black);
     @media screen and (max-width: 425px) {
       padding-left: 1em;
     }
-    
+
     ::before {
       position: absolute;
       content: "";
@@ -42,14 +43,8 @@ const Nav = styled.nav`
       top: 0;
       left: 0;
       background-color: var(--red);
-      clip-path:  polygon(95% 0, 100% 10%, 100% 100%, 0 100%, 0 0);
+      clip-path: polygon(95% 0, 100% 10%, 100% 100%, 0 100%, 0 0);
       z-index: -1;
-    }
-}
-
-
-    @media screen and (max-width: 425px) {
-      margin: 0 -15px;
     }
   }
 `

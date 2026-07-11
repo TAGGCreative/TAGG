@@ -42,6 +42,7 @@ export function MediaPlayer({
   loop = false,
   onReady,
   onPlay,
+  onWaiting,
   style,
 }) {
   if (source?.provider === "hls" && source.url) {
@@ -55,6 +56,7 @@ export function MediaPlayer({
         loop={loop}
         onReady={onReady}
         onPlay={onPlay}
+        onWaiting={onWaiting}
         style={{ width, height, ...style }}
       />
     )
