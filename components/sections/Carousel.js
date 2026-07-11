@@ -1,7 +1,7 @@
 import { Carousel } from "react-responsive-carousel"
 import "react-responsive-carousel/lib/styles/carousel.min.css"
 import styled from "styled-components"
-import { forwardRef, useState } from "react"
+import { forwardRef, useRef, useState } from "react"
 import { useMediaQuery } from "../../utils/useMediaQuery"
 import { Overlay } from "../elements/Controls"
 import { Slide } from "../elements/Slide"
@@ -126,7 +126,7 @@ const EmbedContainer = styled.div`
   }
 `
 
-const Static = styled.img`
+const Static = styled.video`
   position: absolute;
   width: 100%;
   height: 100%;
@@ -141,21 +141,31 @@ const ClipCarousel = forwardRef(
   ({ clipsDesktop, clipsMobile, cloudflareCustomerCode }, ref) => {
     const [staticOpacity, setStaticOpacity] = useState(0)
     const [current, setCurrent] = useState(0)
+    const staticRef = useRef(null)
 
     const isMobile = useMediaQuery({ query: "(max-width: 425px)" })
     const selectedClips = isMobile ? clipsMobile : clipsDesktop
     const viewportResolved = typeof isMobile === "boolean"
 
+    const showStatic = () => {
+      const staticVideo = staticRef.current
+      if (staticVideo) {
+        staticVideo.currentTime = 0
+        staticVideo.play().catch(() => {})
+      }
+      setStaticOpacity(0.6)
+    }
+
     const next = () => {
       const next = current + 1 > selectedClips.length - 1 ? 0 : current + 1
       setCurrent(next)
-      setStaticOpacity(0.6)
+      showStatic()
     }
 
     const prev = () => {
       const prev = current - 1 < 0 ? selectedClips.length - 1 : current - 1
       setCurrent(prev)
-      setStaticOpacity(0.6)
+      showStatic()
     }
 
     // Hide static overlay immediately when video starts - no fade
@@ -164,18 +174,29 @@ const ClipCarousel = forwardRef(
         ["cloudflare", "hls"].includes(selectedClips[current]?.source?.provider)
       ) {
         setStaticOpacity(0)
+        staticRef.current?.pause()
       }
     }
 
     const handlePlayerStart = () => {
       setStaticOpacity(0) // Immediately cut out static when video starts
+      staticRef.current?.pause()
     }
 
     return (
       <Section ref={ref}>
         <Frame>
           {/* static blip between video loads */}
-          <Static src="/images/static.gif" alt="" $opacity={staticOpacity} />
+          <Static
+            ref={staticRef}
+            src="/videos/static-transition.mp4"
+            $opacity={staticOpacity}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+          />
 
           {/* player stays loaded, loads new url */}
           <EmbedContainer>

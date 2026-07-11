@@ -4,7 +4,7 @@ export const GlobalStyle = createGlobalStyle`
   /* p */
   @font-face {
     font-family: Consolas;
-    src: url("/fonts/ConsolasFont/CONSOLA.ttf") format("truetype");
+    src: url("/fonts/ConsolasFont/CONSOLA.woff2") format("woff2");
     font-display: block;
     font-style: normal;
     font-weight: 400;
@@ -12,22 +12,22 @@ export const GlobalStyle = createGlobalStyle`
   /* h */
   @font-face {
     font-family: Montserrat;
-    src: url("/fonts/Montserrat/Montserrat-Regular.ttf") format("truetype");
+    src: url("/fonts/Montserrat/Montserrat-Regular.woff2") format("woff2");
     font-display: block;
     font-style: normal;
     font-weight: 400;
   }
   @font-face {
     font-family: Montserrat-Bold;
-    src: url("/fonts/Montserrat/Montserrat-Bold.ttf") format("truetype");
+    src: url("/fonts/Montserrat/Montserrat-Bold.woff2") format("woff2");
     font-display: block;
     font-style: normal;
     font-weight: 700;
   }
   @font-face {
     font-family: Montserrat-ExtraBold;
-    src: url("/fonts/Montserrat/Montserrat-ExtraBold.ttf")
-    format("truetype");
+    src: url("/fonts/Montserrat/Montserrat-ExtraBold.woff2")
+    format("woff2");
     font-display: block;
     font-style: normal;
     font-weight: 800;

@@ -31,6 +31,8 @@ export default function HlsPlayer({
       hls = new Hls({
         enableWorker: true,
         capLevelToPlayerSize: true,
+        startLevel: 0,
+        abrEwmaDefaultEstimate: 1600000,
         maxBufferLength: 30,
         backBufferLength: 30,
       })

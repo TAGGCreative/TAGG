@@ -25,25 +25,25 @@ function MyApp({ Component, pageProps }) {
         <link rel="icon" href="/images/favicon/favicon.ico" />
         <link
           rel="preload"
-          href="/fonts/ConsolasFont/CONSOLA.ttf"
+          href="/fonts/ConsolasFont/CONSOLA.woff2"
           as="font"
           crossOrigin=""
         />
         <link
           rel="preload"
-          href="/fonts/Montserrat/Montserrat-Regular.ttf"
+          href="/fonts/Montserrat/Montserrat-Regular.woff2"
           as="font"
           crossOrigin=""
         />
         <link
           rel="preload"
-          href="/fonts/Montserrat/Montserrat-Bold.ttf"
+          href="/fonts/Montserrat/Montserrat-Bold.woff2"
           as="font"
           crossOrigin=""
         />
         <link
           rel="preload"
-          href="/fonts/Montserrat/Montserrat-ExtraBold.ttf"
+          href="/fonts/Montserrat/Montserrat-ExtraBold.woff2"
           as="font"
           crossOrigin=""
         />

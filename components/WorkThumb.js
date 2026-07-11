@@ -42,6 +42,7 @@ const WorkThumb = ({ poster, preview, alt, priority = false }) => {
         alt={alt}
         width={width}
         height={height}
+        sizes="(max-width: 425px) 95vw, 31.5vw"
         loading={priority ? "eager" : "lazy"}
         priority={priority}
         quality={75}

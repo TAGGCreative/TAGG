@@ -111,14 +111,13 @@ const Works = forwardRef(({ videoList }, ref) => {
       )}
     >
       <WorksBox>
-        {videoList.map((video, i) => (
+        {videoList.map((video) => (
           <Link href={`/works/${video.id}`} key={video.id}>
             <Work>
               <WorkThumb
                 poster={video.poster}
                 preview={video.preview}
                 alt={`${video.client} — ${video.title}`}
-                priority={i < 2}
               />
               <PoppedHeader className="works-client" noShadow>
                 {video.client}

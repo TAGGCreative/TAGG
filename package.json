@@ -16,7 +16,8 @@
     "media:sync": "node scripts/sync-media-catalog.mjs",
     "media:migrate": "node scripts/migrate-vimeo-to-r2.mjs",
     "media:migrate:dry": "node scripts/migrate-vimeo-to-r2.mjs --dry-run",
-    "media:migrate:check": "node scripts/migrate-vimeo-to-r2.mjs --dry-run --check-source --limit=1"
+    "media:migrate:check": "node scripts/migrate-vimeo-to-r2.mjs --dry-run --check-source --limit=1",
+    "media:startup-renditions": "node scripts/add-hls-startup-rendition.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1085.0",

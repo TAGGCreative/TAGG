@@ -47,6 +47,7 @@ const renditions = [
   { height: 1080, bitrate: "12M", buffer: "24M", bandwidth: 12700000 },
   { height: 720, bitrate: "6M", buffer: "12M", bandwidth: 6700000 },
   { height: 540, bitrate: "3500k", buffer: "7M", bandwidth: 4200000 },
+  { height: 360, bitrate: "1400k", buffer: "2800k", bandwidth: 1600000 },
 ]
 
 const s3 = DRY_RUN
@@ -244,7 +245,7 @@ async function encodeHls(item, source) {
           "-profile:v",
           "high",
           "-force_key_frames",
-          "expr:gte(t,n_forced*6)",
+          "expr:gte(t,n_forced*2)",
           "-sc_threshold",
           "0",
         ]
@@ -265,7 +266,7 @@ async function encodeHls(item, source) {
       "-f",
       "hls",
       "-hls_time",
-      "6",
+      "2",
       "-hls_playlist_type",
       "vod",
       "-hls_flags",
