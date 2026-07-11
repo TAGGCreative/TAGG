@@ -8,6 +8,9 @@ const Frame = styled.div`
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 0);
+  border-radius: 5px;
+  overflow: hidden;
+  contain: paint;
 
   /* Grid overlay for all thumbnails */
   &::after {
@@ -38,13 +41,15 @@ const VideoPreview = styled.video`
   position: absolute;
   inset: 0;
   border-radius: 5px;
-  outline: 1px solid var(--red);
-  opacity: ${({ $isHovered }) => ($isHovered ? 1 : 0)};
+  box-shadow: inset 0 0 0 1px var(--red);
+  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
   transition: opacity 0.2s ease-in-out;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  pointer-events: none;
+  will-change: opacity;
 `
 
 const InstantVideoPreview = ({
@@ -58,6 +63,7 @@ const InstantVideoPreview = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const [shouldLoad, setShouldLoad] = useState(false)
+  const [isVideoReady, setIsVideoReady] = useState(false)
   const videoRef = useRef(null)
 
   useEffect(() => {
@@ -106,11 +112,14 @@ const InstantVideoPreview = ({
       {videoSources && shouldLoad && (
         <VideoPreview
           ref={videoRef}
-          $isHovered={isHovered}
+          $isVisible={isHovered && isVideoReady}
           muted
           loop
           playsInline
-          preload="none"
+          preload="auto"
+          onLoadedData={() => setIsVideoReady(true)}
+          onCanPlay={() => setIsVideoReady(true)}
+          onError={() => setIsVideoReady(false)}
         >
           {/* WebM for better compression */}
           <source src={videoSources.webm} type="video/webm" />

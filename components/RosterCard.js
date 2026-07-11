@@ -46,6 +46,7 @@ const Card = styled.div`
     color: var(--red);
     margin: 0.15em;
     font-family: Montserrat-ExtraBold;
+    font-weight: 800;
     text-transform: uppercase;
     margin-bottom: 0;
     padding-bottom: 0;
@@ -59,6 +60,7 @@ const Card = styled.div`
     padding: 0.2em 0.5em;
     transform: translateX(-0.7em);
     font-family: Montserrat-Bold;
+    font-weight: 700;
   }
 
   .company {

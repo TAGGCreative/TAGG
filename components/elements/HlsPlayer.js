@@ -7,9 +7,9 @@ export default function HlsPlayer({
   autoplay,
   muted,
   loop,
+  poster,
   onReady,
   onPlay,
-  onWaiting,
   style,
 }) {
   const videoRef = useRef(null)
@@ -65,13 +65,12 @@ export default function HlsPlayer({
       autoPlay={autoplay}
       muted={muted}
       loop={loop}
+      poster={poster}
       playsInline
       preload={autoplay ? "auto" : "metadata"}
       onCanPlay={onReady}
       onPlay={onPlay}
       onPlaying={onPlay}
-      onWaiting={onWaiting}
-      onStalled={onWaiting}
       style={{ width: "100%", height: "100%", objectFit: "contain", ...style }}
     />
   )

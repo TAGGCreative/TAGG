@@ -133,7 +133,7 @@ const Static = styled.img`
 
 const ClipCarousel = forwardRef(
   ({ clipsDesktop, clipsMobile, cloudflareCustomerCode }, ref) => {
-    const [staticOpacity, setStaticOpacity] = useState(0.6)
+    const [staticOpacity, setStaticOpacity] = useState(0)
     const [current, setCurrent] = useState(0)
 
     const isMobile = useMediaQuery({ query: "(max-width: 425px)" })
@@ -165,10 +165,6 @@ const ClipCarousel = forwardRef(
       setStaticOpacity(0) // Immediately cut out static when video starts
     }
 
-    const handlePlayerWaiting = () => {
-      setStaticOpacity(0.6)
-    }
-
     return (
       <Section ref={ref}>
         <Frame>
@@ -191,10 +187,10 @@ const ClipCarousel = forwardRef(
                 autoplay
                 muted
                 loop
+                poster={selectedClips[current]?.poster?.src}
                 controls={false}
                 onReady={handlePlayerReady}
                 onPlay={handlePlayerStart}
-                onWaiting={handlePlayerWaiting}
               />
             )}
           </EmbedContainer>

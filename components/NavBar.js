@@ -60,6 +60,7 @@ const Logo = styled.img`
   margin-bottom: 0.35em;
   margin-left: 1em;
   height: 35px;
+  width: auto;
   transition: transform 0.2s ease-in-out;
   filter: invert(20%) sepia(45%) saturate(6941%) hue-rotate(329deg)
     brightness(95%) contrast(94%);
@@ -95,6 +96,7 @@ const Logo = styled.img`
 
   @media screen and (max-width: 425px) {
     height: 25px;
+    width: auto;
     margin-left: 1em;
   }
 `
@@ -103,7 +105,12 @@ export const NavBar = ({ visibleSection }) => {
   return (
     <Nav>
       <a id="logo" href="#">
-        <Logo src="/images/taggSpray.png" alt="TAGG Creative — back to top" />
+        <Logo
+          src="/images/taggSpray.png"
+          alt="TAGG Creative — back to top"
+          width="500"
+          height="496"
+        />
       </a>
       <Links>
         <NavLink href="/#about" active={visibleSection === "about"}>

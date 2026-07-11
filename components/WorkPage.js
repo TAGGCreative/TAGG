@@ -160,6 +160,7 @@ export default function WorkPage({ videos, videoId, cloudflareCustomerCode }) {
           source={video.source}
           customerCode={cloudflareCustomerCode}
           title={`${clientName} — ${title}`}
+          poster={video.poster?.src}
         />
         <PoppedHeader style={{ marginTop: "2em", marginBottom: 0 }}>
           {clientName}

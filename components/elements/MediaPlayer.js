@@ -40,9 +40,9 @@ export function MediaPlayer({
   autoplay = false,
   muted = false,
   loop = false,
+  poster,
   onReady,
   onPlay,
-  onWaiting,
   style,
 }) {
   if (source?.provider === "hls" && source.url) {
@@ -54,9 +54,9 @@ export function MediaPlayer({
         autoplay={autoplay}
         muted={muted}
         loop={loop}
+        poster={poster}
         onReady={onReady}
         onPlay={onPlay}
-        onWaiting={onWaiting}
         style={{ width, height, ...style }}
       />
     )

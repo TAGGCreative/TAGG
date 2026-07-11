@@ -7,6 +7,7 @@ const H1 = styled.h1`
   -webkit-text-stroke: 1px var(--red);
   background-color: transparent;
   font-family: Montserrat-Bold;
+  font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   text-align: center;

@@ -4,6 +4,7 @@ const Popped = styled.h2`
   background-color: transparent;
   color: var(--lightgrey);
   font-family: Montserrat-Bold;
+  font-weight: 700;
   letter-spacing: 50;
   margin-top: 0;
   margin-bottom: 1em;

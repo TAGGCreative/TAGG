@@ -6,7 +6,7 @@ const StyledA = styled.a`
   padding: 0.5em 0.5em;
   display: block;
   color: var(--grey);
-  font-weight: 300;
+  font-weight: 400;
   background-color: transparent;
   font-family: Montserrat;
   font-size: 1.1em;
@@ -20,7 +20,6 @@ const StyledA = styled.a`
 
   :hover {
     color: var(--lightgrey);
-    font-weight: 500;
   }
 `
 
