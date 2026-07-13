@@ -176,7 +176,10 @@ function percentile(values, ratio) {
   if (!values.length) return 0
   const sorted = [...values].sort((a, b) => a - b)
   return sorted[
-    Math.max(0, Math.min(sorted.length - 1, Math.round((sorted.length - 1) * ratio)))
+    Math.max(
+      0,
+      Math.min(sorted.length - 1, Math.round((sorted.length - 1) * ratio)),
+    )
   ]
 }
 
@@ -364,10 +367,7 @@ function chooseHighlightSegments(
     .map((sample) => sample.motion)
     .filter(Number.isFinite)
   const motionFloor = percentile(motionValues, 0.25)
-  const motionPeak = Math.max(
-    motionFloor + 0.01,
-    percentile(motionValues, 0.9),
-  )
+  const motionPeak = Math.max(motionFloor + 0.01, percentile(motionValues, 0.9))
   const saturationValues = timeline
     .map((sample) => sample.saturation)
     .filter(Number.isFinite)
@@ -426,8 +426,7 @@ function chooseHighlightSegments(
         0,
         Math.min(
           1.2,
-          (saturation - saturationFloor) /
-            (saturationPeak - saturationFloor),
+          (saturation - saturationFloor) / (saturationPeak - saturationFloor),
         ),
       )
       const detail = windowSamples.length
@@ -442,12 +441,10 @@ function chooseHighlightSegments(
         normalizedSaturation < 0.18 && normalizedDetail < 0.22 ? 0.55 : 1
       const textScore = textTimeline
         .filter(
-          (sample) =>
-            sample.time >= start - 0.35 && sample.time <= end + 0.35,
+          (sample) => sample.time >= start - 0.35 && sample.time <= end + 0.35,
         )
         .reduce((highest, sample) => Math.max(highest, sample.textScore), 0)
-      const textWeight =
-        textScore >= 8 ? 0.24 : textScore >= 5 ? 0.62 : 1
+      const textWeight = textScore >= 8 ? 0.24 : textScore >= 5 ? 0.62 : 1
       const midpoint = start + clipDuration / 2
       const edgeWeight =
         midpoint < duration * 0.04 || midpoint > duration * 0.96 ? 0.68 : 1
@@ -536,11 +533,7 @@ async function createAutoHighlight(
     analyzeTextTimeline(source, longVideo ? 0.25 : 1),
   ])
   await onProgress(14)
-  const scenes = await detectSceneTimes(
-    source,
-    dimensions.duration,
-    timeline,
-  )
+  const scenes = await detectSceneTimes(source, dimensions.duration, timeline)
   await onProgress(20)
   const segments = chooseHighlightSegments(
     scenes,
@@ -629,13 +622,15 @@ async function encodeHls(
   output,
   dimensions,
   onProfileComplete = async () => {},
+  createScrubProxy = false,
 ) {
   const portrait = dimensions.width < dimensions.height
   const sourceLimit = portrait ? dimensions.width : dimensions.height
-  let selected = profiles.filter((profile) => profile.height <= sourceLimit)
-  if (!selected.length) selected.push(profiles.at(-1))
-  if (dimensions.duration > 300 && selected.length > 3)
-    selected = [selected[0], selected.at(-1)]
+  const available = profiles.filter((profile) => profile.height <= sourceLimit)
+  let selected = available.length ? [available[0]] : [profiles.at(-1)]
+  const lightweight = available.find((profile) => profile.height <= 540)
+  if (lightweight && lightweight.height !== selected[0].height)
+    selected.push(lightweight)
   const selectedDirectories = new Set(
     selected.map((profile) => `${profile.height}p`),
   )
@@ -649,88 +644,132 @@ async function encodeHls(
   )
   const canRemuxSource =
     dimensions.codec_name === "h264" && selected[0].height === sourceLimit
-  const encodeCount = selected.length - (canRemuxSource ? 1 : 0)
-  const threadsPerEncode = Math.max(
-    2,
-    Math.floor(availableParallelism() / Math.max(1, encodeCount)),
-  )
   let completedProfiles = 0
 
-  await Promise.all(selected.map(async (profile, index) => {
-    const directory = path.join(output, `${profile.height}p`)
-    const marker = path.join(directory, ".complete")
-    if (await exists(marker)) {
+  await Promise.all(
+    selected.map(async (profile, index) => {
+      const directory = path.join(output, `${profile.height}p`)
+      const marker = path.join(directory, ".complete")
+      if (await exists(marker)) {
+        completedProfiles += 1
+        await onProfileComplete(completedProfiles, selected.length)
+        return
+      }
+      await rm(directory, { recursive: true, force: true })
+      await mkdir(directory, { recursive: true })
+      const targetPrimary = Math.min(profile.height, sourceLimit)
+      const remux = canRemuxSource && index === 0
+      const scrubProxy = createScrubProxy && index === selected.length - 1
+      const scrubFile = path.join(output, "scrub.mp4")
+      const videoOptions = remux
+        ? ["-c:v", "copy"]
+        : [
+            "-vf",
+            portrait
+              ? `scale=${targetPrimary}:-2:flags=lanczos`
+              : `scale=-2:${targetPrimary}:flags=lanczos`,
+            "-c:v",
+            "h264_videotoolbox",
+            "-allow_sw",
+            "1",
+            "-prio_speed",
+            "1",
+            "-profile:v",
+            "high",
+            "-coder",
+            "cabac",
+            "-b:v",
+            profile.bitrate,
+            "-maxrate",
+            profile.bitrate,
+            "-bufsize",
+            profile.buffer,
+            "-pix_fmt",
+            "nv12",
+            "-force_key_frames",
+            "expr:gte(t,n_forced*6)",
+            "-sc_threshold",
+            "0",
+          ]
+      const inputForHls = scrubProxy && !remux ? scrubFile : source
+      if (scrubProxy && !remux)
+        await run("ffmpeg", [
+          "-hide_banner",
+          "-loglevel",
+          "error",
+          "-y",
+          "-i",
+          source,
+          "-map",
+          "0:v:0",
+          "-map",
+          "0:a:0?",
+          ...videoOptions,
+          "-c:a",
+          dimensions.audioCodec === "aac" ? "copy" : "aac",
+          ...(dimensions.audioCodec === "aac" ? [] : ["-b:a", "128k"]),
+          "-movflags",
+          "+faststart",
+          scrubFile,
+        ])
+      else if (scrubProxy && remux)
+        await run("ffmpeg", [
+          "-hide_banner",
+          "-loglevel",
+          "error",
+          "-y",
+          "-i",
+          source,
+          "-map",
+          "0:v:0",
+          "-map",
+          "0:a:0?",
+          "-c",
+          "copy",
+          "-movflags",
+          "+faststart",
+          scrubFile,
+        ])
+      await run("ffmpeg", [
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-i",
+        inputForHls,
+        "-map",
+        "0:v:0",
+        "-map",
+        "0:a:0?",
+        ...(scrubProxy && !remux ? ["-c", "copy"] : videoOptions),
+        ...(scrubProxy && !remux
+          ? []
+          : [
+              "-c:a",
+              dimensions.audioCodec === "aac" ? "copy" : "aac",
+              ...(dimensions.audioCodec === "aac" ? [] : ["-b:a", "128k"]),
+            ]),
+        "-f",
+        "hls",
+        "-hls_time",
+        "6",
+        "-hls_playlist_type",
+        "vod",
+        "-hls_flags",
+        "independent_segments",
+        "-hls_segment_type",
+        "fmp4",
+        "-hls_fmp4_init_filename",
+        "init.mp4",
+        "-hls_segment_filename",
+        path.join(directory, "segment_%05d.m4s"),
+        path.join(directory, "index.m3u8"),
+      ])
+      await writeFile(marker, "")
       completedProfiles += 1
       await onProfileComplete(completedProfiles, selected.length)
-      return
-    }
-    await rm(directory, { recursive: true, force: true })
-    await mkdir(directory, { recursive: true })
-    const targetPrimary = Math.min(profile.height, sourceLimit)
-    const remux = canRemuxSource && index === 0
-    const videoOptions = remux
-      ? ["-c:v", "copy"]
-      : [
-          "-vf",
-          portrait
-            ? `scale=${targetPrimary}:-2:flags=lanczos`
-            : `scale=-2:${targetPrimary}:flags=lanczos`,
-          "-c:v",
-          "libx264",
-          "-preset",
-          "veryfast",
-          "-crf",
-          "20",
-          "-threads",
-          String(threadsPerEncode),
-          "-maxrate",
-          profile.bitrate,
-          "-bufsize",
-          profile.buffer,
-          "-pix_fmt",
-          "yuv420p",
-          "-profile:v",
-          "high",
-          "-force_key_frames",
-          "expr:gte(t,n_forced*2)",
-          "-sc_threshold",
-          "0",
-        ]
-    await run("ffmpeg", [
-      "-hide_banner",
-      "-loglevel",
-      "error",
-      "-y",
-      "-i",
-      source,
-      "-map",
-      "0:v:0",
-      "-map",
-      "0:a:0?",
-      ...videoOptions,
-      "-c:a",
-      dimensions.audioCodec === "aac" ? "copy" : "aac",
-      ...(dimensions.audioCodec === "aac" ? [] : ["-b:a", "128k"]),
-      "-f",
-      "hls",
-      "-hls_time",
-      "2",
-      "-hls_playlist_type",
-      "vod",
-      "-hls_flags",
-      "independent_segments",
-      "-hls_segment_type",
-      "fmp4",
-      "-hls_fmp4_init_filename",
-      "init.mp4",
-      "-hls_segment_filename",
-      path.join(directory, "segment_%05d.m4s"),
-      path.join(directory, "index.m3u8"),
-    ])
-    await writeFile(marker, "")
-    completedProfiles += 1
-    await onProfileComplete(completedProfiles, selected.length)
-  }))
+    }),
+  )
   const aspect = dimensions.width / dimensions.height
   const master = ["#EXTM3U", "#EXT-X-VERSION:7"]
   for (const profile of selected) {
@@ -745,80 +784,65 @@ async function encodeHls(
   await writeFile(path.join(output, "master.m3u8"), `${master.join("\n")}\n`)
 }
 
-async function createProjectDerivatives(source, output, dimensions) {
+async function createSelectedDerivatives(source, output, dimensions, options) {
   const poster = path.join(output, "poster.jpg")
   const previewMp4 = path.join(output, "preview.mp4")
-  const previewWebm = path.join(output, "preview.webm")
-  const start = Math.max(
+  const posterTime = Math.max(
     0,
-    Math.min(dimensions.duration * 0.18, Math.max(0, dimensions.duration - 7)),
+    Math.min(Number(options.posterTime || 0), dimensions.duration),
   )
-  if (!(await exists(poster)))
-    await run("ffmpeg", [
-      "-hide_banner",
-      "-loglevel",
-      "error",
-      "-y",
-      "-ss",
-      String(start),
-      "-i",
-      source,
-      "-frames:v",
-      "1",
-      "-vf",
-      "scale=1920:-2",
-      "-q:v",
-      "2",
-      poster,
-    ])
-  if (!(await exists(previewMp4)))
-    await run("ffmpeg", [
-      "-hide_banner",
-      "-loglevel",
-      "error",
-      "-y",
-      "-ss",
-      String(start),
-      "-t",
-      "6",
-      "-i",
-      source,
-      "-an",
-      "-vf",
-      "scale=720:-2",
-      "-c:v",
-      "libx264",
-      "-preset",
-      "medium",
-      "-crf",
-      "24",
-      "-movflags",
-      "+faststart",
-      previewMp4,
-    ])
-  if (!(await exists(previewWebm)))
-    await run("ffmpeg", [
-      "-hide_banner",
-      "-loglevel",
-      "error",
-      "-y",
-      "-ss",
-      String(start),
-      "-t",
-      "6",
-      "-i",
-      source,
-      "-an",
-      "-vf",
-      "scale=720:-2",
-      "-c:v",
-      "libvpx-vp9",
-      "-b:v",
-      "0",
-      "-crf",
-      "34",
-      previewWebm,
-    ])
+  const previewStart = Math.max(
+    0,
+    Math.min(
+      Number(options.previewStart || 0),
+      Math.max(0, dimensions.duration - 1),
+    ),
+  )
+  await run("ffmpeg", [
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-y",
+    "-ss",
+    String(posterTime),
+    "-i",
+    source,
+    "-frames:v",
+    "1",
+    "-q:v",
+    "1",
+    poster,
+  ])
+  await run("ffmpeg", [
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-y",
+    "-ss",
+    String(previewStart),
+    "-t",
+    "6",
+    "-i",
+    source,
+    "-an",
+    "-vf",
+    dimensions.width < dimensions.height
+      ? "scale=-2:960:flags=lanczos"
+      : "scale=960:-2:flags=lanczos",
+    "-c:v",
+    "h264_videotoolbox",
+    "-allow_sw",
+    "1",
+    "-prio_speed",
+    "1",
+    "-b:v",
+    "3500k",
+    "-pix_fmt",
+    "nv12",
+    "-movflags",
+    "+faststart",
+    previewMp4,
+  ])
 }
 
 async function walk(directory) {
@@ -869,7 +893,7 @@ async function uploadFile(job, file, key) {
     throw new Error(`R2 output upload failed (${response.status})`)
 }
 
-async function uploadOutputs(job, output) {
+async function uploadOutputs(job, output, progressStart = 70) {
   const files = await walk(output)
   const concurrency = Math.min(12, Math.max(4, availableParallelism()))
   for (let offset = 0; offset < files.length; offset += concurrency) {
@@ -880,9 +904,10 @@ async function uploadOutputs(job, output) {
       }),
     )
     const progress =
-      62 +
+      progressStart +
       Math.round(
-        (Math.min(offset + concurrency, files.length) / files.length) * 36,
+        (Math.min(offset + concurrency, files.length) / files.length) *
+          (98 - progressStart),
       )
     await api(`/api/processor/jobs/${job.id}/progress`, {
       method: "POST",
@@ -893,117 +918,60 @@ async function uploadOutputs(job, output) {
 
 async function processJob(job) {
   const directory = path.join(WORK_ROOT, job.id)
-  const source = path.join(directory, "source")
+  const localSource = path.join(directory, "source")
   const output = path.join(directory, "output")
+  const selectedDerivatives = job.asset_role === "projectDerivatives"
+  const source = selectedDerivatives ? job.downloadUrl : localSource
   await mkdir(output, { recursive: true })
-  await download(job, source)
+  if (!selectedDerivatives) await download(job, localSource)
   await api(`/api/processor/jobs/${job.id}/progress`, {
     method: "POST",
     body: JSON.stringify({ progress: 8 }),
   })
   const dimensions = await probe(source)
-  const generatedDesktop = job.asset_role === "carouselDesktopFromMaster"
-  let carouselClipFiles = []
-  if (generatedDesktop) {
-    const roughcut = path.join(output, "carousel-roughcut.mp4")
-    const segments = await createAutoHighlight(
+  if (selectedDerivatives) {
+    await createSelectedDerivatives(
       source,
-      roughcut,
+      output,
       dimensions,
-      async (progress) =>
-        api(`/api/processor/jobs/${job.id}/progress`, {
-          method: "POST",
-          body: JSON.stringify({ progress }),
-        }),
-    )
-    carouselClipFiles = await createCarouselClips(
-      source,
-      path.join(output, "carousel-clips"),
-      segments,
+      job.options || {},
     )
     await api(`/api/processor/jobs/${job.id}/progress`, {
       method: "POST",
-      body: JSON.stringify({ progress: 38 }),
+      body: JSON.stringify({ progress: 70 }),
     })
+    await uploadOutputs(job, output, 70)
+  } else {
     await encodeHls(
-      roughcut,
+      source,
       output,
-      await probe(roughcut),
+      dimensions,
       async (completed, total) =>
         api(`/api/processor/jobs/${job.id}/progress`, {
           method: "POST",
           body: JSON.stringify({
-            progress: 38 + Math.round((completed / total) * 12),
+            progress: 8 + Math.round((completed / total) * 62),
           }),
         }),
+      job.asset_role === "main",
     )
-  } else {
-    await encodeHls(source, output, dimensions, async (completed, total) =>
-      api(`/api/processor/jobs/${job.id}/progress`, {
-        method: "POST",
-        body: JSON.stringify({
-          progress: 8 + Math.round((completed / total) * 44),
-        }),
-      }),
-    )
+    await uploadOutputs(job, output, 70)
   }
-  await api(`/api/processor/jobs/${job.id}/progress`, {
-    method: "POST",
-    body: JSON.stringify({ progress: 52 }),
-  })
-  if (job.asset_role === "main") {
-    await createProjectDerivatives(source, output, dimensions)
-    const roughcut = path.join(output, "carousel-roughcut.mp4")
-    const segments = await createAutoHighlight(
-      source,
-      roughcut,
-      dimensions,
-      async (stage) =>
-        api(`/api/processor/jobs/${job.id}/progress`, {
-          method: "POST",
-          body: JSON.stringify({
-            progress: 52 + Math.round((stage / 30) * 8),
-          }),
-        }),
-    )
-    carouselClipFiles = await createCarouselClips(
-      source,
-      path.join(output, "carousel-clips"),
-      segments,
-    )
-    const roughcutDimensions = await probe(roughcut)
-    await mkdir(path.join(output, "carousel-desktop"), { recursive: true })
-    await encodeHls(
-      roughcut,
-      path.join(output, "carousel-desktop"),
-      roughcutDimensions,
-    )
-  }
-  await api(`/api/processor/jobs/${job.id}/progress`, {
-    method: "POST",
-    body: JSON.stringify({ progress: 62 }),
-  })
-  await uploadOutputs(job, output)
   const prefix = job.outputPrefix
   await api(`/api/processor/jobs/${job.id}/complete`, {
     method: "POST",
     body: JSON.stringify({
       output: {
-        masterKey: `${prefix}/master.m3u8`,
-        posterKey: `${prefix}/poster.jpg`,
-        previewMp4Key: `${prefix}/preview.mp4`,
-        previewWebmKey: `${prefix}/preview.webm`,
-        carouselDesktopMasterKey:
-          job.asset_role === "main"
-            ? `${prefix}/carousel-desktop/master.m3u8`
-            : null,
-        carouselRoughcutKey:
-          job.asset_role === "main" || generatedDesktop
-            ? `${prefix}/carousel-roughcut.mp4`
-            : null,
-        carouselClipKeys: carouselClipFiles.map(
-          (file) => `${prefix}/carousel-clips/${path.basename(file)}`,
-        ),
+        masterKey: selectedDerivatives ? null : `${prefix}/master.m3u8`,
+        scrubKey: job.asset_role === "main" ? `${prefix}/scrub.mp4` : null,
+        posterKey: selectedDerivatives ? `${prefix}/poster.jpg` : null,
+        previewMp4Key: selectedDerivatives ? `${prefix}/preview.mp4` : null,
+        posterTime: selectedDerivatives
+          ? Number(job.options?.posterTime || 0)
+          : null,
+        previewStart: selectedDerivatives
+          ? Number(job.options?.previewStart || 0)
+          : null,
         width: dimensions.width,
         height: dimensions.height,
       },
@@ -1062,39 +1030,7 @@ if (SELF_TEST) {
     source,
   ])
   const dimensions = await probe(source)
-  const syntheticBoundaries = Array.from({ length: 9 }, (_, index) => index * 2)
-  const syntheticTimeline = Array.from({ length: 73 }, (_, index) => {
-    const time = index * 0.25
-    return {
-      time,
-      motion: time >= 8 && time <= 12 ? 24 : 2,
-      cutScore: syntheticBoundaries.includes(time) ? 12 : 0.2,
-    }
-  })
-  const syntheticSelection = chooseHighlightSegments(
-    syntheticBoundaries,
-    18,
-    syntheticTimeline,
-  )
-  if (syntheticSelection.length < 5)
-    throw new Error("Highlight selector did not return enough clips")
-  if (
-    syntheticSelection.some((segment) =>
-      syntheticBoundaries.some(
-        (boundary) =>
-          boundary > segment.start + 0.001 &&
-          boundary < segment.start + segment.duration - 0.001,
-      ),
-    )
-  )
-    throw new Error("Highlight selector allowed a clip to cross a scene cut")
-  if (
-    !syntheticSelection.some(
-      (segment) => segment.start >= 7.8 && segment.start <= 12,
-    )
-  )
-    throw new Error("Highlight selector ignored the high-energy section")
-  await encodeHls(source, output, dimensions)
+  await encodeHls(source, output, dimensions, async () => {}, true)
   const remuxedMaster = path.join(directory, "remuxed-master.mp4")
   await download(
     {
@@ -1109,29 +1045,15 @@ if (SELF_TEST) {
     throw new Error(
       "Processor self-test could not ingest an existing HLS master",
     )
-  await createProjectDerivatives(source, output, dimensions)
-  const roughcut = path.join(output, "carousel-roughcut.mp4")
-  const segments = await createAutoHighlight(source, roughcut, dimensions)
-  await createCarouselClips(
-    source,
-    path.join(output, "carousel-clips"),
-    segments,
-  )
-  await mkdir(path.join(output, "carousel-desktop"), { recursive: true })
-  await encodeHls(
-    roughcut,
-    path.join(output, "carousel-desktop"),
-    await probe(roughcut),
-  )
+  await createSelectedDerivatives(source, output, dimensions, {
+    posterTime: 4,
+    previewStart: 8,
+  })
   for (const required of [
     "master.m3u8",
+    "scrub.mp4",
     "poster.jpg",
     "preview.mp4",
-    "preview.webm",
-    "carousel-roughcut.mp4",
-    "carousel-clips/clip-01.mp4",
-    "carousel-clips/clip-05.mp4",
-    "carousel-desktop/master.m3u8",
   ]) {
     if (!(await exists(path.join(output, required))))
       throw new Error(`Processor self-test did not create ${required}`)

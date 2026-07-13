@@ -28,6 +28,7 @@ export const processingJobsSql = `CREATE TABLE IF NOT EXISTS processing_jobs (
   attempts INTEGER NOT NULL DEFAULT 0,
   error TEXT,
   lease_until TEXT,
+  options_json TEXT,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
   created_by TEXT NOT NULL

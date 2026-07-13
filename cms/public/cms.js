@@ -11,6 +11,7 @@ const state = {
   savedAt: null,
   publishedRevisionId: null,
   drawer: false,
+  mediaPicker: null,
   toast: null,
   saveTimer: null,
 }
@@ -260,8 +261,28 @@ function projectEditor(project) {
       )}
       ${uploadCard(project.id, "poster", "Poster", "Optional custom image", Boolean(project.poster?.src), "image/*")}
     </div>
-    <div class="full">${carouselEditPack(project)}</div>
+    ${mediaSelectionPanel(project)}
   </div>`
+}
+
+function mediaSelectionPanel(project) {
+  const derivativeJob = jobFor(project.id, "projectDerivatives")
+  const [statusClass, status] = statusLabel(
+    derivativeJob,
+    Boolean(project.poster?.src && project.preview?.mp4),
+  )
+  const hasMaster = Boolean(project.source?.url)
+  return `<section class="media-selection-panel full">
+    <div class="selection-poster" style="${project.poster?.src ? `background-image:url('${escapeHtml(project.poster.src)}')` : ""}"><span>${project.poster?.src ? "Current poster" : "No poster selected"}</span></div>
+    <div class="selection-copy">
+      <span class="eyebrow">Thumbnail media</span>
+      <h3>Poster frame + hover preview</h3>
+      <p>Scrub through the uploaded film, choose one full-quality poster frame, then choose where the six-second thumbnail preview begins.</p>
+      <span class="status ${statusClass}"><span class="dot"></span>${escapeHtml(derivativeJob?.error || status)}</span>
+    </div>
+    <button class="button primary" type="button" data-open-media-picker="${escapeHtml(project.id)}" ${hasMaster && !["waiting", "processing"].includes(derivativeJob?.status) ? "" : "disabled"}>${project.poster?.src || project.preview?.mp4 ? "Choose new frames" : "Choose frames"}</button>
+    ${derivativeJob && ["waiting", "processing"].includes(derivativeJob.status) ? `<span class="progress"><span style="width:${Number(derivativeJob.progress || 0)}%"></span></span>` : ""}
+  </section>`
 }
 
 function normalizeCarouselContent() {
@@ -311,10 +332,7 @@ function carouselClip(projectId, format) {
 }
 
 function carouselJob(projectId, format) {
-  const roles =
-    format === "mobile"
-      ? ["heroMobile"]
-      : ["carouselDesktopFromMaster", "heroDesktop"]
+  const roles = format === "mobile" ? ["heroMobile"] : ["heroDesktop"]
   return roles
     .map((role) => jobFor(projectId, role))
     .find((job) => job && job.status !== "ready")
@@ -326,31 +344,13 @@ function carouselAsset(project, format) {
   const role = format === "mobile" ? "heroMobile" : "heroDesktop"
   const ready = Boolean(clip?.source?.url || clip?.source?.id)
   const [statusClass, status] = statusLabel(job, ready)
-  const generatedDesktop =
-    format === "desktop" && project.carouselDraft?.desktopSource?.url
-  const canGenerateDesktop = format === "desktop" && project.source?.url
   return `<div class="carousel-asset ${format}">
     <div class="asset-preview" style="${clip?.poster?.src || project.poster?.src ? `background-image:url('${escapeHtml(clip?.poster?.src || project.poster?.src)}')` : ""}"><span>${format === "mobile" ? "9:16" : "16:9"}</span></div>
     <div class="asset-copy"><strong>${format === "mobile" ? "Mobile from Resolve" : "Desktop carousel"}</strong><span class="status ${statusClass}"><span class="dot"></span>${escapeHtml(job?.error || status)}</span></div>
     <div class="asset-actions">
-      ${generatedDesktop ? `<button class="button small" data-use-generated="${escapeHtml(project.id)}">${ready ? "Replace with generated cut" : "Use generated cut"}</button>` : ""}
-      ${canGenerateDesktop ? `<button class="button small ghost" data-generate-existing="${escapeHtml(project.id)}" ${job ? "disabled" : ""}>${job ? "Generating…" : generatedDesktop ? "Regenerate from master" : "Generate from existing master"}</button>` : ""}
       <label class="button small ghost upload-button">Upload custom<input type="file" accept="video/*" data-upload="${escapeHtml(project.id)}:${role}" /></label>
     </div>
     ${job && ["waiting", "processing", "uploading"].includes(job.status) ? `<span class="progress"><span style="width:${Number(job.progress || 0)}%"></span></span>` : ""}
-  </div>`
-}
-
-function carouselEditPack(project) {
-  const draft = project.carouselDraft
-  if (!draft?.roughcutUrl && !draft?.clipUrls?.length)
-    return `<div class="edit-pack pending"><span><strong>Resolve edit pack</strong><small>Upload the main master to generate downloadable scene clips.</small></span></div>`
-  return `<div class="edit-pack">
-    <span><strong>Resolve edit pack</strong><small>Download the rough cut or source clips, reframe them in Resolve, then upload the finished mobile video above.</small></span>
-    <div class="edit-pack-links">
-      ${draft.roughcutUrl ? `<a class="button small" href="${escapeHtml(draft.roughcutUrl)}" download>Download rough cut</a>` : ""}
-      ${(draft.clipUrls || []).map((url, index) => `<a class="button small ghost" href="${escapeHtml(url)}" download>Clip ${String(index + 1).padStart(2, "0")}</a>`).join("")}
-    </div>
   </div>`
 }
 
@@ -374,7 +374,6 @@ function carouselCard(project, index) {
       ${carouselAsset(project, "desktop")}
       ${carouselAsset(project, "mobile")}
     </div>
-    ${carouselEditPack(project)}
     <div class="approval-row">
       <span><strong>${readyToReview ? "Ready for your review" : "Waiting for both formats"}</strong><small>${readyToReview ? "Use Preview site below, then approve this project for publishing." : "Approval unlocks after desktop and mobile clips are ready."}</small></span>
       <label class="approval-check"><input type="checkbox" data-carousel-approved="${escapeHtml(project.id)}" ${settings.approved ? "checked" : ""} ${readyToReview ? "" : "disabled"}/> Approved</label>
@@ -478,6 +477,53 @@ function revisionsDrawer() {
   </aside>`
 }
 
+function formatTime(seconds) {
+  const value = Math.max(0, Number(seconds || 0))
+  const minutes = Math.floor(value / 60)
+  const remainder = Math.floor(value % 60)
+  const tenths = Math.floor((value % 1) * 10)
+  return `${minutes}:${String(remainder).padStart(2, "0")}.${tenths}`
+}
+
+function mediaPickerModal() {
+  const picker = state.mediaPicker
+  if (!picker) return ""
+  const project = state.content.media.works.find(
+    (item) => item.id === picker.projectId,
+  )
+  return `<div class="media-picker-backdrop" data-action="close-media-picker">
+    <section class="media-picker" role="dialog" aria-modal="true" aria-labelledby="media-picker-title" onclick="event.stopPropagation()">
+      <header class="media-picker-head">
+        <div><span class="eyebrow">${escapeHtml(project?.client || "Project")}</span><h2 id="media-picker-title">Choose thumbnail media</h2></div>
+        <button class="button ghost" type="button" data-action="close-media-picker">Close</button>
+      </header>
+      <div class="media-picker-player">
+        <video src="${escapeHtml(picker.url)}" preload="metadata" playsinline controls data-media-video></video>
+      </div>
+      <div class="media-scrubber">
+        <input type="range" min="0" max="1" value="${Number(picker.currentTime || 0)}" step="0.05" data-media-scrubber aria-label="Video position" />
+        <div><strong data-media-current>${formatTime(picker.currentTime)}</strong><span data-media-duration>Loading duration…</span></div>
+      </div>
+      <div class="selection-markers">
+        <article>
+          <span><strong>Poster frame</strong><small>Extracted from the original master at full resolution.</small></span>
+          <span class="marker-time" data-poster-time>${formatTime(picker.posterTime)}</span>
+          <button class="button" type="button" data-set-media-marker="poster">Use current frame</button>
+        </article>
+        <article>
+          <span><strong>Hover preview</strong><small>Six seconds beginning at your selected point.</small></span>
+          <span class="marker-time" data-preview-time>${formatTime(picker.previewStart)}–${formatTime(Number(picker.previewStart || 0) + 6)}</span>
+          <button class="button" type="button" data-set-media-marker="preview">Start here</button>
+        </article>
+      </div>
+      <footer class="media-picker-actions">
+        <span>Nothing changes until you save these selections.</span>
+        <button class="button primary" type="button" data-action="save-media-selection">Create poster + preview</button>
+      </footer>
+    </section>
+  </div>`
+}
+
 function render() {
   if (!state.content) return
   const view =
@@ -500,7 +546,7 @@ function render() {
     <main class="main">${view}</main>
   </div>
   <footer class="publish-bar"><span class="save-state"></span><div class="row"><button class="button ghost" data-action="history">History</button><button class="button" data-action="preview">Preview site</button><button class="button primary" data-action="publish">Publish</button></div></footer>
-  ${revisionsDrawer()}${state.toast ? `<div class="toast ${state.toast.error ? "error" : ""}">${escapeHtml(state.toast.message)}</div>` : ""}`
+  ${revisionsDrawer()}${mediaPickerModal()}${state.toast ? `<div class="toast ${state.toast.error ? "error" : ""}">${escapeHtml(state.toast.message)}</div>` : ""}`
   bindEvents()
   updateSaveState()
 }
@@ -559,32 +605,66 @@ function removeCarouselProject(projectId) {
   render()
 }
 
-async function useGeneratedCarousel(projectId) {
-  await saveDraft()
+async function openMediaPicker(projectId) {
   try {
-    await api(
-      `/api/projects/${encodeURIComponent(projectId)}/carousel/use-generated`,
-      { method: "POST", body: "{}" },
+    const project = state.content.media.works.find(
+      (item) => item.id === projectId,
     )
-    notify("Generated desktop cut added to the carousel draft.")
-    await load(false)
+    const source = project?.cmsScrubUrl
+      ? { url: project.cmsScrubUrl }
+      : await api(`/api/projects/${encodeURIComponent(projectId)}/media-source`)
+    state.mediaPicker = {
+      projectId,
+      url: source.url,
+      duration: 0,
+      currentTime: Number(project?.mediaSelection?.posterTime || 0),
+      posterTime: Number(project?.mediaSelection?.posterTime || 0),
+      previewStart: Number(project?.mediaSelection?.previewStart || 0),
+    }
+    render()
   } catch (error) {
     notify(error.message, true)
   }
 }
 
-async function generateDesktopFromMaster(projectId) {
-  await saveDraft()
+function updateMediaPickerUi() {
+  const picker = state.mediaPicker
+  if (!picker) return
+  const scrubber = document.querySelector("[data-media-scrubber]")
+  if (scrubber) {
+    scrubber.max = String(Math.max(0.1, picker.duration || 0.1))
+    scrubber.value = String(picker.currentTime || 0)
+  }
+  const current = document.querySelector("[data-media-current]")
+  const duration = document.querySelector("[data-media-duration]")
+  const poster = document.querySelector("[data-poster-time]")
+  const preview = document.querySelector("[data-preview-time]")
+  if (current) current.textContent = formatTime(picker.currentTime)
+  if (duration)
+    duration.textContent = picker.duration
+      ? `of ${formatTime(picker.duration)}`
+      : "Loading duration…"
+  if (poster) poster.textContent = formatTime(picker.posterTime)
+  if (preview)
+    preview.textContent = `${formatTime(picker.previewStart)}–${formatTime(Math.min(picker.duration || Infinity, picker.previewStart + 6))}`
+}
+
+async function saveMediaSelection() {
+  const picker = state.mediaPicker
+  if (!picker) return
   try {
-    const result = await api(
-      `/api/projects/${encodeURIComponent(projectId)}/carousel/generate-from-master`,
-      { method: "POST", body: "{}" },
+    await api(
+      `/api/projects/${encodeURIComponent(picker.projectId)}/media-selection`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          posterTime: picker.posterTime,
+          previewStart: picker.previewStart,
+        }),
+      },
     )
-    notify(
-      result.existing
-        ? "That desktop carousel cut is already processing."
-        : "Existing master queued. The desktop cut and Resolve clips are being created.",
-    )
+    state.mediaPicker = null
+    notify("Poster and hover preview queued. This should only take a moment.")
     await load(false)
   } catch (error) {
     notify(error.message, true)
@@ -866,19 +946,48 @@ function bindEvents() {
       ),
     )
   document
-    .querySelectorAll("[data-use-generated]")
+    .querySelectorAll("[data-open-media-picker]")
     .forEach((button) =>
       button.addEventListener("click", () =>
-        useGeneratedCarousel(button.dataset.useGenerated),
+        openMediaPicker(button.dataset.openMediaPicker),
       ),
     )
-  document
-    .querySelectorAll("[data-generate-existing]")
-    .forEach((button) =>
-      button.addEventListener("click", () =>
-        generateDesktopFromMaster(button.dataset.generateExisting),
-      ),
-    )
+  const pickerVideo = document.querySelector("[data-media-video]")
+  const pickerScrubber = document.querySelector("[data-media-scrubber]")
+  if (pickerVideo && pickerScrubber && state.mediaPicker) {
+    pickerVideo.addEventListener("loadedmetadata", () => {
+      state.mediaPicker.duration = Number(pickerVideo.duration || 0)
+      state.mediaPicker.currentTime = Math.min(
+        state.mediaPicker.currentTime,
+        state.mediaPicker.duration,
+      )
+      pickerVideo.currentTime = state.mediaPicker.currentTime
+      updateMediaPickerUi()
+    })
+    pickerVideo.addEventListener("timeupdate", () => {
+      if (!state.mediaPicker || pickerScrubber.matches(":active")) return
+      state.mediaPicker.currentTime = pickerVideo.currentTime
+      updateMediaPickerUi()
+    })
+    pickerScrubber.addEventListener("input", () => {
+      state.mediaPicker.currentTime = Number(pickerScrubber.value)
+      pickerVideo.currentTime = state.mediaPicker.currentTime
+      updateMediaPickerUi()
+    })
+  }
+  document.querySelectorAll("[data-set-media-marker]").forEach((button) =>
+    button.addEventListener("click", () => {
+      if (!state.mediaPicker) return
+      if (button.dataset.setMediaMarker === "poster")
+        state.mediaPicker.posterTime = state.mediaPicker.currentTime
+      else
+        state.mediaPicker.previewStart = Math.min(
+          state.mediaPicker.currentTime,
+          Math.max(0, state.mediaPicker.duration - 1),
+        )
+      updateMediaPickerUi()
+    }),
+  )
   document.querySelectorAll("[data-carousel-move]").forEach((button) =>
     button.addEventListener("click", () => {
       const [index, direction] = button.dataset.carouselMove
@@ -1021,6 +1130,11 @@ function bindEvents() {
           state.drawer = false
           render()
         },
+        "close-media-picker": () => {
+          state.mediaPicker = null
+          render()
+        },
+        "save-media-selection": saveMediaSelection,
       }
       actions[button.dataset.action]?.()
     }),
@@ -1048,5 +1162,6 @@ async function load(first = true) {
 load()
 setInterval(() => {
   const editing = document.activeElement?.matches?.("input, textarea, select")
-  if (!state.dirty && !state.saving && !editing) load(false)
+  if (!state.dirty && !state.saving && !editing && !state.mediaPicker)
+    load(false)
 }, 15_000)

@@ -12,12 +12,12 @@ const MAX_UPLOAD_BYTES = 80 * 1024 * 1024 * 1024
 const PART_SIZE = 64 * 1024 * 1024
 const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"])
 const VIDEO_ROLES = new Set(["main", "heroDesktop", "heroMobile"])
-const GENERATED_DESKTOP_ROLE = "carouselDesktopFromMaster"
+const DERIVATIVE_ROLE = "projectDerivatives"
 const IMAGE_ROLES = new Set(["poster", "head", "mask"])
 const schemaStatements = [
   `CREATE TABLE IF NOT EXISTS content_documents (key TEXT PRIMARY KEY, content_json TEXT NOT NULL, revision_id TEXT, updated_at TEXT NOT NULL, updated_by TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS revisions (id TEXT PRIMARY KEY, content_json TEXT NOT NULL, label TEXT NOT NULL, created_at TEXT NOT NULL, created_by TEXT NOT NULL, is_published INTEGER NOT NULL DEFAULT 0)`,
-  `CREATE TABLE IF NOT EXISTS processing_jobs (id TEXT PRIMARY KEY, project_id TEXT NOT NULL, asset_role TEXT NOT NULL, object_key TEXT NOT NULL, original_name TEXT NOT NULL, mime_type TEXT NOT NULL, size_bytes INTEGER NOT NULL, status TEXT NOT NULL, progress INTEGER NOT NULL DEFAULT 0, attempts INTEGER NOT NULL DEFAULT 0, error TEXT, lease_until TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, created_by TEXT NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS processing_jobs (id TEXT PRIMARY KEY, project_id TEXT NOT NULL, asset_role TEXT NOT NULL, object_key TEXT NOT NULL, original_name TEXT NOT NULL, mime_type TEXT NOT NULL, size_bytes INTEGER NOT NULL, status TEXT NOT NULL, progress INTEGER NOT NULL DEFAULT 0, attempts INTEGER NOT NULL DEFAULT 0, error TEXT, lease_until TEXT, options_json TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, created_by TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS access_users (email TEXT PRIMARY KEY, first_seen_at TEXT NOT NULL, last_seen_at TEXT NOT NULL)`,
   `CREATE INDEX IF NOT EXISTS revisions_created_at_idx ON revisions(created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS processing_jobs_status_idx ON processing_jobs(status, created_at)`,
@@ -35,8 +35,10 @@ function now() {
 }
 
 function cmsKey(env, path) {
-  const prefix = String(env.CMS_STORAGE_PREFIX || "cms")
-    .replace(/^\/+|\/+$/g, "")
+  const prefix = String(env.CMS_STORAGE_PREFIX || "cms").replace(
+    /^\/+|\/+$/g,
+    "",
+  )
   return `${prefix}/${String(path).replace(/^\/+/, "")}`
 }
 
@@ -464,104 +466,91 @@ async function restoreRevision(env, email, id) {
   return json({ restored: id })
 }
 
-async function useGeneratedCarousel(env, email, projectId) {
-  const draft = await readDocument(env, "draft")
-  normalizeCarousel(draft.content)
-  const project = draft.content.media.works.find(
-    (item) => item.id === projectId,
+async function projectMediaSource(env, projectId) {
+  const job = await env.DB.prepare(
+    "SELECT object_key, mime_type, original_name FROM processing_jobs WHERE project_id = ? AND asset_role = 'main' AND status = 'ready' ORDER BY updated_at DESC LIMIT 1",
   )
-  if (!project) return json({ error: "Project not found." }, 404)
-  if (!project.carouselDraft?.desktopSource?.url)
+    .bind(projectId)
+    .first()
+  if (!job || String(job.object_key).startsWith("external:"))
     return json(
-      {
-        error:
-          "Upload and process this project's master before using its generated desktop cut.",
-      },
+      { error: "Upload this project's master before choosing its frames." },
       409,
     )
-  if (!draft.content.media.carouselOrder.includes(projectId))
-    draft.content.media.carouselOrder.push(projectId)
-  draft.content.media.carouselSettings[projectId] = {
-    ...(draft.content.media.carouselSettings[projectId] || {}),
-    approved: false,
-  }
-  const clip = {
-    id: `${projectId}-desktop`,
-    projectId,
-    client: project.client,
-    title: project.title,
-    source: project.carouselDraft.desktopSource,
-    poster: project.poster,
-  }
-  const existing = draft.content.media.carousels.desktop.find(
-    (item) => item.projectId === projectId,
+  const url = await getSignedUrl(
+    s3Client(env),
+    new GetObjectCommand({
+      Bucket: env.R2_BUCKET_NAME,
+      Key: job.object_key,
+      ResponseContentType: job.mime_type,
+    }),
+    { expiresIn: 2 * 60 * 60 },
   )
-  if (existing) Object.assign(existing, clip)
-  else draft.content.media.carousels.desktop.push(clip)
-  normalizeCarousel(draft.content)
-  const timestamp = now()
-  await env.DB.prepare(
-    "UPDATE content_documents SET content_json = ?, updated_at = ?, updated_by = ? WHERE key = 'draft'",
-  )
-    .bind(JSON.stringify(draft.content), timestamp, email)
-    .run()
-  return json({ projectId, format: "desktop" })
+  return json({ url, name: job.original_name })
 }
 
-async function queueDesktopFromMaster(env, email, projectId) {
+async function queueProjectDerivatives(request, env, email, projectId) {
+  const input = await request.json()
+  const posterTime = Number(input.posterTime)
+  const previewStart = Number(input.previewStart)
+  if (
+    !Number.isFinite(posterTime) ||
+    !Number.isFinite(previewStart) ||
+    posterTime < 0 ||
+    previewStart < 0 ||
+    posterTime > 24 * 60 * 60 ||
+    previewStart > 24 * 60 * 60
+  )
+    return json({ error: "Choose valid poster and preview times." }, 400)
+
   const draft = await readDocument(env, "draft")
-  normalizeCarousel(draft.content)
   const project = draft.content.media.works.find(
-    (item) => item.id === projectId,
+    (item) => String(item.id) === projectId,
   )
   if (!project) return json({ error: "Project not found." }, 404)
 
-  let sourceUrl
-  try {
-    sourceUrl = new URL(project.source?.url)
-  } catch {
+  const active = await env.DB.prepare(
+    "SELECT id FROM processing_jobs WHERE project_id = ? AND asset_role = ? AND status IN ('waiting', 'processing') LIMIT 1",
+  )
+    .bind(projectId, DERIVATIVE_ROLE)
+    .first()
+  if (active)
     return json(
-      { error: "This project does not have a usable master URL." },
+      { error: "That poster and hover preview are already processing." },
       409,
     )
-  }
-  if (sourceUrl.protocol !== "https:")
-    return json({ error: "The existing master must use HTTPS." }, 409)
 
-  const active = await env.DB.prepare(
-    "SELECT id FROM processing_jobs WHERE project_id = ? AND asset_role = ? AND status IN ('waiting', 'processing', 'uploading') LIMIT 1",
+  const master = await env.DB.prepare(
+    "SELECT object_key, original_name, mime_type, size_bytes FROM processing_jobs WHERE project_id = ? AND asset_role = 'main' AND status = 'ready' ORDER BY updated_at DESC LIMIT 1",
   )
-    .bind(projectId, GENERATED_DESKTOP_ROLE)
+    .bind(projectId)
     .first()
-  if (active) return json({ jobId: active.id, existing: true })
+  if (!master || String(master.object_key).startsWith("external:"))
+    return json(
+      { error: "Upload this project's master before choosing its frames." },
+      409,
+    )
 
-  const timestamp = now()
   const jobId = crypto.randomUUID()
-  if (!draft.content.media.carouselOrder.includes(projectId))
-    draft.content.media.carouselOrder.push(projectId)
-  draft.content.media.carouselSettings[projectId] = {
-    ...(draft.content.media.carouselSettings[projectId] || {}),
-    approved: false,
-  }
-  await env.DB.batch([
-    env.DB.prepare(
-      "INSERT INTO processing_jobs (id, project_id, asset_role, object_key, original_name, mime_type, size_bytes, status, created_at, updated_at, created_by) VALUES (?, ?, ?, ?, ?, ?, 0, 'waiting', ?, ?, ?)",
-    ).bind(
+  const timestamp = now()
+  await env.DB.prepare(
+    "INSERT INTO processing_jobs (id, project_id, asset_role, object_key, original_name, mime_type, size_bytes, status, options_json, created_at, updated_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, 'waiting', ?, ?, ?, ?)",
+  )
+    .bind(
       jobId,
       projectId,
-      GENERATED_DESKTOP_ROLE,
-      `external:${btoa(sourceUrl.toString())}`,
-      "existing-master.m3u8",
-      "application/vnd.apple.mpegurl",
+      DERIVATIVE_ROLE,
+      master.object_key,
+      master.original_name,
+      master.mime_type,
+      master.size_bytes,
+      JSON.stringify({ posterTime, previewStart }),
       timestamp,
       timestamp,
       email,
-    ),
-    env.DB.prepare(
-      "UPDATE content_documents SET content_json = ?, updated_at = ?, updated_by = ? WHERE key = 'draft'",
-    ).bind(JSON.stringify(draft.content), timestamp, email),
-  ])
-  return json({ jobId, existing: false })
+    )
+    .run()
+  return json({ jobId, status: "waiting" })
 }
 
 async function startUpload(request, env, email) {
@@ -715,7 +704,7 @@ async function nextProcessorJob(request, env) {
   const timestamp = now()
   const expired = timestamp
   const job = await env.DB.prepare(
-    "SELECT * FROM processing_jobs WHERE status = 'waiting' OR (status = 'processing' AND lease_until < ?) ORDER BY CASE asset_role WHEN 'main' THEN 0 WHEN 'heroDesktop' THEN 1 WHEN 'heroMobile' THEN 1 ELSE 2 END, created_at LIMIT 1",
+    "SELECT * FROM processing_jobs WHERE status = 'waiting' OR (status = 'processing' AND lease_until < ?) ORDER BY CASE asset_role WHEN 'main' THEN 0 WHEN 'projectDerivatives' THEN 1 WHEN 'heroDesktop' THEN 2 WHEN 'heroMobile' THEN 2 ELSE 3 END, created_at LIMIT 1",
   )
     .bind(expired)
     .first()
@@ -747,7 +736,8 @@ async function nextProcessorJob(request, env) {
       status: "processing",
       lease_until: leaseUntil,
       downloadUrl,
-      outputPrefix: `videos/${job.project_id}/${job.asset_role}`,
+      options: JSON.parse(job.options_json || "{}"),
+      outputPrefix: `videos/${job.project_id}/${job.asset_role}/${job.id}`,
     },
   })
 }
@@ -839,6 +829,11 @@ async function updateProcessorJob(request, env, id, action) {
   const output = input.output || {}
   if (job.asset_role === "main") {
     project.source = { provider: "hls", url: `${baseUrl}/${output.masterKey}` }
+    project.cmsScrubUrl = output.scrubKey
+      ? `${baseUrl}/${output.scrubKey}`
+      : null
+    delete project.carouselDraft
+  } else if (job.asset_role === DERIVATIVE_ROLE) {
     project.poster = {
       src: `${baseUrl}/${output.posterKey}`,
       width: output.width || 1920,
@@ -847,38 +842,12 @@ async function updateProcessorJob(request, env, id, action) {
     project.preview = {
       provider: "static",
       mp4: `${baseUrl}/${output.previewMp4Key}`,
-      webm: `${baseUrl}/${output.previewWebmKey}`,
     }
-    project.carouselDraft = {
-      desktopSource: {
-        provider: "hls",
-        url: `${baseUrl}/${output.carouselDesktopMasterKey}`,
-      },
-      roughcutUrl: `${baseUrl}/${output.carouselRoughcutKey}`,
-      clipUrls: (output.carouselClipKeys || []).map(
-        (key) => `${baseUrl}/${key}`,
-      ),
-      generatedAt: timestamp,
+    project.mediaSelection = {
+      posterTime: Number(output.posterTime || 0),
+      previewStart: Number(output.previewStart || 0),
+      updatedAt: timestamp,
     }
-  } else if (job.asset_role === GENERATED_DESKTOP_ROLE) {
-    project.carouselDraft = {
-      desktopSource: {
-        provider: "hls",
-        url: `${baseUrl}/${output.masterKey}`,
-      },
-      roughcutUrl: `${baseUrl}/${output.carouselRoughcutKey}`,
-      clipUrls: (output.carouselClipKeys || []).map(
-        (key) => `${baseUrl}/${key}`,
-      ),
-      generatedAt: timestamp,
-    }
-    if (!draft.content.media.carouselOrder.includes(job.project_id))
-      draft.content.media.carouselOrder.push(job.project_id)
-    draft.content.media.carouselSettings[job.project_id] = {
-      ...(draft.content.media.carouselSettings[job.project_id] || {}),
-      approved: false,
-    }
-    normalizeCarousel(draft.content)
   } else if (["heroDesktop", "heroMobile"].includes(job.asset_role)) {
     const collection = job.asset_role.includes("Mobile") ? "mobile" : "desktop"
     if (!draft.content.media.carouselOrder.includes(job.project_id))
@@ -936,23 +905,20 @@ async function routeApi(request, env, email) {
     return completeUpload(request, env)
   if (path === "/api/uploads/abort" && request.method === "POST")
     return abortUpload(request, env)
-  const generatedMatch = path.match(
-    /^\/api\/projects\/([^/]+)\/carousel\/use-generated$/,
+  const mediaSourceMatch = path.match(
+    /^\/api\/projects\/([^/]+)\/media-source$/,
   )
-  if (generatedMatch && request.method === "POST")
-    return useGeneratedCarousel(
+  if (mediaSourceMatch && request.method === "GET")
+    return projectMediaSource(env, decodeURIComponent(mediaSourceMatch[1]))
+  const mediaSelectionMatch = path.match(
+    /^\/api\/projects\/([^/]+)\/media-selection$/,
+  )
+  if (mediaSelectionMatch && request.method === "POST")
+    return queueProjectDerivatives(
+      request,
       env,
       email,
-      decodeURIComponent(generatedMatch[1]),
-    )
-  const fromMasterMatch = path.match(
-    /^\/api\/projects\/([^/]+)\/carousel\/generate-from-master$/,
-  )
-  if (fromMasterMatch && request.method === "POST")
-    return queueDesktopFromMaster(
-      env,
-      email,
-      decodeURIComponent(fromMasterMatch[1]),
+      decodeURIComponent(mediaSelectionMatch[1]),
     )
   const retryMatch = path.match(/^\/api\/jobs\/([^/]+)\/retry$/)
   if (retryMatch && request.method === "POST") {
