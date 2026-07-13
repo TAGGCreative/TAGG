@@ -48,7 +48,30 @@ const CoreSection = styled(HomeSection)`
   }
 `
 
-export default function Core() {
+function CopyBlock({ item, dropped }) {
+  return (
+    <>
+      <PoppedHeader className={dropped ? "dropped" : undefined}>
+        {item.heading}
+      </PoppedHeader>
+      <p>
+        {item.paragraphs.map((paragraph, index) => (
+          <span key={paragraph}>
+            {index > 0 && (
+              <>
+                <br />
+                <br />
+              </>
+            )}
+            {paragraph}
+          </span>
+        ))}
+      </p>
+    </>
+  )
+}
+
+export default function Core({ items }) {
   return (
     <CoreSection
       id="core"
@@ -98,41 +121,15 @@ export default function Core() {
     >
       <Wrap>
         <Text gridArea="a">
-          <PoppedHeader>PRETTY ISN'T THE POINT</PoppedHeader>
-          <p>
-            Nice shots are table stakes. Anyone can make something pretty. We
-            make pretty mean something. No one cares what camera you used—if it
-            got them out of bed on Monday.
-          </p>
+          <CopyBlock item={items[0]} />
         </Text>
 
         <Text gridArea="b">
-          <PoppedHeader>LEAN, SMART, AND INDEPENDANT.</PoppedHeader>
-          <p>
-            No hand-holding. No game of telephone. No endless CC threads. Just
-            give us the idea and let us run. We curate the right team—project by
-            project, from the best talent around the world. High standards, low
-            drama.
-          </p>
+          <CopyBlock item={items[1]} />
         </Text>
 
         <Text mt="50%" gridArea="c">
-          <PoppedHeader className="dropped">PARTNERS &gt; CLIENTS</PoppedHeader>
-          <p>
-            Think{" "}
-            <span style={{ fontStyle: "italic" }}>
-              same team, different office
-            </span>
-            . Just because we aren't in the same place, doesn't mean we can't
-            build a relationship like we are.
-            <br />
-            <br />
-            It's simple——when we have each other's back we'll make better
-            content together.
-            <br />
-            <br />
-            We also expect an invite to your christmas party… Just kidding.
-          </p>
+          <CopyBlock item={items[2]} dropped />
         </Text>
       </Wrap>
     </CoreSection>

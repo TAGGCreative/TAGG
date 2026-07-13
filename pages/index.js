@@ -9,20 +9,46 @@ import TheFam from "../components/sections/TheFam"
 import OurRep from "../components/sections/OurRep"
 import Contact from "../components/sections/Contact"
 import { PrivacyPolicy } from "../components/elements/PrivacyPolicy"
-import { getMediaCatalog } from "../lib/mediaCatalog"
+import { getSiteContent } from "../lib/siteContent"
 import { useInView } from "../utils/useInView"
 import { BackgroundStatic1 } from "../components/elements/BackgroundStatic1"
+import Link from "next/link"
 
-export function getStaticProps() {
-  const catalog = getMediaCatalog()
+export async function getStaticProps({ preview = false, previewData = {} }) {
+  const content = await getSiteContent({
+    previewToken: preview ? previewData?.token : undefined,
+  })
+  const catalog = content.media
+  const visibleWorks = catalog.works.filter(
+    (project) => project.visible !== false,
+  )
+  const hiddenIds = new Set(
+    catalog.works
+      .filter((project) => project.visible === false)
+      .map((project) => project.id),
+  )
+  const carouselOrder = new Map(
+    (catalog.carouselOrder || []).map((projectId, index) => [projectId, index]),
+  )
+  const orderedCarousel = (format) =>
+    [...catalog.carousels[format]]
+      .filter((clip) => !hiddenIds.has(clip.projectId))
+      .sort(
+        (a, b) =>
+          (carouselOrder.get(a.projectId) ?? Number.MAX_SAFE_INTEGER) -
+          (carouselOrder.get(b.projectId) ?? Number.MAX_SAFE_INTEGER),
+      )
 
   return {
     props: {
-      videoList: catalog.works,
-      clipsMobile: catalog.carousels.mobile,
-      clipsDesktop: catalog.carousels.desktop,
+      videoList: visibleWorks,
+      clipsMobile: orderedCarousel("mobile"),
+      clipsDesktop: orderedCarousel("desktop"),
       cloudflareCustomerCode: catalog.cloudflare?.customerCode || "",
+      editorial: content.editorial,
+      isPreview: preview,
     },
+    revalidate: preview ? 1 : 60,
   }
 }
 
@@ -31,6 +57,8 @@ export default function Home({
   clipsMobile,
   clipsDesktop,
   cloudflareCustomerCode,
+  editorial,
+  isPreview,
 }) {
   // Nav targeting
   const { ref: refCarousel, inView: inViewCarousel } = useInView()
@@ -56,6 +84,12 @@ export default function Home({
         }
       />
       <main>
+        {isPreview && (
+          <div className="cms-preview-banner">
+            TAGG CMS preview
+            <Link href="/api/cms-exit-preview">Exit preview</Link>
+          </div>
+        )}
         <h1 className="sr-only">TAGG Creative — Vancouver production studio</h1>
         <BackgroundStatic1 />
         <Carousel
@@ -64,14 +98,18 @@ export default function Home({
           cloudflareCustomerCode={cloudflareCustomerCode}
           ref={refCarousel}
         />
-        <WhoWeAre id="about" />
-        <Core id="core" />
-        <OurArena id="our-arena" />
+        <WhoWeAre id="about" content={editorial.sections.whoWeAre} />
+        <Core id="core" items={editorial.sections.core} />
+        <OurArena id="our-arena" items={editorial.sections.ourArena} />
         <Works videoList={videoList} id="works" ref={refWorks} />
-        <People id="people" ref={refPeople} />
-        <TheFam id="the-fam" />
+        <People
+          id="people"
+          people={editorial.people.leadership}
+          ref={refPeople}
+        />
+        <TheFam id="the-fam" people={editorial.people.extended} />
         <OurRep id="our-rep" />
-        <Contact id="contact" ref={refContact} />
+        <Contact id="contact" contact={editorial.contact} ref={refContact} />
         <PrivacyPolicy />
       </main>
     </>

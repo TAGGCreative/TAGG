@@ -1,0 +1,36 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "tagg-cms",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-07-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "alias": {
+    "@aws-sdk/xml-builder": "./aws-xml-builder.mjs",
+  },
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./public",
+    "not_found_handling": "single-page-application",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tagg-cms",
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "migrations_dir": "./migrations",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "tagg-media",
+    },
+  ],
+  "vars": {
+    "ENVIRONMENT": "production",
+    "R2_BUCKET_NAME": "tagg-media",
+    "R2_PUBLIC_BASE_URL": "https://media.taggcreative.com",
+    "PUBLIC_SITE_URL": "https://taggcreative.com",
+    "ALLOWED_EDITOR_EMAILS": "",
+  },
+}

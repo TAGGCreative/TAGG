@@ -15,35 +15,6 @@ const FamStaggerBox = styled(StaggerBox)`
   }
 `
 
-const team = {
-  extended: [
-    {
-      head: "/images/extended-fam/ExtendedFam_Baylee.png",
-      mask: "/images/extended-fam/ExtendedFam_Baylee copy.png",
-      given: "BAYLEE",
-      sur: "SINNER",
-      role: "Director / Producer",
-      bio: "A creative power house with a serious knack for documentary storytelling. No matter what she's working on—Baylee's bubbly charisma is ever present, resulting in serious laughs and big time grins. Oh, and she's now an Honorary Canadian after rocking that tuxedo.",
-    },
-    {
-      head: "/images/extended-fam/ExtendedFam_JeffZwicker-DirectorOfPhotography.png",
-      mask: "/images/extended-fam/ExtendedFam_JeffZwicker-DirectorOfPhotography copy.png",
-      given: "JEFF",
-      sur: "ZWICKER",
-      role: "Cinematographer",
-      bio: "Put him in any room, any location, under any amount of pressure, and this man will light it beautifully. He's also got a mean Jiu Jitsu take down.",
-    },
-    {
-      head: "/images/extended-fam/TAGG-WEB-TeamPhotos-Pink-Hein-.png",
-      mask: "/images/extended-fam/TAGG-WEB-TeamPhotos-Pink-Hein-copy.png",
-      given: "HEIN",
-      sur: "HAMERS",
-      role: "Visual Artist",
-      bio: "It's not everyday that you meet a professional who perfectly blends technical prowess and unbridled creativity, but Hein is certainly one of them. He's Multi-disciplined, inventive, cerebral, but most importantly; he  takes our ideas, places them beautifully in the VFX realm and pushes them beyond our imagination.",
-    },
-  ],
-}
-
 const TheFamSection = styled(HomeSection)`
   margin-top: -35vh;
   margin-bottom: 15vh;
@@ -54,11 +25,12 @@ const TheFamSection = styled(HomeSection)`
   }
 `
 
-export default function TheFam() {
+export default function TheFam({ people }) {
   return (
     <TheFamSection
       id="the-fam"
       header="the family"
+      sectionStyle={{ marginBottom: "6vh" }}
       HeaderComponent={() => (
         <AnimatedHeader id="the-fam-header">
           <svg
@@ -116,21 +88,19 @@ export default function TheFam() {
       )}
     >
       <FamStaggerBox>
-        {team.extended.map(
-          ({ given, sur, role, company, bio, head, mask }, i) => (
-            <RosterCard
-              given={given}
-              sur={sur}
-              role={role}
-              company={company}
-              bio={bio}
-              head={head}
-              mask={mask}
-              overlayOpacity={given === "BAYLEE" ? 0.98 : undefined}
-              key={i}
-            />
-          ),
-        )}
+        {people.map(({ id, given, sur, role, company, bio, head, mask }) => (
+          <RosterCard
+            given={given}
+            sur={sur}
+            role={role}
+            company={company}
+            bio={bio}
+            head={head}
+            mask={mask}
+            overlayOpacity={given === "BAYLEE" ? 0.98 : undefined}
+            key={id}
+          />
+        ))}
       </FamStaggerBox>
     </TheFamSection>
   )

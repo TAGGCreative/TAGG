@@ -3,7 +3,7 @@ import HomeSection from "./HomeSection"
 import { Wrap, Text } from "./Core"
 import { AnimatedHeader } from "../elements/AnimatedHeader"
 
-export default function OurArena() {
+export default function OurArena({ items }) {
   return (
     <HomeSection
       id="our-arena"
@@ -86,48 +86,55 @@ export default function OurArena() {
     >
       <Wrap>
         <Text gridArea="a">
-          <PoppedHeader>DOCUMENTARY BY DESIGN</PoppedHeader>
-          <p>
-            We tell real stories. Docu-style. No actors. No scripts. No staged
-            moments pretending to be something they’re not. We work with
-            founders, teams, and companies with something to say—and say it in a
-            way that actually lands. This isn’t content for content’s sake. It’s
-            story with a day job.
-          </p>
+          <PoppedHeader>{items[0].heading}</PoppedHeader>
+          <p>{items[0].paragraphs.join("\n\n")}</p>
         </Text>
         <Text gridArea="b">
-          <PoppedHeader>EDITORIAL BY NATURE</PoppedHeader>
+          <PoppedHeader>{items[1].heading}</PoppedHeader>
           <p>
-            We’re editors first. Always have been. That means we see the end at
-            the beginning. We think in structure, rhythm, timing—what actually
-            works in the cut. So when we produce, we produce on purpose.
-            <br />
-            <br />
-            We also offer edit only services if that’s your jam.
+            {items[1].paragraphs.map((paragraph, index) => (
+              <span key={paragraph}>
+                {index > 0 && (
+                  <>
+                    <br />
+                    <br />
+                  </>
+                )}
+                {paragraph}
+              </span>
+            ))}
           </p>
         </Text>
         <Text gridArea="c">
-          <PoppedHeader>CAMERAS OPTIONAL</PoppedHeader>
+          <PoppedHeader>{items[2].heading}</PoppedHeader>
           <p>
-            Not everything needs a camera crew. Some stories can be built
-            without setting foot on set. With generative AI, stock footage, and
-            archival gems, we can craft the story without ever rolling a frame.
-            Just faster, leaner, and often, way more efficient.
-            <br />
-            <br />
-            We’ll miss crafty, though.
+            {items[2].paragraphs.map((paragraph, index) => (
+              <span key={paragraph}>
+                {index > 0 && (
+                  <>
+                    <br />
+                    <br />
+                  </>
+                )}
+                {paragraph}
+              </span>
+            ))}
           </p>
         </Text>
         <Text gridArea="d">
-          <PoppedHeader>CREATIVE INCLUDED</PoppedHeader>
+          <PoppedHeader>{items[3].heading}</PoppedHeader>
           <p>
-            We don’t wait for the boards. We shape the creative from day one.
-            Ideas, angles, formats, hooks. It’s all part of the work. We find
-            the angle, craft the story, and build the thing from the ground up.
-            Some folks think you need an agency to crack the concept.
-            <br />
-            <br />
-            We don’t.
+            {items[3].paragraphs.map((paragraph, index) => (
+              <span key={paragraph}>
+                {index > 0 && (
+                  <>
+                    <br />
+                    <br />
+                  </>
+                )}
+                {paragraph}
+              </span>
+            ))}
           </p>
         </Text>
       </Wrap>

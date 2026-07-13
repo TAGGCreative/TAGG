@@ -17,11 +17,21 @@
     "media:migrate": "node scripts/migrate-vimeo-to-r2.mjs",
     "media:migrate:dry": "node scripts/migrate-vimeo-to-r2.mjs --dry-run",
     "media:migrate:check": "node scripts/migrate-vimeo-to-r2.mjs --dry-run --check-source --limit=1",
-    "media:startup-renditions": "node scripts/add-hls-startup-rendition.mjs"
+    "media:startup-renditions": "node scripts/add-hls-startup-rendition.mjs",
+    "cms:dev": "CLOUDFLARE_INCLUDE_PROCESS_ENV=true node --env-file=.env ./node_modules/wrangler/bin/wrangler.js dev --config cms/wrangler.jsonc --local --var ENVIRONMENT:development",
+    "cms:db:local": "wrangler d1 migrations apply tagg-cms --config cms/wrangler.jsonc --local",
+    "cms:db:remote": "wrangler d1 migrations apply tagg-cms --config cms/wrangler.jsonc --remote",
+    "cms:deploy": "wrangler deploy --config cms/wrangler.jsonc",
+    "cms:processor": "node scripts/cms-media-processor.mjs",
+    "cms:processor:local": "CMS_API_URL=http://localhost:8787 CMS_PROCESSOR_TOKEN=local-tagg-processor node scripts/cms-media-processor.mjs",
+    "cms:processor:test": "node scripts/cms-media-processor.mjs --self-test",
+    "cms:test": "node --test tests/cms-content.test.mjs",
+    "cms:check": "npm run cms:test && npm run cms:processor:test && wrangler deploy --config cms/wrangler.jsonc --dry-run --outdir .wrangler/cms-build"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1085.0",
     "@aws-sdk/lib-storage": "^3.1085.0",
+    "@aws-sdk/s3-request-presigner": "^3.1085.0",
     "@emotion/is-prop-valid": "^1.4.0",
     "dotenv": "^17.4.2",
     "hls.js": "^1.6.16",
@@ -38,7 +48,8 @@
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.2.10",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "wrangler": "^4.110.0"
   },
   "overrides": {
     "postcss": "8.5.10"

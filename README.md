@@ -68,3 +68,66 @@ production branch described by the previous Vercel workflow. The site can be
 moved to another Next.js-compatible host independently of the media migration;
 Cloudflare Stream does not require the website itself to be hosted by
 Cloudflare.
+
+## TAGG Content Room
+
+The private CMS lives in `cms/` and is designed for
+`https://cms.taggcreative.com`. It keeps the public site's layout and motion in
+code while allowing trusted editors to manage projects, ordering, copy, people,
+contact information, previews, and published revisions.
+
+### Cloudflare resources
+
+1. Create a D1 database named `tagg-cms`, then replace the placeholder
+   `database_id` in `cms/wrangler.jsonc` with its ID.
+2. Keep the existing `tagg-media` R2 binding and apply `cms/r2-cors.json` to the
+   bucket. The `etag` response header is required for resumable multipart
+   uploads.
+3. Add Worker secrets with `wrangler secret put --config cms/wrangler.jsonc`:
+   `PREVIEW_SECRET`, `REVALIDATE_SECRET`, `PROCESSOR_TOKEN`, `R2_ACCOUNT_ID`,
+   `R2_ACCESS_KEY_ID`, and `R2_SECRET_ACCESS_KEY`.
+4. Set `ALLOWED_EDITOR_EMAILS` to a comma-separated list of TAGG Google account
+   addresses. Apply the D1 migration with `npm run cms:db:remote`, then deploy
+   with `npm run cms:deploy`.
+5. Put Cloudflare Access in front of `cms.taggcreative.com`, using Google as the
+   identity provider and the same email allowlist. The Worker repeats the
+   allowlist check server-side using Access's authenticated-email header.
+
+For local CMS work, run `npm run cms:db:local`, then `npm run cms:dev`. The local
+command loads the existing media-storage connection from `.env` and uses the
+development editor mode automatically. Run `npm run cms:processor:local` in
+parallel whenever local carousel generations are queued; its localhost-only
+credential is not accepted by the deployed CMS.
+
+### Public-site connection
+
+Set the public Next.js deployment values shown in `.env.example`:
+
+- `CMS_CONTENT_BASE_URL=https://media.taggcreative.com/cms`
+- `CMS_PREVIEW_SECRET` to the same value as the Worker `PREVIEW_SECRET`
+- `CMS_REVALIDATE_SECRET` to the same value as the Worker `REVALIDATE_SECRET`
+
+The site uses the checked-in catalog and editorial content whenever the remote
+snapshot is unavailable. Published snapshots revalidate the homepage and work
+routes immediately, with one-minute ISR as the fallback.
+
+### Mac media helper
+
+The designated processing Mac needs Node.js, FFmpeg, and FFprobe. Put
+`CMS_API_URL=https://cms.taggcreative.com` and the matching
+`CMS_PROCESSOR_TOKEN` in the repository `.env`, then test one queued item with:
+
+```bash
+npm run cms:processor -- --once
+```
+
+When that succeeds, `scripts/install-cms-helper.sh` installs the same processor
+as a background LaunchAgent. It resumes leased work, keeps partial local work
+through interruptions, clears completed temporary files, and reports errors to
+the Content Room. Each master upload also creates a desktop carousel rough cut
+and a set of downloadable scene clips. Editors can bring those clips into
+Resolve for intentional 9:16 reframing, then upload the finished mobile carousel
+video before approving the project for publishing. Projects that already have a
+master can create the same package from the Carousel screen with **Generate from
+existing master**; the generated cut remains a draft until **Use generated cut**
+is selected.

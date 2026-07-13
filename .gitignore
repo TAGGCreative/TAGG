@@ -4,6 +4,7 @@
 
 # dependencies
 /node_modules
+__pycache__/
 /.pnp
 .pnp.js
 
@@ -40,3 +41,6 @@ yarn-error.log*
 
 # resumable local video migration workspace
 /.media-work/
+/.cms-media-work/
+/.wrangler/
+/cms/.wrangler/

@@ -60,6 +60,7 @@ export default function OurRep() {
     <OurRepSection
       id="our-rep"
       header="our rep"
+      sectionStyle={{ marginBottom: "6vh" }}
       HeaderComponent={() => (
         <AnimatedHeader id="our-rep-header">
           <svg

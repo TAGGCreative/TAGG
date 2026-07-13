@@ -1,6 +1,25 @@
 import styled from "styled-components"
 import Image from "next/image"
 
+const splitBioIntoLines = (text, maxCharacters = 42) => {
+  const words = text.trim().split(/\s+/)
+  const lines = []
+  let line = ""
+
+  words.forEach((word) => {
+    const candidate = line ? `${line} ${word}` : word
+    if (line && candidate.length > maxCharacters) {
+      lines.push(line)
+      line = word
+    } else {
+      line = candidate
+    }
+  })
+
+  if (line) lines.push(line)
+  return lines
+}
+
 const Card = styled.div`
   display: flex;
   flex-direction: column;
@@ -73,21 +92,46 @@ const Card = styled.div`
     margin-bottom: 0;
   }
 
+  .bio-reveal {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 1.05s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .bio-reveal-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
   p {
-    opacity: 0;
+    margin: 0;
+    padding-top: 0.9em;
     background-color: transparent;
     color: var(--grey);
     font-family: Consolas;
     line-height: 25px;
     letter-spacing: 25;
-    transform: translateX(0.01em);
     max-width: 100%;
-    transition: all 0.35s ease;
   }
 
-  :hover {
-    p {
+  .bio-line {
+    display: block;
+    opacity: 0;
+    transform: translateY(-0.65em);
+    transition:
+      opacity 0.55s ease,
+      transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  &:hover {
+    .bio-reveal {
+      grid-template-rows: 1fr;
+    }
+
+    .bio-line {
       opacity: 1;
+      transform: translateY(0);
+      transition-delay: var(--bio-line-delay);
     }
 
     img {
@@ -105,8 +149,15 @@ const Card = styled.div`
   }
 
   @media screen and (max-width: 425px) {
-    p {
+    .bio-reveal {
+      grid-template-rows: 1fr;
+      transition: none;
+    }
+
+    .bio-line {
       opacity: 1;
+      transform: none;
+      transition: none;
     }
 
     img {
@@ -160,7 +211,24 @@ export default function RosterCard({
         </h3>
         {company && <h4 className="company">{company}</h4>}
         <h4>{role}</h4>
-        {bio && <p>{bio}</p>}
+        {bio && (
+          <div className="bio-reveal">
+            <div className="bio-reveal-inner">
+              <p>
+                {splitBioIntoLines(bio).map((line, index, lines) => (
+                  <span
+                    className="bio-line"
+                    key={`${index}-${line}`}
+                    style={{ "--bio-line-delay": `${120 + index * 85}ms` }}
+                  >
+                    {line}
+                    {index < lines.length - 1 ? " " : ""}
+                  </span>
+                ))}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </Card>
   )

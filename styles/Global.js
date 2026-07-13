@@ -97,6 +97,27 @@ export const GlobalStyle = createGlobalStyle`
     border: 0;
   }
 
+  .cms-preview-banner {
+    position: fixed;
+    z-index: 9999;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    padding: 9px 14px;
+    border: 1px solid var(--red);
+    border-radius: 999px;
+    background: rgba(13, 18, 25, 0.94);
+    color: var(--white);
+    font: 12px Consolas, monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .cms-preview-banner a { color: var(--red); }
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;

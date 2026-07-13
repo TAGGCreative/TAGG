@@ -578,6 +578,16 @@
       }
     }
   ],
+  "carouselOrder": [
+    "658838914",
+    "658838775",
+    "658838629",
+    "658838647",
+    "660724223",
+    "658838698",
+    "658838893"
+  ],
+  "carouselSettings": {},
   "carousels": {
     "desktop": [
       {
@@ -688,22 +698,6 @@
         "title": "The Gathering 2020",
         "poster": {
           "src": "/media/posters/571461779.jpg",
-          "width": 960,
-          "height": 540
-        }
-      },
-      {
-        "id": "658467177",
-        "projectId": "658838602",
-        "source": {
-          "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/658467177/master.m3u8",
-          "legacyVimeoId": "658467177"
-        },
-        "client": "Amazon AWS x Intel",
-        "title": "15 Year Anniversary",
-        "poster": {
-          "src": "/media/posters/658467177.jpg",
           "width": 960,
           "height": 540
         }
@@ -818,22 +812,6 @@
         "title": "The Gathering 2020",
         "poster": {
           "src": "/media/posters/629599782.jpg",
-          "width": 960,
-          "height": 540
-        }
-      },
-      {
-        "id": "658467122",
-        "projectId": "658838602",
-        "source": {
-          "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/658467122/master.m3u8",
-          "legacyVimeoId": "658467122"
-        },
-        "client": "Amazon AWS x Intel",
-        "title": "15 Year Anniversary",
-        "poster": {
-          "src": "/media/posters/658467122.jpg",
           "width": 960,
           "height": 540
         }

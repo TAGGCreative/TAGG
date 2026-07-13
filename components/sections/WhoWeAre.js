@@ -73,7 +73,7 @@ const Section = styled.section`
   }
 `
 
-const WhoWeAre = forwardRef((props, ref) => {
+const WhoWeAre = forwardRef(({ content }, ref) => {
   const { ref: refAnimation, inView } = useInView({
     threshold: 0.5,
     triggerOnce: true,
@@ -116,15 +116,19 @@ const WhoWeAre = forwardRef((props, ref) => {
 
       <div className="centerframe">
         <div className={inView ? "textpos appear" : "textpos hidden"}>
-          <PoppedHeader>A SOLUTION-FIRST NARRATIVE STUDIO</PoppedHeader>
+          <PoppedHeader>{content.eyebrow}</PoppedHeader>
           <p>
-            We're not here for branded navel-gazing. We're here to solve sh*t.
-            Story is the tool, not the trophy. We build narratives that do
-            work—raise capital, rally teams, distill complexities. No matter the
-            medium, format or deliverable;
-            <br />
-            <br />
-            We lead with solutions, arrive with story, and end in goosebumps.
+            {content.paragraphs.map((paragraph, index) => (
+              <span key={paragraph}>
+                {index > 0 && (
+                  <>
+                    <br />
+                    <br />
+                  </>
+                )}
+                {paragraph}
+              </span>
+            ))}
           </p>
         </div>
       </div>

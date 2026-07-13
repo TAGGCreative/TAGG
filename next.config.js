@@ -15,6 +15,13 @@ const nextConfig = {
   images: {
     formats: ["image/webp", "image/avif"],
     minimumCacheTTL: 86400,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "media.taggcreative.com",
+        pathname: "/**",
+      },
+    ],
   },
   async headers() {
     return [

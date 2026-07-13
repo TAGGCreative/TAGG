@@ -47,28 +47,25 @@ const CardStyles = styled.div`
   }
 `
 
-export default function ContactCard({ style }) {
+export default function ContactCard({ style, contact }) {
   return (
     <CardStyles style={style}>
-      <a href="mailto:info@taggcreative.com">
-        <PoppedHeader>info@taggcreative.com</PoppedHeader>
+      <a href={`mailto:${contact.email}`}>
+        <PoppedHeader>{contact.email}</PoppedHeader>
       </a>
-      <a
-        href="https://goo.gl/maps/YuozNgimFFpJ6Wdv5"
-        target="_blank"
-        rel="noreferrer"
-      >
+      <a href={contact.mapUrl} target="_blank" rel="noreferrer">
         <p>
-          128 W Pender St, Suite 1607
-          <br />
-          Vancouver, BC, Canada
-          <br />
-          V6B 1R8
+          {contact.addressLines.map((line, index) => (
+            <span key={line}>
+              {index > 0 && <br />}
+              {line}
+            </span>
+          ))}
         </p>
       </a>
       <div id="icons">
         <a
-          href="https://www.linkedin.com/company/tagg-creative-inc./about/"
+          href={contact.socials.linkedin}
           target="_blank"
           rel="noreferrer"
           aria-label="TAGG Creative on LinkedIn"
@@ -85,7 +82,7 @@ export default function ContactCard({ style }) {
           </svg>
         </a>
         <a
-          href="https://www.instagram.com/taggcreative/"
+          href={contact.socials.instagram}
           target="_blank"
           rel="noreferrer"
           aria-label="TAGG Creative on Instagram"
@@ -111,7 +108,7 @@ export default function ContactCard({ style }) {
           </svg>
         </a>
         <a
-          href="https://vimeo.com/taggcreative"
+          href={contact.socials.vimeo}
           target="_blank"
           rel="noreferrer"
           aria-label="TAGG Creative on Vimeo"

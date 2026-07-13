@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "sections": {
+    "whoWeAre": {
+      "eyebrow": "A SOLUTION-FIRST NARRATIVE STUDIO",
+      "paragraphs": [
+        "We're not here for branded navel-gazing. We're here to solve sh*t. Story is the tool, not the trophy. We build narratives that do work—raise capital, rally teams, distill complexities. No matter the medium, format or deliverable;",
+        "We lead with solutions, arrive with story, and end in goosebumps."
+      ]
+    },
+    "core": [
+      {
+        "heading": "PRETTY ISN'T THE POINT",
+        "paragraphs": [
+          "Nice shots are table stakes. Anyone can make something pretty. We make pretty mean something. No one cares what camera you used—if it got them out of bed on Monday."
+        ]
+      },
+      {
+        "heading": "LEAN, SMART, AND INDEPENDANT.",
+        "paragraphs": [
+          "No hand-holding. No game of telephone. No endless CC threads. Just give us the idea and let us run. We curate the right team—project by project, from the best talent around the world. High standards, low drama."
+        ]
+      },
+      {
+        "heading": "PARTNERS > CLIENTS",
+        "paragraphs": [
+          "Think same team, different office. Just because we aren't in the same place, doesn't mean we can't build a relationship like we are.",
+          "It's simple——when we have each other's back we'll make better content together.",
+          "We also expect an invite to your christmas party… Just kidding."
+        ]
+      }
+    ],
+    "ourArena": [
+      {
+        "heading": "DOCUMENTARY BY DESIGN",
+        "paragraphs": [
+          "We tell real stories. Docu-style. No actors. No scripts. No staged moments pretending to be something they’re not. We work with founders, teams, and companies with something to say—and say it in a way that actually lands. This isn’t content for content’s sake. It’s story with a day job."
+        ]
+      },
+      {
+        "heading": "EDITORIAL BY NATURE",
+        "paragraphs": [
+          "We’re editors first. Always have been. That means we see the end at the beginning. We think in structure, rhythm, timing—what actually works in the cut. So when we produce, we produce on purpose.",
+          "We also offer edit only services if that’s your jam."
+        ]
+      },
+      {
+        "heading": "CAMERAS OPTIONAL",
+        "paragraphs": [
+          "Not everything needs a camera crew. Some stories can be built without setting foot on set. With generative AI, stock footage, and archival gems, we can craft the story without ever rolling a frame. Just faster, leaner, and often, way more efficient.",
+          "We’ll miss crafty, though."
+        ]
+      },
+      {
+        "heading": "CREATIVE INCLUDED",
+        "paragraphs": [
+          "We don’t wait for the boards. We shape the creative from day one. Ideas, angles, formats, hooks. It’s all part of the work. We find the angle, craft the story, and build the thing from the ground up. Some folks think you need an agency to crack the concept.",
+          "We don’t."
+        ]
+      }
+    ]
+  },
+  "people": {
+    "leadership": [
+      {
+        "id": "troy-adam-gordon",
+        "given": "TROY ADAM",
+        "sur": "GORDON",
+        "role": "CEO, Executive Producer",
+        "head": "/images/leadership/Leadership_TroyAdamGordon -CEO.png",
+        "mask": "/images/leadership/Leadership_TroyAdamGordon -CEO copy.png",
+        "bio": "He has over 20K hours of production and post experience under his belt, accumulated over 20M  organic views on content he's produced, worked  with Grammy award winning artists, cult brands, and still unapologetically wastes countless hours watching cat videos."
+      },
+      {
+        "id": "zaqir-virani",
+        "given": "ZAQIR",
+        "sur": "VIRANI",
+        "role": "Strategic Advisor",
+        "head": "/images/leadership/Leadership_ZaqirVirani - Advisor.png",
+        "mask": "/images/leadership/Leadership_ZaqirVirani - Advisor copy.png",
+        "bio": "An executive leader in business development and growth strategy, Zaqir preaches narrative-driven engagement strategies and systems thinking. In his work as an advisor to TAGG Creative, Zaqir consults on all things growth—from sales strategies to messaging, and from tactical engagement to business development."
+      }
+    ],
+    "extended": [
+      {
+        "id": "baylee-sinner",
+        "given": "BAYLEE",
+        "sur": "SINNER",
+        "role": "Director / Producer",
+        "head": "/images/extended-fam/ExtendedFam_Baylee.png",
+        "mask": "/images/extended-fam/ExtendedFam_Baylee copy.png",
+        "bio": "A creative power house with a serious knack for documentary storytelling. No matter what she's working on—Baylee's bubbly charisma is ever present, resulting in serious laughs and big time grins. Oh, and she's now an Honorary Canadian after rocking that tuxedo."
+      },
+      {
+        "id": "jeff-zwicker",
+        "given": "JEFF",
+        "sur": "ZWICKER",
+        "role": "Cinematographer",
+        "head": "/images/extended-fam/ExtendedFam_JeffZwicker-DirectorOfPhotography.png",
+        "mask": "/images/extended-fam/ExtendedFam_JeffZwicker-DirectorOfPhotography copy.png",
+        "bio": "Put him in any room, any location, under any amount of pressure, and this man will light it beautifully. He's also got a mean Jiu Jitsu take down."
+      },
+      {
+        "id": "hein-hamers",
+        "given": "HEIN",
+        "sur": "HAMERS",
+        "role": "Visual Artist",
+        "head": "/images/extended-fam/TAGG-WEB-TeamPhotos-Pink-Hein-.png",
+        "mask": "/images/extended-fam/TAGG-WEB-TeamPhotos-Pink-Hein-copy.png",
+        "bio": "It's not everyday that you meet a professional who perfectly blends technical prowess and unbridled creativity, but Hein is certainly one of them. He's Multi-disciplined, inventive, cerebral, but most importantly; he  takes our ideas, places them beautifully in the VFX realm and pushes them beyond our imagination."
+      }
+    ]
+  },
+  "contact": {
+    "email": "info@taggcreative.com",
+    "addressLines": [
+      "128 W Pender St, Suite 1607",
+      "Vancouver, BC, Canada",
+      "V6B 1R8"
+    ],
+    "mapUrl": "https://goo.gl/maps/YuozNgimFFpJ6Wdv5",
+    "socials": {
+      "linkedin": "https://www.linkedin.com/company/tagg-creative-inc./about/",
+      "instagram": "https://www.instagram.com/taggcreative/",
+      "vimeo": "https://vimeo.com/taggcreative"
+    }
+  }
+}

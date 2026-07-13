@@ -14,7 +14,7 @@ const ContactSection = styled(HomeSection)`
   }
 `
 
-const Contact = forwardRef((props, ref) => {
+const Contact = forwardRef(({ contact }, ref) => {
   return (
     <ContactSection
       id="contact"
@@ -80,7 +80,7 @@ const Contact = forwardRef((props, ref) => {
         </AnimatedHeader>
       )}
     >
-      <ContactCard />
+      <ContactCard contact={contact} />
     </ContactSection>
   )
 })

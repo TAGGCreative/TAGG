@@ -1,15 +1,11 @@
 import { useEffect } from "react"
 import { useRouter } from "next/router"
 import WorkPage from "../../components/WorkPage"
-import {
-  getCloudflareCustomerCode,
-  getWork,
-  getWorks,
-} from "../../lib/mediaCatalog"
+import { getFallbackSiteContent, getPublishedWork } from "../../lib/siteContent"
 
 // because this is a dynamic route, get all possible routes at build
 export async function getStaticPaths() {
-  const videolist = getWorks()
+  const videolist = getFallbackSiteContent().media.works
 
   const paths = videolist.map((video) => {
     return {
@@ -25,20 +21,29 @@ export async function getStaticPaths() {
   }
 }
 
-export async function getStaticProps({ params }) {
+export async function getStaticProps({
+  params,
+  preview = false,
+  previewData = {},
+}) {
   const { videoId } = params
-  const work = getWork(videoId)
+  const { content, work } = await getPublishedWork(videoId, {
+    previewToken: preview ? previewData?.token : undefined,
+  })
 
-  if (!work) {
+  if (!work || work.visible === false) {
     return { notFound: true }
   }
 
   return {
     props: {
-      videos: getWorks(),
+      videos: content.media.works.filter(
+        (project) => project.visible !== false,
+      ),
       videoId,
-      cloudflareCustomerCode: getCloudflareCustomerCode(),
+      cloudflareCustomerCode: content.media.cloudflare?.customerCode || "",
     },
+    revalidate: preview ? 1 : 60,
   }
 }
 

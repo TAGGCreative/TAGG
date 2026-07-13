@@ -1,8 +1,8 @@
 import { forwardRef } from "react"
-import { useRouter } from "next/router"
 import styled from "styled-components"
 
 import WorkThumb from "../WorkThumb"
+import VideoModal, { useVideoModal } from "../VideoModal"
 import PoppedHeader from "../PoppedHeader"
 import HomeSection from "./HomeSection"
 import { StaggerBox } from "../elements/StaggerBox"
@@ -22,10 +22,15 @@ const Work = styled.div`
     margin: 0;
     margin-top: 1em;
     font-size: 1.3em;
+    transition: text-shadow 0.2s ease-in-out;
   }
 
   & p {
     margin: 0;
+  }
+
+  &:hover h2 {
+    text-shadow: -0.1em 0.1em var(--red);
   }
 
   @media screen and (max-width: 425px) {
@@ -49,24 +54,56 @@ const WorksSection = styled(HomeSection)`
   }
 `
 
+const openWork = (event, video, openProject) => {
+  if (
+    event.defaultPrevented ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  )
+    return
+
+  event.preventDefault()
+  openProject(video, event)
+}
+
+const WorksGrid = ({ videoList }) => {
+  const openProject = useVideoModal()
+
+  return (
+    <WorksBox>
+      {videoList.map((video) => {
+        const href = `/works/${video.id}`
+        return (
+          <a
+            href={href}
+            key={video.id}
+            onClick={(event) => openWork(event, video, openProject)}
+            aria-haspopup="dialog"
+          >
+            <Work>
+              <div data-modal-thumbnail data-modal-thumbnail-anchor>
+                <WorkThumb
+                  poster={video.poster}
+                  preview={video.preview}
+                  alt={`${video.client} — ${video.title}`}
+                />
+              </div>
+              <PoppedHeader className="works-client" noShadow>
+                {video.client}
+              </PoppedHeader>
+              <p>{video.title}</p>
+            </Work>
+          </a>
+        )
+      })}
+    </WorksBox>
+  )
+}
+
 const Works = forwardRef(({ videoList }, ref) => {
-  const router = useRouter()
-
-  const navigateToWork = (event, href) => {
-    if (
-      event.defaultPrevented ||
-      event.button !== 0 ||
-      event.metaKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.altKey
-    )
-      return
-
-    event.preventDefault()
-    router.push(href)
-  }
-
   return (
     <WorksSection
       id="works"
@@ -120,30 +157,9 @@ const Works = forwardRef(({ videoList }, ref) => {
         </AnimatedHeader>
       )}
     >
-      <WorksBox>
-        {videoList.map((video) => {
-          const href = `/works/${video.id}`
-          return (
-            <a
-              href={href}
-              key={video.id}
-              onClick={(event) => navigateToWork(event, href)}
-            >
-              <Work>
-                <WorkThumb
-                  poster={video.poster}
-                  preview={video.preview}
-                  alt={`${video.client} — ${video.title}`}
-                />
-                <PoppedHeader className="works-client" noShadow>
-                  {video.client}
-                </PoppedHeader>
-                <p>{video.title}</p>
-              </Work>
-            </a>
-          )
-        })}
-      </WorksBox>
+      <VideoModal>
+        <WorksGrid videoList={videoList} />
+      </VideoModal>
     </WorksSection>
   )
 })

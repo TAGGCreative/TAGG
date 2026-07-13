@@ -12,26 +12,7 @@ const PeopleStaggerBox = styled(StaggerBox)`
   }
 `
 
-const leadership = [
-  {
-    given: "TROY ADAM",
-    sur: "GORDON",
-    role: "CEO, Executive Producer",
-    head: "/images/leadership/Leadership_TroyAdamGordon -CEO.png",
-    mask: "/images/leadership/Leadership_TroyAdamGordon -CEO copy.png",
-    bio: "He has over 20K hours of production and post experience under his belt, accumulated over 20M  organic views on content he's produced, worked  with Grammy award winning artists, cult brands, and still unapologetically wastes countless hours watching cat videos.",
-  },
-  {
-    given: "ZAQIR",
-    sur: "VIRANI",
-    role: "Strategic Advisor",
-    head: "/images/leadership/Leadership_ZaqirVirani - Advisor.png",
-    mask: "/images/leadership/Leadership_ZaqirVirani - Advisor copy.png",
-    bio: "An executive leader in business development and growth strategy, Zaqir preaches narrative-driven engagement strategies and systems thinking. In his work as an advisor to TAGG Creative, Zaqir consults on all things growth—from sales strategies to messaging, and from tactical engagement to business development.",
-  },
-]
-
-export default function People() {
+export default function People({ people }) {
   return (
     <HomeSection
       id="people"
@@ -90,7 +71,7 @@ export default function People() {
       )}
     >
       <PeopleStaggerBox>
-        {leadership.map(({ given, sur, role, bio, head, mask }, i) => (
+        {people.map(({ id, given, sur, role, bio, head, mask }) => (
           <RosterCard
             given={given}
             sur={sur}
@@ -98,7 +79,7 @@ export default function People() {
             bio={bio}
             head={head}
             mask={mask}
-            key={i}
+            key={id}
           />
         ))}
       </PeopleStaggerBox>
