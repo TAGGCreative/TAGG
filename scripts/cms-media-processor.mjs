@@ -11,6 +11,7 @@ import {
   stat,
   writeFile,
 } from "node:fs/promises"
+import { availableParallelism } from "node:os"
 import path from "node:path"
 import { pipeline } from "node:stream/promises"
 
@@ -155,16 +156,20 @@ async function probe(source) {
   const output = await capture("ffprobe", [
     "-v",
     "error",
-    "-select_streams",
-    "v:0",
     "-show_entries",
-    "stream=width,height:format=duration",
+    "stream=codec_type,codec_name,width,height:format=duration",
     "-of",
     "json",
     source,
   ])
   const data = JSON.parse(output)
-  return { ...data.streams[0], duration: Number(data.format.duration || 0) }
+  const video = data.streams.find((stream) => stream.codec_type === "video")
+  const audio = data.streams.find((stream) => stream.codec_type === "audio")
+  return {
+    ...video,
+    audioCodec: audio?.codec_name || null,
+    duration: Number(data.format.duration || 0),
+  }
 }
 
 function percentile(values, ratio) {
@@ -175,7 +180,7 @@ function percentile(values, ratio) {
   ]
 }
 
-async function analyzeVisualTimeline(source) {
+async function analyzeVisualTimeline(source, sampleFps = 6) {
   return new Promise((resolve) => {
     const child = spawn(
       "ffmpeg",
@@ -187,7 +192,7 @@ async function analyzeVisualTimeline(source) {
         source,
         "-an",
         "-vf",
-        "fps=6,scale=320:-2:flags=fast_bilinear,signalstats,metadata=print:key=lavfi.signalstats.YDIF,metadata=print:key=lavfi.signalstats.SATAVG,scdet=threshold=0,metadata=print:key=lavfi.scd.score,entropy,metadata=print:key=lavfi.entropy.normalized_entropy.normal.Y",
+        `fps=${sampleFps},scale=320:-2:flags=fast_bilinear,signalstats,metadata=print:key=lavfi.signalstats.YDIF,metadata=print:key=lavfi.signalstats.SATAVG,scdet=threshold=0,metadata=print:key=lavfi.scd.score,entropy,metadata=print:key=lavfi.entropy.normalized_entropy.normal.Y`,
         "-f",
         "null",
         "-",
@@ -234,7 +239,7 @@ async function analyzeVisualTimeline(source) {
   })
 }
 
-async function analyzeTextTimeline(source) {
+async function analyzeTextTimeline(source, sampleFps = 1) {
   return new Promise((resolve) => {
     const child = spawn(
       "ffmpeg",
@@ -246,7 +251,7 @@ async function analyzeTextTimeline(source) {
         source,
         "-an",
         "-vf",
-        "fps=1,scale=480:-2:flags=fast_bilinear,ocr,metadata=print:key=lavfi.ocr.text",
+        `fps=${sampleFps},scale=480:-2:flags=fast_bilinear,ocr,metadata=print:key=lavfi.ocr.text`,
         "-f",
         "null",
         "-",
@@ -289,7 +294,9 @@ async function detectSceneTimes(source, duration, timeline = []) {
         source,
         "-an",
         "-vf",
-        "select='gt(scene,0.16)',showinfo",
+        duration > 300
+          ? "fps=8,scale=480:-2:flags=fast_bilinear,select='gt(scene,0.13)',showinfo"
+          : "select='gt(scene,0.16)',showinfo",
         "-f",
         "null",
         "-",
@@ -523,9 +530,10 @@ async function createAutoHighlight(
   )
   if (await exists(selectionFile))
     return JSON.parse(await readFile(selectionFile, "utf8"))
+  const longVideo = dimensions.duration > 300
   const [timeline, textTimeline] = await Promise.all([
-    analyzeVisualTimeline(source),
-    analyzeTextTimeline(source),
+    analyzeVisualTimeline(source, longVideo ? 2 : 6),
+    analyzeTextTimeline(source, longVideo ? 0.25 : 1),
   ])
   await onProgress(14)
   const scenes = await detectSceneTimes(
@@ -616,18 +624,78 @@ async function createCarouselClips(source, directory, segments) {
   return files
 }
 
-async function encodeHls(source, output, dimensions) {
+async function encodeHls(
+  source,
+  output,
+  dimensions,
+  onProfileComplete = async () => {},
+) {
   const portrait = dimensions.width < dimensions.height
   const sourceLimit = portrait ? dimensions.width : dimensions.height
-  const selected = profiles.filter((profile) => profile.height <= sourceLimit)
+  let selected = profiles.filter((profile) => profile.height <= sourceLimit)
   if (!selected.length) selected.push(profiles.at(-1))
-  for (const profile of selected) {
+  if (dimensions.duration > 300 && selected.length > 3)
+    selected = [selected[0], selected.at(-1)]
+  const selectedDirectories = new Set(
+    selected.map((profile) => `${profile.height}p`),
+  )
+  await Promise.all(
+    profiles
+      .map((profile) => `${profile.height}p`)
+      .filter((directory) => !selectedDirectories.has(directory))
+      .map((directory) =>
+        rm(path.join(output, directory), { recursive: true, force: true }),
+      ),
+  )
+  const canRemuxSource =
+    dimensions.codec_name === "h264" && selected[0].height === sourceLimit
+  const encodeCount = selected.length - (canRemuxSource ? 1 : 0)
+  const threadsPerEncode = Math.max(
+    2,
+    Math.floor(availableParallelism() / Math.max(1, encodeCount)),
+  )
+  let completedProfiles = 0
+
+  await Promise.all(selected.map(async (profile, index) => {
     const directory = path.join(output, `${profile.height}p`)
     const marker = path.join(directory, ".complete")
-    if (await exists(marker)) continue
+    if (await exists(marker)) {
+      completedProfiles += 1
+      await onProfileComplete(completedProfiles, selected.length)
+      return
+    }
     await rm(directory, { recursive: true, force: true })
     await mkdir(directory, { recursive: true })
     const targetPrimary = Math.min(profile.height, sourceLimit)
+    const remux = canRemuxSource && index === 0
+    const videoOptions = remux
+      ? ["-c:v", "copy"]
+      : [
+          "-vf",
+          portrait
+            ? `scale=${targetPrimary}:-2:flags=lanczos`
+            : `scale=-2:${targetPrimary}:flags=lanczos`,
+          "-c:v",
+          "libx264",
+          "-preset",
+          "veryfast",
+          "-crf",
+          "20",
+          "-threads",
+          String(threadsPerEncode),
+          "-maxrate",
+          profile.bitrate,
+          "-bufsize",
+          profile.buffer,
+          "-pix_fmt",
+          "yuv420p",
+          "-profile:v",
+          "high",
+          "-force_key_frames",
+          "expr:gte(t,n_forced*2)",
+          "-sc_threshold",
+          "0",
+        ]
     await run("ffmpeg", [
       "-hide_banner",
       "-loglevel",
@@ -639,32 +707,10 @@ async function encodeHls(source, output, dimensions) {
       "0:v:0",
       "-map",
       "0:a:0?",
-      "-vf",
-      portrait
-        ? `scale=${targetPrimary}:-2:flags=lanczos`
-        : `scale=-2:${targetPrimary}:flags=lanczos`,
-      "-c:v",
-      "libx264",
-      "-preset",
-      "medium",
-      "-crf",
-      "18",
-      "-maxrate",
-      profile.bitrate,
-      "-bufsize",
-      profile.buffer,
-      "-pix_fmt",
-      "yuv420p",
-      "-profile:v",
-      "high",
-      "-force_key_frames",
-      "expr:gte(t,n_forced*2)",
-      "-sc_threshold",
-      "0",
+      ...videoOptions,
       "-c:a",
-      "aac",
-      "-b:a",
-      "128k",
+      dimensions.audioCodec === "aac" ? "copy" : "aac",
+      ...(dimensions.audioCodec === "aac" ? [] : ["-b:a", "128k"]),
       "-f",
       "hls",
       "-hls_time",
@@ -682,7 +728,9 @@ async function encodeHls(source, output, dimensions) {
       path.join(directory, "index.m3u8"),
     ])
     await writeFile(marker, "")
-  }
+    completedProfiles += 1
+    await onProfileComplete(completedProfiles, selected.length)
+  }))
   const aspect = dimensions.width / dimensions.height
   const master = ["#EXTM3U", "#EXT-X-VERSION:7"]
   for (const profile of selected) {
@@ -823,7 +871,7 @@ async function uploadFile(job, file, key) {
 
 async function uploadOutputs(job, output) {
   const files = await walk(output)
-  const concurrency = 4
+  const concurrency = Math.min(12, Math.max(4, availableParallelism()))
   for (let offset = 0; offset < files.length; offset += concurrency) {
     await Promise.all(
       files.slice(offset, offset + concurrency).map((file) => {
@@ -877,9 +925,27 @@ async function processJob(job) {
       method: "POST",
       body: JSON.stringify({ progress: 38 }),
     })
-    await encodeHls(roughcut, output, await probe(roughcut))
+    await encodeHls(
+      roughcut,
+      output,
+      await probe(roughcut),
+      async (completed, total) =>
+        api(`/api/processor/jobs/${job.id}/progress`, {
+          method: "POST",
+          body: JSON.stringify({
+            progress: 38 + Math.round((completed / total) * 12),
+          }),
+        }),
+    )
   } else {
-    await encodeHls(source, output, dimensions)
+    await encodeHls(source, output, dimensions, async (completed, total) =>
+      api(`/api/processor/jobs/${job.id}/progress`, {
+        method: "POST",
+        body: JSON.stringify({
+          progress: 8 + Math.round((completed / total) * 44),
+        }),
+      }),
+    )
   }
   await api(`/api/processor/jobs/${job.id}/progress`, {
     method: "POST",
@@ -888,7 +954,18 @@ async function processJob(job) {
   if (job.asset_role === "main") {
     await createProjectDerivatives(source, output, dimensions)
     const roughcut = path.join(output, "carousel-roughcut.mp4")
-    const segments = await createAutoHighlight(source, roughcut, dimensions)
+    const segments = await createAutoHighlight(
+      source,
+      roughcut,
+      dimensions,
+      async (stage) =>
+        api(`/api/processor/jobs/${job.id}/progress`, {
+          method: "POST",
+          body: JSON.stringify({
+            progress: 52 + Math.round((stage / 30) * 8),
+          }),
+        }),
+    )
     carouselClipFiles = await createCarouselClips(
       source,
       path.join(output, "carousel-clips"),

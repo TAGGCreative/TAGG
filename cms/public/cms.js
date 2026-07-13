@@ -141,10 +141,16 @@ function jobFor(projectId, role) {
 
 function statusLabel(job, ready) {
   if (!job) return ready ? ["ready", "Ready"] : ["", "Drop file"]
+  const macIsBusy = state.jobs.some(
+    (candidate) => candidate.id !== job.id && candidate.status === "processing",
+  )
   return (
     {
       uploading: ["uploading", "Uploading"],
-      waiting: ["waiting", "Waiting for TAGG Mac"],
+      waiting: [
+        "waiting",
+        macIsBusy ? "Queued · TAGG Mac is busy" : "Queued for TAGG Mac",
+      ],
       processing: ["processing", "Processing"],
       ready: ["ready", "Ready"],
       error: ["error", "Needs attention"],

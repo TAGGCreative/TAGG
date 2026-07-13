@@ -715,7 +715,7 @@ async function nextProcessorJob(request, env) {
   const timestamp = now()
   const expired = timestamp
   const job = await env.DB.prepare(
-    "SELECT * FROM processing_jobs WHERE status = 'waiting' OR (status = 'processing' AND lease_until < ?) ORDER BY created_at LIMIT 1",
+    "SELECT * FROM processing_jobs WHERE status = 'waiting' OR (status = 'processing' AND lease_until < ?) ORDER BY CASE asset_role WHEN 'main' THEN 0 WHEN 'heroDesktop' THEN 1 WHEN 'heroMobile' THEN 1 ELSE 2 END, created_at LIMIT 1",
   )
     .bind(expired)
     .first()
@@ -956,6 +956,20 @@ async function routeApi(request, env, email) {
     )
   const retryMatch = path.match(/^\/api\/jobs\/([^/]+)\/retry$/)
   if (retryMatch && request.method === "POST") {
+    const job = await env.DB.prepare(
+      "SELECT object_key FROM processing_jobs WHERE id = ? AND status = 'error'",
+    )
+      .bind(retryMatch[1])
+      .first()
+    if (!job) return json({ error: "Processing job not found." }, 404)
+    if (
+      !String(job.object_key).startsWith("external:") &&
+      !(await env.MEDIA.head(job.object_key))
+    )
+      return json(
+        { error: "The original upload is missing. Choose the file again." },
+        409,
+      )
     await env.DB.prepare(
       "UPDATE processing_jobs SET status = 'waiting', error = NULL, progress = 0, lease_until = NULL, updated_at = ? WHERE id = ? AND status = 'error'",
     )
