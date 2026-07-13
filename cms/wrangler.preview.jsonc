@@ -1,0 +1,45 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "tagg-cms-preview",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-07-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "alias": {
+    "@aws-sdk/xml-builder": "./aws-xml-builder.mjs",
+  },
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./public",
+    "not_found_handling": "single-page-application",
+  },
+  "routes": [
+    {
+      "pattern": "cms-preview.taggcreative.com",
+      "custom_domain": true,
+    },
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tagg-cms-preview",
+      "database_id": "75b5ca93-a450-4f5e-88f6-84752787f748",
+      "migrations_dir": "./migrations",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "tagg-media",
+    },
+  ],
+  "vars": {
+    "ENVIRONMENT": "preview",
+    "CMS_STORAGE_PREFIX": "cms-preview",
+    "R2_BUCKET_NAME": "tagg-media",
+    "R2_PUBLIC_BASE_URL": "https://media.taggcreative.com",
+    "PUBLIC_SITE_URL": "https://tagg-git-codex-cms-vercel-preview-tagg-creatives-projects.vercel.app",
+    "ALLOWED_EDITOR_EMAILS": "troy@taggcreative.com",
+    "PREVIEW_SECRET": "tagg-cms-preview-bridge-v1",
+    "REVALIDATE_SECRET": "tagg-cms-preview-bridge-v1",
+  },
+}

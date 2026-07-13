@@ -22,13 +22,34 @@ const escapeHtml = (value = "") =>
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
 
+const previewAccess =
+  location.hostname.endsWith(".workers.dev") ||
+  location.hostname === "cms-preview.taggcreative.com"
+
+function previewAccessToken() {
+  if (!previewAccess) return ""
+  let token = sessionStorage.getItem("tagg-preview-access") || ""
+  if (!token) {
+    token = prompt("Enter the TAGG preview access code")?.trim() || ""
+    if (token) sessionStorage.setItem("tagg-preview-access", token)
+  }
+  return token
+}
+
 async function api(path, options = {}) {
+  const previewToken = previewAccessToken()
   const response = await fetch(path, {
     ...options,
-    headers: { "content-type": "application/json", ...(options.headers || {}) },
+    headers: {
+      "content-type": "application/json",
+      ...(previewToken ? { "x-tagg-preview-token": previewToken } : {}),
+      ...(options.headers || {}),
+    },
   })
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
+    if (response.status === 403 && previewAccess)
+      sessionStorage.removeItem("tagg-preview-access")
     const message =
       [data.error, ...(data.errors || [])].filter(Boolean).join(" ") ||
       `Request failed (${response.status})`

@@ -34,6 +34,12 @@ function now() {
   return new Date().toISOString()
 }
 
+function cmsKey(env, path) {
+  const prefix = String(env.CMS_STORAGE_PREFIX || "cms")
+    .replace(/^\/+|\/+$/g, "")
+  return `${prefix}/${String(path).replace(/^\/+/, "")}`
+}
+
 function initialContent() {
   const content = {
     version: 1,
@@ -97,6 +103,12 @@ function allowedEmail(request, env) {
   ) {
     return "local-editor@taggcreative.com"
   }
+  if (
+    env.ENVIRONMENT === "preview" &&
+    env.PREVIEW_EDITOR_TOKEN &&
+    request.headers.get("x-tagg-preview-token") === env.PREVIEW_EDITOR_TOKEN
+  )
+    return "preview-editor@taggcreative.com"
   const email = request.headers
     .get("cf-access-authenticated-user-email")
     ?.trim()
@@ -153,7 +165,7 @@ async function ensureSeed(env, email) {
       "INSERT INTO revisions (id, content_json, label, created_at, created_by, is_published) VALUES (?, ?, ?, ?, ?, 1)",
     ).bind(revisionId, content, "Imported current site", timestamp, email),
   ])
-  await env.MEDIA.put("cms/published/current.json", content, {
+  await env.MEDIA.put(cmsKey(env, "published/current.json"), content, {
     httpMetadata: {
       contentType: "application/json",
       cacheControl: "public, max-age=60",
@@ -357,7 +369,7 @@ async function createPreview(env) {
   const draft = await readDocument(env, "draft")
   const token = crypto.randomUUID()
   await env.MEDIA.put(
-    `cms/previews/${token}.json`,
+    cmsKey(env, `previews/${token}.json`),
     JSON.stringify(draft.content),
     {
       customMetadata: {
@@ -391,14 +403,14 @@ async function publish(env, email) {
   const revisionId = crypto.randomUUID()
   draft.content.updatedAt = timestamp
   const serialized = JSON.stringify(draft.content)
-  const versionKey = `cms/published/revisions/${revisionId}.json`
+  const versionKey = cmsKey(env, `published/revisions/${revisionId}.json`)
   await env.MEDIA.put(versionKey, serialized, {
     httpMetadata: {
       contentType: "application/json",
       cacheControl: "public, max-age=31536000, immutable",
     },
   })
-  await env.MEDIA.put("cms/published/current.json", serialized, {
+  await env.MEDIA.put(cmsKey(env, "published/current.json"), serialized, {
     httpMetadata: {
       contentType: "application/json",
       cacheControl: "public, max-age=60",
@@ -569,7 +581,10 @@ async function startUpload(request, env, email) {
   const projectId = String(input.projectId || "").trim()
   if (!projectId)
     return json({ error: "Save the project before uploading media." }, 400)
-  const key = `cms/originals/${projectId}/${role}/${jobId}-${safeName(input.fileName)}`
+  const key = cmsKey(
+    env,
+    `originals/${projectId}/${role}/${jobId}-${safeName(input.fileName)}`,
+  )
   const created = await env.MEDIA.createMultipartUpload(key, {
     httpMetadata: { contentType: mimeType },
     customMetadata: { projectId, role, jobId },
