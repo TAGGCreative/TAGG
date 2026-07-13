@@ -2,7 +2,15 @@ import "dotenv/config"
 
 import { spawn } from "node:child_process"
 import { createReadStream } from "node:fs"
-import { access, mkdir, readdir, rm, stat, writeFile } from "node:fs/promises"
+import {
+  access,
+  mkdir,
+  readFile,
+  readdir,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises"
 import path from "node:path"
 import { pipeline } from "node:stream/promises"
 
@@ -159,7 +167,118 @@ async function probe(source) {
   return { ...data.streams[0], duration: Number(data.format.duration || 0) }
 }
 
-async function detectSceneTimes(source, duration) {
+function percentile(values, ratio) {
+  if (!values.length) return 0
+  const sorted = [...values].sort((a, b) => a - b)
+  return sorted[
+    Math.max(0, Math.min(sorted.length - 1, Math.round((sorted.length - 1) * ratio)))
+  ]
+}
+
+async function analyzeVisualTimeline(source) {
+  return new Promise((resolve) => {
+    const child = spawn(
+      "ffmpeg",
+      [
+        "-hide_banner",
+        "-loglevel",
+        "info",
+        "-i",
+        source,
+        "-an",
+        "-vf",
+        "fps=6,scale=320:-2:flags=fast_bilinear,signalstats,metadata=print:key=lavfi.signalstats.YDIF,metadata=print:key=lavfi.signalstats.SATAVG,scdet=threshold=0,metadata=print:key=lavfi.scd.score,entropy,metadata=print:key=lavfi.entropy.normalized_entropy.normal.Y",
+        "-f",
+        "null",
+        "-",
+      ],
+      { stdio: ["ignore", "ignore", "pipe"] },
+    )
+    let output = ""
+    child.stderr.on("data", (chunk) => {
+      output += chunk
+      if (output.length > 8_000_000) output = output.slice(-8_000_000)
+    })
+    child.on("error", () => resolve([]))
+    child.on("exit", () => {
+      const samples = new Map()
+      let currentTime = null
+      for (const line of output.split("\n")) {
+        const timeMatch = line.match(/frame:\d+.*pts_time:([0-9.]+)/)
+        if (timeMatch) currentTime = Number(timeMatch[1])
+        if (!Number.isFinite(currentTime)) continue
+        const key = currentTime.toFixed(3)
+        const sample = samples.get(key) || {
+          time: currentTime,
+          motion: 0,
+          saturation: 0,
+          detail: 0,
+          cutScore: 0,
+        }
+        const motionMatch = line.match(/lavfi\.signalstats\.YDIF=([0-9.]+)/)
+        if (motionMatch) sample.motion = Number(motionMatch[1])
+        const saturationMatch = line.match(
+          /lavfi\.signalstats\.SATAVG=([0-9.]+)/,
+        )
+        if (saturationMatch) sample.saturation = Number(saturationMatch[1])
+        const cutMatch = line.match(/lavfi\.scd\.score=([0-9.]+)/)
+        if (cutMatch) sample.cutScore = Number(cutMatch[1])
+        const detailMatch = line.match(
+          /lavfi\.entropy\.normalized_entropy\.normal\.Y=([0-9.]+)/,
+        )
+        if (detailMatch) sample.detail = Number(detailMatch[1])
+        samples.set(key, sample)
+      }
+      resolve([...samples.values()].sort((a, b) => a.time - b.time))
+    })
+  })
+}
+
+async function analyzeTextTimeline(source) {
+  return new Promise((resolve) => {
+    const child = spawn(
+      "ffmpeg",
+      [
+        "-hide_banner",
+        "-loglevel",
+        "info",
+        "-i",
+        source,
+        "-an",
+        "-vf",
+        "fps=1,scale=480:-2:flags=fast_bilinear,ocr,metadata=print:key=lavfi.ocr.text",
+        "-f",
+        "null",
+        "-",
+      ],
+      { stdio: ["ignore", "ignore", "pipe"] },
+    )
+    let output = ""
+    child.stderr.on("data", (chunk) => {
+      output += chunk
+      if (output.length > 2_000_000) output = output.slice(-2_000_000)
+    })
+    child.on("error", () => resolve([]))
+    child.on("exit", () => {
+      const samples = []
+      let currentTime = null
+      for (const line of output.split("\n")) {
+        const timeMatch = line.match(/frame:\d+.*pts_time:([0-9.]+)/)
+        if (timeMatch) currentTime = Number(timeMatch[1])
+        const textMatch = line.match(/lavfi\.ocr\.text=(.*)$/)
+        if (!textMatch || !Number.isFinite(currentTime)) continue
+        const words = textMatch[1].match(/[A-Za-z]{4,}/g) || []
+        samples.push({
+          time: currentTime,
+          textScore: words.reduce((sum, word) => sum + word.length, 0),
+        })
+      }
+      resolve(samples)
+    })
+  })
+}
+
+async function detectSceneTimes(source, duration, timeline = []) {
   if (duration <= 16) return [0]
   return new Promise((resolve) => {
     const child = spawn(
@@ -170,7 +289,7 @@ async function detectSceneTimes(source, duration) {
         source,
         "-an",
         "-vf",
-        "select='gt(scene,0.30)',showinfo",
+        "select='gt(scene,0.16)',showinfo",
         "-f",
         "null",
         "-",
@@ -189,51 +308,239 @@ async function detectSceneTimes(source, duration) {
         const value = Number(match[1])
         if (
           Number.isFinite(value) &&
-          value > 0.35 &&
-          value < duration - 0.7 &&
-          value - times.at(-1) > 0.65
+          value > 0.25 &&
+          value < duration - 0.35 &&
+          value - times.at(-1) > 0.24
         )
           times.push(value)
       }
-      resolve(times)
+      for (let index = 1; index < timeline.length - 1; index += 1) {
+        const sample = timeline[index]
+        if (
+          sample.cutScore >= 3.2 &&
+          sample.cutScore >= timeline[index - 1].cutScore * 1.35 &&
+          sample.cutScore >= timeline[index + 1].cutScore * 1.35 &&
+          sample.time > 0.25 &&
+          sample.time < duration - 0.35
+        )
+          times.push(sample.time)
+      }
+      const merged = [...new Set(times.map((time) => Number(time.toFixed(3))))]
+        .sort((a, b) => a - b)
+        .filter(
+          (time, index, values) =>
+            index === 0 || time - values[index - 1] > 0.22,
+        )
+      resolve(merged)
     })
   })
 }
 
-function chooseHighlightSegments(sceneTimes, duration) {
+function chooseHighlightSegments(
+  sceneTimes,
+  duration,
+  timeline = [],
+  textTimeline = [],
+) {
   if (duration <= 15) return [{ start: 0, duration }]
-  const segmentDuration = 1.55
-  const desired = Math.min(9, Math.max(5, Math.floor(duration / 6)))
-  const candidates = sceneTimes
-    .filter((time) => time > 0.75)
-    .map((time) =>
-      Math.min(Math.max(0, time + 0.18), duration - segmentDuration),
-    )
+  const desired = Math.min(9, Math.max(5, Math.floor(duration / 7)))
+  const boundaries = [
+    0,
+    ...sceneTimes.filter((time) => time > 0.01 && time < duration - 0.01),
+    duration,
+  ]
+    .sort((a, b) => a - b)
     .filter(
-      (time, index, values) => index === 0 || time - values[index - 1] > 0.7,
+      (time, index, values) => index === 0 || time - values[index - 1] > 0.22,
     )
-  if (candidates.length < desired) {
-    for (let index = 0; index < desired * 2; index += 1) {
-      const time =
-        ((index + 0.65) / (desired * 2)) * (duration - segmentDuration)
-      if (candidates.every((candidate) => Math.abs(candidate - time) > 1.25))
-        candidates.push(time)
+  const motionValues = timeline
+    .map((sample) => sample.motion)
+    .filter(Number.isFinite)
+  const motionFloor = percentile(motionValues, 0.25)
+  const motionPeak = Math.max(
+    motionFloor + 0.01,
+    percentile(motionValues, 0.9),
+  )
+  const saturationValues = timeline
+    .map((sample) => sample.saturation)
+    .filter(Number.isFinite)
+  const saturationFloor = percentile(saturationValues, 0.2)
+  const saturationPeak = Math.max(
+    saturationFloor + 0.01,
+    percentile(saturationValues, 0.85),
+  )
+  const detailValues = timeline
+    .map((sample) => sample.detail)
+    .filter(Number.isFinite)
+  const detailFloor = percentile(detailValues, 0.2)
+  const detailPeak = Math.max(
+    detailFloor + 0.001,
+    percentile(detailValues, 0.85),
+  )
+  const candidates = []
+
+  for (let index = 0; index < boundaries.length - 1; index += 1) {
+    const shotStart = boundaries[index]
+    const shotEnd = boundaries[index + 1]
+    const shotDuration = shotEnd - shotStart
+    const clipDuration = Math.min(1.4, shotDuration - 0.2)
+    if (clipDuration < 0.72) continue
+    const earliest = shotStart + 0.1
+    const latest = Math.max(earliest, shotEnd - 0.1 - clipDuration)
+    const positionCount = Math.min(
+      5,
+      Math.max(1, Math.floor(shotDuration / 2.4)),
+    )
+    for (let position = 0; position < positionCount; position += 1) {
+      const ratio = (position + 1) / (positionCount + 1)
+      const start = earliest + (latest - earliest) * ratio
+      const end = start + clipDuration
+      const windowSamples = timeline.filter(
+        (sample) => sample.time >= start + 0.08 && sample.time <= end - 0.08,
+      )
+      const windowValues = windowSamples.map((sample) => sample.motion)
+      const average = windowValues.length
+        ? windowValues.reduce((sum, value) => sum + value, 0) /
+          windowValues.length
+        : motionFloor
+      const active = windowValues.length
+        ? percentile(windowValues, 0.78)
+        : motionFloor
+      const rawEnergy = average * 0.42 + active * 0.58
+      const normalizedEnergy = Math.max(
+        0,
+        Math.min(1.5, (rawEnergy - motionFloor) / (motionPeak - motionFloor)),
+      )
+      const saturation = windowSamples.length
+        ? windowSamples.reduce((sum, sample) => sum + sample.saturation, 0) /
+          windowSamples.length
+        : saturationFloor
+      const normalizedSaturation = Math.max(
+        0,
+        Math.min(
+          1.2,
+          (saturation - saturationFloor) /
+            (saturationPeak - saturationFloor),
+        ),
+      )
+      const detail = windowSamples.length
+        ? windowSamples.reduce((sum, sample) => sum + sample.detail, 0) /
+          windowSamples.length
+        : detailFloor
+      const normalizedDetail = Math.max(
+        0,
+        Math.min(1.2, (detail - detailFloor) / (detailPeak - detailFloor)),
+      )
+      const titleCardWeight =
+        normalizedSaturation < 0.18 && normalizedDetail < 0.22 ? 0.55 : 1
+      const textScore = textTimeline
+        .filter(
+          (sample) =>
+            sample.time >= start - 0.35 && sample.time <= end + 0.35,
+        )
+        .reduce((highest, sample) => Math.max(highest, sample.textScore), 0)
+      const textWeight =
+        textScore >= 8 ? 0.24 : textScore >= 5 ? 0.62 : 1
+      const midpoint = start + clipDuration / 2
+      const edgeWeight =
+        midpoint < duration * 0.04 || midpoint > duration * 0.96 ? 0.68 : 1
+      const shotWeight = shotDuration > 10 ? 0.9 : 1
+      candidates.push({
+        start,
+        duration: clipDuration,
+        midpoint,
+        score:
+          (0.12 +
+            normalizedEnergy * 0.58 +
+            normalizedSaturation * 0.18 +
+            normalizedDetail * 0.24) *
+          edgeWeight *
+          shotWeight *
+          titleCardWeight *
+          textWeight,
+      })
     }
-    candidates.sort((a, b) => a - b)
   }
-  if (candidates.length <= desired)
-    return candidates.map((start) => ({ start, duration: segmentDuration }))
-  return Array.from({ length: desired }, (_, index) => {
-    const candidateIndex = Math.round(
-      (index * (candidates.length - 1)) / Math.max(1, desired - 1),
+
+  const ranked = [...candidates].sort(
+    (a, b) => b.score - a.score || a.start - b.start,
+  )
+  const selected = []
+  const bucketCount = Math.min(5, desired)
+  const bucketLimit = Math.ceil(desired / bucketCount)
+  const bucketCounts = Array.from({ length: bucketCount }, () => 0)
+  const minimumGap = Math.max(2.1, duration / (desired * 2.5))
+
+  const tryAdd = (candidate, gap, enforceBuckets) => {
+    if (
+      selected.some(
+        (existing) => Math.abs(existing.midpoint - candidate.midpoint) < gap,
+      )
     )
-    return { start: candidates[candidateIndex], duration: segmentDuration }
-  })
+      return false
+    const bucket = Math.min(
+      bucketCount - 1,
+      Math.floor((candidate.midpoint / duration) * bucketCount),
+    )
+    if (enforceBuckets && bucketCounts[bucket] >= bucketLimit) return false
+    selected.push(candidate)
+    bucketCounts[bucket] += 1
+    return true
+  }
+
+  for (const candidate of ranked) {
+    tryAdd(candidate, minimumGap, true)
+    if (selected.length >= desired) break
+  }
+  for (const candidate of ranked) {
+    if (selected.includes(candidate)) continue
+    tryAdd(candidate, minimumGap * 0.62, false)
+    if (selected.length >= desired) break
+  }
+  for (const candidate of ranked) {
+    if (!selected.includes(candidate)) selected.push(candidate)
+    if (selected.length >= desired) break
+  }
+
+  return selected
+    .slice(0, desired)
+    .sort((a, b) => a.start - b.start)
+    .map(({ start, duration: clipDuration }) => ({
+      start: Number(start.toFixed(3)),
+      duration: Number(clipDuration.toFixed(3)),
+    }))
 }
 
-async function createAutoHighlight(source, target, dimensions) {
-  const scenes = await detectSceneTimes(source, dimensions.duration)
-  const segments = chooseHighlightSegments(scenes, dimensions.duration)
+async function createAutoHighlight(
+  source,
+  target,
+  dimensions,
+  onProgress = async () => {},
+) {
+  const selectionFile = path.join(
+    path.dirname(path.dirname(target)),
+    "carousel-segments.json",
+  )
+  if (await exists(selectionFile))
+    return JSON.parse(await readFile(selectionFile, "utf8"))
+  const [timeline, textTimeline] = await Promise.all([
+    analyzeVisualTimeline(source),
+    analyzeTextTimeline(source),
+  ])
+  await onProgress(14)
+  const scenes = await detectSceneTimes(
+    source,
+    dimensions.duration,
+    timeline,
+  )
+  await onProgress(20)
+  const segments = chooseHighlightSegments(
+    scenes,
+    dimensions.duration,
+    timeline,
+    textTimeline,
+  )
+  await writeFile(selectionFile, JSON.stringify(segments, null, 2))
   if (await exists(target)) return segments
   const args = ["-hide_banner", "-loglevel", "error", "-y"]
   for (const segment of segments)
@@ -266,6 +573,7 @@ async function createAutoHighlight(source, target, dimensions) {
     target,
   )
   await run("ffmpeg", args)
+  await onProgress(30)
   return segments
 }
 
@@ -550,12 +858,25 @@ async function processJob(job) {
   let carouselClipFiles = []
   if (generatedDesktop) {
     const roughcut = path.join(output, "carousel-roughcut.mp4")
-    const segments = await createAutoHighlight(source, roughcut, dimensions)
+    const segments = await createAutoHighlight(
+      source,
+      roughcut,
+      dimensions,
+      async (progress) =>
+        api(`/api/processor/jobs/${job.id}/progress`, {
+          method: "POST",
+          body: JSON.stringify({ progress }),
+        }),
+    )
     carouselClipFiles = await createCarouselClips(
       source,
       path.join(output, "carousel-clips"),
       segments,
     )
+    await api(`/api/processor/jobs/${job.id}/progress`, {
+      method: "POST",
+      body: JSON.stringify({ progress: 38 }),
+    })
     await encodeHls(roughcut, output, await probe(roughcut))
   } else {
     await encodeHls(source, output, dimensions)
@@ -664,6 +985,38 @@ if (SELF_TEST) {
     source,
   ])
   const dimensions = await probe(source)
+  const syntheticBoundaries = Array.from({ length: 9 }, (_, index) => index * 2)
+  const syntheticTimeline = Array.from({ length: 73 }, (_, index) => {
+    const time = index * 0.25
+    return {
+      time,
+      motion: time >= 8 && time <= 12 ? 24 : 2,
+      cutScore: syntheticBoundaries.includes(time) ? 12 : 0.2,
+    }
+  })
+  const syntheticSelection = chooseHighlightSegments(
+    syntheticBoundaries,
+    18,
+    syntheticTimeline,
+  )
+  if (syntheticSelection.length < 5)
+    throw new Error("Highlight selector did not return enough clips")
+  if (
+    syntheticSelection.some((segment) =>
+      syntheticBoundaries.some(
+        (boundary) =>
+          boundary > segment.start + 0.001 &&
+          boundary < segment.start + segment.duration - 0.001,
+      ),
+    )
+  )
+    throw new Error("Highlight selector allowed a clip to cross a scene cut")
+  if (
+    !syntheticSelection.some(
+      (segment) => segment.start >= 7.8 && segment.start <= 12,
+    )
+  )
+    throw new Error("Highlight selector ignored the high-energy section")
   await encodeHls(source, output, dimensions)
   const remuxedMaster = path.join(directory, "remuxed-master.mp4")
   await download(
