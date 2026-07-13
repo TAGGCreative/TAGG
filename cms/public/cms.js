@@ -684,6 +684,8 @@ function xhrPut(url, blob, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     xhr.open("PUT", url)
+    const previewToken = previewAccessToken()
+    if (previewToken) xhr.setRequestHeader("x-tagg-preview-token", previewToken)
     xhr.upload.onprogress = (event) =>
       event.lengthComputable && onProgress(event.loaded / event.total)
     xhr.onload = () =>
@@ -695,7 +697,7 @@ function xhrPut(url, blob, onProgress) {
   })
 }
 
-async function uploadFile(file, projectId, role) {
+async function uploadFile(file, projectId, role, recoveryAttempt = 0) {
   const fingerprint = uploadFingerprint(file, projectId, role)
   let session = JSON.parse(localStorage.getItem(fingerprint) || "null")
   try {
@@ -773,6 +775,15 @@ async function uploadFile(file, projectId, role) {
     )
     await load(false)
   } catch (error) {
+    const staleUploadSession =
+      recoveryAttempt === 0 &&
+      session &&
+      /404|upload session not found|multipart upload/i.test(error.message)
+    if (staleUploadSession) {
+      localStorage.removeItem(fingerprint)
+      state.jobs = state.jobs.filter((item) => item.id !== session.jobId)
+      return uploadFile(file, projectId, role, recoveryAttempt + 1)
+    }
     const job = state.jobs.find((item) => item.id === session?.jobId)
     if (job) Object.assign(job, { status: "error", error: error.message })
     notify(`${error.message} Choose the same file to resume.`, true)
