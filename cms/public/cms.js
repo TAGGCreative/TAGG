@@ -14,6 +14,7 @@ const state = {
   mediaPicker: null,
   toast: null,
   saveTimer: null,
+  refreshingJobs: false,
 }
 
 const escapeHtml = (value = "") =>
@@ -147,16 +148,23 @@ function statusLabel(job, ready) {
   )
   return (
     {
-      uploading: ["uploading", "Uploading"],
+      uploading: ["uploading", `Uploading · ${Number(job.progress || 0)}%`],
       waiting: [
         "waiting",
         macIsBusy ? "Queued · TAGG Mac is busy" : "Queued for TAGG Mac",
       ],
-      processing: ["processing", "Processing"],
+      processing: ["processing", `Processing · ${Number(job.progress || 0)}%`],
       ready: ["ready", "Ready"],
       error: ["error", "Needs attention"],
     }[job.status] || ["", job.status]
   )
+}
+
+function progressBar(job) {
+  if (!job || !["uploading", "waiting", "processing"].includes(job.status))
+    return ""
+  const indeterminate = job.status === "waiting"
+  return `<span class="progress ${indeterminate ? "indeterminate" : ""}" role="progressbar" aria-label="${escapeHtml(job.status)}" ${indeterminate ? "" : `aria-valuenow="${Number(job.progress || 0)}"`}><span style="width:${indeterminate ? 32 : Number(job.progress || 0)}%"></span></span>`
 }
 
 function uploadCard(
@@ -174,7 +182,7 @@ function uploadCard(
     <span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(hint)}</small></span>
     <span class="status ${statusClass}"><span class="dot"></span>${escapeHtml(job?.error || label)}</span>
     ${job?.status === "error" && !String(job.error || "").startsWith("Upload interrupted") && ["main", "heroDesktop", "heroMobile"].includes(role) ? `<span class="button" role="button" tabindex="0" data-retry-job="${job.id}">Retry processing</span>` : ""}
-    ${job && ["uploading", "processing"].includes(job.status) ? `<span class="progress"><span style="width:${Number(job.progress || 0)}%"></span></span>` : ""}
+    ${progressBar(job)}
   </label>`
 }
 
@@ -281,7 +289,7 @@ function mediaSelectionPanel(project) {
       <span class="status ${statusClass}"><span class="dot"></span>${escapeHtml(derivativeJob?.error || status)}</span>
     </div>
     <button class="button primary" type="button" data-open-media-picker="${escapeHtml(project.id)}" ${hasMaster && !["waiting", "processing"].includes(derivativeJob?.status) ? "" : "disabled"}>${project.poster?.src || project.preview?.mp4 ? "Choose new frames" : "Choose frames"}</button>
-    ${derivativeJob && ["waiting", "processing"].includes(derivativeJob.status) ? `<span class="progress"><span style="width:${Number(derivativeJob.progress || 0)}%"></span></span>` : ""}
+    ${progressBar(derivativeJob)}
   </section>`
 }
 
@@ -350,7 +358,7 @@ function carouselAsset(project, format) {
     <div class="asset-actions">
       <label class="button small ghost upload-button">Upload custom<input type="file" accept="video/*" data-upload="${escapeHtml(project.id)}:${role}" /></label>
     </div>
-    ${job && ["waiting", "processing", "uploading"].includes(job.status) ? `<span class="progress"><span style="width:${Number(job.progress || 0)}%"></span></span>` : ""}
+    ${progressBar(job)}
   </div>`
 }
 
@@ -1159,7 +1167,36 @@ async function load(first = true) {
   }
 }
 
+async function refreshActiveJobs() {
+  if (state.refreshingJobs || state.mediaPicker || state.dirty || state.saving)
+    return
+  const active = state.jobs.some((job) =>
+    ["waiting", "processing"].includes(job.status),
+  )
+  if (!active) return
+  const editing = document.activeElement?.matches?.("input, textarea, select")
+  if (editing) return
+  state.refreshingJobs = true
+  try {
+    const previous = new Map(state.jobs.map((job) => [job.id, job.status]))
+    const data = await api("/api/jobs")
+    state.jobs = data.jobs
+    const finished = state.jobs.some(
+      (job) =>
+        ["uploading", "waiting", "processing"].includes(previous.get(job.id)) &&
+        ["ready", "error"].includes(job.status),
+    )
+    if (finished) await load(false)
+    else render()
+  } catch (error) {
+    console.warn("Job progress refresh failed", error)
+  } finally {
+    state.refreshingJobs = false
+  }
+}
+
 load()
+setInterval(refreshActiveJobs, 3000)
 setInterval(() => {
   const editing = document.activeElement?.matches?.("input, textarea, select")
   if (!state.dirty && !state.saving && !editing && !state.mediaPicker)

@@ -392,6 +392,7 @@ h1 {
   background: var(--amber);
 }
 .progress {
+  position: relative;
   height: 4px;
   border-radius: 3px;
   background: #313a49;
@@ -399,9 +400,49 @@ h1 {
   margin-top: 8px;
 }
 .progress span {
+  position: relative;
   display: block;
   height: 100%;
   background: var(--pink);
+  overflow: hidden;
+  transition: width 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.progress span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, #ffffff80, transparent);
+  transform: translateX(-100%);
+  animation: progress-sheen 1.8s ease-in-out infinite;
+}
+.progress.indeterminate span {
+  position: absolute;
+  width: 32% !important;
+  animation: progress-waiting 1.7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes progress-sheen {
+  55%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes progress-waiting {
+  0% {
+    left: -32%;
+  }
+  55% {
+    left: 55%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .progress span,
+  .progress span::after {
+    animation: none;
+    transition: none;
+  }
 }
 
 .media-selection-panel {

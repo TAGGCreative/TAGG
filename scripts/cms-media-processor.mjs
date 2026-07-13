@@ -13,6 +13,7 @@ import {
 } from "node:fs/promises"
 import { availableParallelism } from "node:os"
 import path from "node:path"
+import { Transform } from "node:stream"
 import { pipeline } from "node:stream/promises"
 
 const API = process.env.CMS_API_URL?.replace(/\/$/, "")
@@ -58,6 +59,33 @@ async function api(endpoint, options = {}) {
   throw lastError
 }
 
+function createProgressReporter(job) {
+  let lastProgress = -1
+  let lastSentAt = 0
+  let pending = Promise.resolve()
+  const report = (value, force = false) => {
+    const progress = Math.max(0, Math.min(98, Math.floor(Number(value) || 0)))
+    const currentTime = Date.now()
+    if (
+      progress <= lastProgress ||
+      (!force && currentTime - lastSentAt < 1500 && progress - lastProgress < 2)
+    )
+      return pending
+    lastProgress = progress
+    lastSentAt = currentTime
+    pending = pending
+      .catch(() => {})
+      .then(() =>
+        api(`/api/processor/jobs/${job.id}/progress`, {
+          method: "POST",
+          body: JSON.stringify({ progress }),
+        }),
+      )
+    return pending
+  }
+  return { report, flush: () => pending }
+}
+
 function run(command, args) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { stdio: ["ignore", "ignore", "pipe"] })
@@ -72,6 +100,38 @@ function run(command, args) {
         ? resolve()
         : reject(new Error(`${command} failed: ${errorOutput.trim()}`)),
     )
+  })
+}
+
+function runFfmpeg(args, duration, onProgress = () => {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(
+      "ffmpeg",
+      ["-progress", "pipe:2", "-nostats", ...args],
+      { stdio: ["ignore", "ignore", "pipe"] },
+    )
+    let errorOutput = ""
+    let lineBuffer = ""
+    child.stderr.on("data", (chunk) => {
+      const text = chunk.toString()
+      errorOutput += text
+      if (errorOutput.length > 8000) errorOutput = errorOutput.slice(-8000)
+      lineBuffer += text
+      const lines = lineBuffer.split(/\r?\n/)
+      lineBuffer = lines.pop() || ""
+      for (const line of lines) {
+        const match = line.match(/^out_time_us=(\d+)$/)
+        if (match && duration > 0)
+          onProgress(Math.min(0.995, Number(match[1]) / 1_000_000 / duration))
+      }
+    })
+    child.on("error", reject)
+    child.on("exit", (code) => {
+      if (code === 0) {
+        onProgress(1)
+        resolve()
+      } else reject(new Error(`ffmpeg failed: ${errorOutput.trim()}`))
+    })
   })
 }
 
@@ -100,12 +160,15 @@ async function exists(file) {
   }
 }
 
-async function download(job, target) {
+async function download(job, target, onProgress = () => {}) {
   const isHls =
     job.mime_type === "application/vnd.apple.mpegurl" ||
     String(job.downloadUrl).includes(".m3u8")
   if (isHls) {
-    if ((await exists(target)) && (await stat(target)).size > 0) return
+    if ((await exists(target)) && (await stat(target)).size > 0) {
+      onProgress(1)
+      return
+    }
     const partial = `${target}.partial`
     await run("ffmpeg", [
       "-hide_banner",
@@ -127,13 +190,14 @@ async function download(job, target) {
       partial,
     ])
     await (await import("node:fs/promises")).rename(partial, target)
+    onProgress(1)
     return
   }
   if (
     (await exists(target)) &&
     (await stat(target)).size === Number(job.size_bytes)
   )
-    return
+    return onProgress(1)
   const partial = `${target}.partial`
   const localProcessorDownload = String(job.downloadUrl).startsWith(
     `${API}/api/processor/`,
@@ -145,11 +209,24 @@ async function download(job, target) {
   })
   if (!response.ok || !response.body)
     throw new Error(`Original download failed (${response.status})`)
+  const total =
+    Number(job.size_bytes || 0) ||
+    Number(response.headers.get("content-length"))
+  let received = 0
+  const meter = new Transform({
+    transform(chunk, encoding, callback) {
+      received += chunk.length
+      if (total > 0) onProgress(Math.min(1, received / total))
+      callback(null, chunk)
+    },
+  })
   await pipeline(
     response.body,
+    meter,
     (await import("node:fs")).createWriteStream(partial),
   )
   await (await import("node:fs/promises")).rename(partial, target)
+  onProgress(1)
 }
 
 async function probe(source) {
@@ -621,7 +698,7 @@ async function encodeHls(
   source,
   output,
   dimensions,
-  onProfileComplete = async () => {},
+  onProgress = () => {},
   createScrubProxy = false,
 ) {
   const portrait = dimensions.width < dimensions.height
@@ -644,15 +721,28 @@ async function encodeHls(
   )
   const canRemuxSource =
     dimensions.codec_name === "h264" && selected[0].height === sourceLimit
-  let completedProfiles = 0
+  const profileProgress = selected.map(() => 0)
+  let emittedProgress = 0
+  const updateProfileProgress = (index, value) => {
+    profileProgress[index] = Math.max(
+      profileProgress[index],
+      Math.min(1, value),
+    )
+    const overall =
+      profileProgress.reduce((total, item) => total + item, 0) /
+      profileProgress.length
+    if (overall > emittedProgress) {
+      emittedProgress = overall
+      onProgress(overall)
+    }
+  }
 
   await Promise.all(
     selected.map(async (profile, index) => {
       const directory = path.join(output, `${profile.height}p`)
       const marker = path.join(directory, ".complete")
       if (await exists(marker)) {
-        completedProfiles += 1
-        await onProfileComplete(completedProfiles, selected.length)
+        updateProfileProgress(index, 1)
         return
       }
       await rm(directory, { recursive: true, force: true })
@@ -691,83 +781,100 @@ async function encodeHls(
             "-sc_threshold",
             "0",
           ]
-      const inputForHls = scrubProxy && !remux ? scrubFile : source
+      const inputForHls = scrubProxy ? scrubFile : source
+      let hlsProgressStart = 0
       if (scrubProxy && !remux)
-        await run("ffmpeg", [
-          "-hide_banner",
-          "-loglevel",
-          "error",
-          "-y",
-          "-i",
-          source,
-          "-map",
-          "0:v:0",
-          "-map",
-          "0:a:0?",
-          ...videoOptions,
-          "-c:a",
-          dimensions.audioCodec === "aac" ? "copy" : "aac",
-          ...(dimensions.audioCodec === "aac" ? [] : ["-b:a", "128k"]),
-          "-movflags",
-          "+faststart",
-          scrubFile,
-        ])
+        await runFfmpeg(
+          [
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            source,
+            "-map",
+            "0:v:0",
+            "-map",
+            "0:a:0?",
+            ...videoOptions,
+            "-c:a",
+            dimensions.audioCodec === "aac" ? "copy" : "aac",
+            ...(dimensions.audioCodec === "aac" ? [] : ["-b:a", "128k"]),
+            "-movflags",
+            "+faststart",
+            scrubFile,
+          ],
+          dimensions.duration,
+          (fraction) => updateProfileProgress(index, fraction * 0.9),
+        )
       else if (scrubProxy && remux)
-        await run("ffmpeg", [
+        await runFfmpeg(
+          [
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            source,
+            "-map",
+            "0:v:0",
+            "-map",
+            "0:a:0?",
+            "-c",
+            "copy",
+            "-movflags",
+            "+faststart",
+            scrubFile,
+          ],
+          dimensions.duration,
+          (fraction) => updateProfileProgress(index, fraction * 0.35),
+        )
+      if (scrubProxy) hlsProgressStart = remux ? 0.35 : 0.9
+      await runFfmpeg(
+        [
           "-hide_banner",
           "-loglevel",
           "error",
           "-y",
           "-i",
-          source,
+          inputForHls,
           "-map",
           "0:v:0",
           "-map",
           "0:a:0?",
-          "-c",
-          "copy",
-          "-movflags",
-          "+faststart",
-          scrubFile,
-        ])
-      await run("ffmpeg", [
-        "-hide_banner",
-        "-loglevel",
-        "error",
-        "-y",
-        "-i",
-        inputForHls,
-        "-map",
-        "0:v:0",
-        "-map",
-        "0:a:0?",
-        ...(scrubProxy && !remux ? ["-c", "copy"] : videoOptions),
-        ...(scrubProxy && !remux
-          ? []
-          : [
-              "-c:a",
-              dimensions.audioCodec === "aac" ? "copy" : "aac",
-              ...(dimensions.audioCodec === "aac" ? [] : ["-b:a", "128k"]),
-            ]),
-        "-f",
-        "hls",
-        "-hls_time",
-        "6",
-        "-hls_playlist_type",
-        "vod",
-        "-hls_flags",
-        "independent_segments",
-        "-hls_segment_type",
-        "fmp4",
-        "-hls_fmp4_init_filename",
-        "init.mp4",
-        "-hls_segment_filename",
-        path.join(directory, "segment_%05d.m4s"),
-        path.join(directory, "index.m3u8"),
-      ])
+          ...(scrubProxy ? ["-c", "copy"] : videoOptions),
+          ...(scrubProxy
+            ? []
+            : [
+                "-c:a",
+                dimensions.audioCodec === "aac" ? "copy" : "aac",
+                ...(dimensions.audioCodec === "aac" ? [] : ["-b:a", "128k"]),
+              ]),
+          "-f",
+          "hls",
+          "-hls_time",
+          "6",
+          "-hls_playlist_type",
+          "vod",
+          "-hls_flags",
+          "independent_segments",
+          "-hls_segment_type",
+          "fmp4",
+          "-hls_fmp4_init_filename",
+          "init.mp4",
+          "-hls_segment_filename",
+          path.join(directory, "segment_%05d.m4s"),
+          path.join(directory, "index.m3u8"),
+        ],
+        dimensions.duration,
+        (fraction) =>
+          updateProfileProgress(
+            index,
+            hlsProgressStart + fraction * (1 - hlsProgressStart),
+          ),
+      )
       await writeFile(marker, "")
-      completedProfiles += 1
-      await onProfileComplete(completedProfiles, selected.length)
+      updateProfileProgress(index, 1)
     }),
   )
   const aspect = dimensions.width / dimensions.height
@@ -893,7 +1000,7 @@ async function uploadFile(job, file, key) {
     throw new Error(`R2 output upload failed (${response.status})`)
 }
 
-async function uploadOutputs(job, output, progressStart = 70) {
+async function uploadOutputs(job, output, progressStart = 70, onProgress) {
   const files = await walk(output)
   const concurrency = Math.min(12, Math.max(4, availableParallelism()))
   for (let offset = 0; offset < files.length; offset += concurrency) {
@@ -909,10 +1016,7 @@ async function uploadOutputs(job, output, progressStart = 70) {
         (Math.min(offset + concurrency, files.length) / files.length) *
           (98 - progressStart),
       )
-    await api(`/api/processor/jobs/${job.id}/progress`, {
-      method: "POST",
-      body: JSON.stringify({ progress }),
-    })
+    await onProgress(progress, true)
   }
 }
 
@@ -922,12 +1026,13 @@ async function processJob(job) {
   const output = path.join(directory, "output")
   const selectedDerivatives = job.asset_role === "projectDerivatives"
   const source = selectedDerivatives ? job.downloadUrl : localSource
+  const progress = createProgressReporter(job)
   await mkdir(output, { recursive: true })
-  if (!selectedDerivatives) await download(job, localSource)
-  await api(`/api/processor/jobs/${job.id}/progress`, {
-    method: "POST",
-    body: JSON.stringify({ progress: 8 }),
-  })
+  if (!selectedDerivatives)
+    await download(job, localSource, (fraction) =>
+      progress.report(1 + fraction * 7),
+    )
+  await progress.report(8, true)
   const dimensions = await probe(source)
   if (selectedDerivatives) {
     await createSelectedDerivatives(
@@ -936,27 +1041,20 @@ async function processJob(job) {
       dimensions,
       job.options || {},
     )
-    await api(`/api/processor/jobs/${job.id}/progress`, {
-      method: "POST",
-      body: JSON.stringify({ progress: 70 }),
-    })
-    await uploadOutputs(job, output, 70)
+    await progress.report(70, true)
+    await uploadOutputs(job, output, 70, progress.report)
   } else {
     await encodeHls(
       source,
       output,
       dimensions,
-      async (completed, total) =>
-        api(`/api/processor/jobs/${job.id}/progress`, {
-          method: "POST",
-          body: JSON.stringify({
-            progress: 8 + Math.round((completed / total) * 62),
-          }),
-        }),
+      (fraction) => progress.report(8 + fraction * 62),
       job.asset_role === "main",
     )
-    await uploadOutputs(job, output, 70)
+    await progress.report(70, true)
+    await uploadOutputs(job, output, 70, progress.report)
   }
+  await progress.flush()
   const prefix = job.outputPrefix
   await api(`/api/processor/jobs/${job.id}/complete`, {
     method: "POST",

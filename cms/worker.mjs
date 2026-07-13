@@ -346,6 +346,13 @@ async function bootstrap(env, email) {
   })
 }
 
+async function processingJobs(env) {
+  const jobs = await env.DB.prepare(
+    "SELECT id, project_id, asset_role, original_name, status, progress, error, created_at, updated_at FROM processing_jobs ORDER BY created_at DESC LIMIT 100",
+  ).all()
+  return json({ jobs: jobs.results })
+}
+
 async function saveDraft(request, env, email) {
   const content = await request.json()
   normalizeCarousel(content)
@@ -882,6 +889,8 @@ async function routeApi(request, env, email) {
   const path = url.pathname
   if (path === "/api/bootstrap" && request.method === "GET")
     return bootstrap(env, email)
+  if (path === "/api/jobs" && request.method === "GET")
+    return processingJobs(env)
   if (path === "/api/draft" && request.method === "PUT")
     return saveDraft(request, env, email)
   if (path === "/api/preview" && request.method === "POST")
