@@ -6,6 +6,10 @@
   <key>ProgramArguments</key>
   <array><string>__NODE__</string><string>__ROOT__/scripts/cms-media-processor.mjs</string></array>
   <key>WorkingDirectory</key><string>__ROOT__</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key><string>__PATH__</string>
+  </dict>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
   <key>ProcessType</key><string>Background</string>

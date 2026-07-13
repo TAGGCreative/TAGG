@@ -166,7 +166,7 @@ function uploadCard(
     <input type="file" accept="${accept}" data-upload="${escapeHtml(projectId)}:${role}" />
     <span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(hint)}</small></span>
     <span class="status ${statusClass}"><span class="dot"></span>${escapeHtml(job?.error || label)}</span>
-    ${job?.status === "error" && ["main", "heroDesktop", "heroMobile"].includes(role) ? `<span class="button" role="button" tabindex="0" data-retry-job="${job.id}">Retry processing</span>` : ""}
+    ${job?.status === "error" && !String(job.error || "").startsWith("Upload interrupted") && ["main", "heroDesktop", "heroMobile"].includes(role) ? `<span class="button" role="button" tabindex="0" data-retry-job="${job.id}">Retry processing</span>` : ""}
     ${job && ["uploading", "processing"].includes(job.status) ? `<span class="progress"><span style="width:${Number(job.progress || 0)}%"></span></span>` : ""}
   </label>`
 }
