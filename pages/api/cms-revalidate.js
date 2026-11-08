@@ -1,11 +1,7 @@
 import crypto from "node:crypto"
 
 function verify(body, signature) {
-  const secret =
-    process.env.CMS_REVALIDATE_SECRET ||
-    (process.env.VERCEL_ENV === "preview"
-      ? "tagg-cms-preview-bridge-v1"
-      : null)
+  const secret = process.env.CMS_REVALIDATE_SECRET
   if (!secret || !signature) return false
   const expected = crypto
     .createHmac("sha256", secret)
@@ -21,6 +17,7 @@ function verify(body, signature) {
 export const config = { api: { bodyParser: false } }
 
 export default async function handler(req, res) {
+  if (process.env.TAGG_CMS_ENABLED !== "true") return res.status(404).end()
   if (req.method !== "POST") return res.status(405).end()
   const chunks = []
   for await (const chunk of req) chunks.push(chunk)

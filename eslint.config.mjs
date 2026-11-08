@@ -8,5 +8,15 @@ export default defineConfig([
       "react/no-unescaped-entities": "off",
     },
   },
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    "alive-moodboard-site/**",
+    "interdependence-editorial-reel/**",
+    "we-are-rosie-portfolio-site/**",
+    "docs/**",
+    "tmp/**",
+  ]),
 ])

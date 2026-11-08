@@ -44,3 +44,10 @@ yarn-error.log*
 /.cms-media-work/
 /.wrangler/
 /cms/.wrangler/
+
+# unrelated local projects and working artifacts
+/alive-moodboard-site/
+/interdependence-editorial-reel/
+/we-are-rosie-portfolio-site/
+/docs/
+/tmp/

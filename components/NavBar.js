@@ -1,4 +1,5 @@
 import styled from "styled-components"
+import { useEffect, useRef, useState } from "react"
 import { NavLink } from "./NavLink"
 
 const Nav = styled.nav`
@@ -26,15 +27,24 @@ const Nav = styled.nav`
 
   #logo {
     position: relative;
-    display: block;
-    margin-left: -1.25em;
+    display: grid;
+    place-items: center;
+    width: 68px;
+    height: 62px;
+    margin-left: -1em;
     margin-top: 0.5em;
     padding: 1px;
+    box-sizing: border-box;
     background-color: var(--red);
-    clip-path: polygon(0 0, 82% 0, 100% 50%, 82% 100%, 0 100%);
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+    filter: drop-shadow(5px 6px 0 var(--red));
     isolation: isolate;
+
     @media screen and (max-width: 425px) {
-      margin-left: -0.75em;
+      width: 52px;
+      height: 48px;
+      margin-left: -0.5em;
+      filter: drop-shadow(4px 4px 0 var(--red));
     }
 
     &::before {
@@ -42,7 +52,7 @@ const Nav = styled.nav`
       content: "";
       inset: 1px;
       background-color: var(--black);
-      clip-path: polygon(0 0, 82% 0, 100% 50%, 82% 100%, 0 100%);
+      clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 0 100%);
       z-index: 0;
     }
   }
@@ -57,7 +67,7 @@ const Links = styled.div`
 const Logo = styled.img`
   position: relative;
   z-index: 1;
-  margin: 0.65em 1.35em 0.4em 0.85em;
+  margin: 0;
   height: 35px;
   width: auto;
   transition: transform 0.2s ease-in-out;
@@ -96,11 +106,44 @@ const Logo = styled.img`
   @media screen and (max-width: 425px) {
     height: 25px;
     width: auto;
-    margin: 0.55em 1.15em 0.35em 0.75em;
+    margin: 0;
   }
 `
 
 export const NavBar = ({ visibleSection }) => {
+  const [displayedSection, setDisplayedSection] = useState(visibleSection)
+  const pendingSection = useRef(null)
+  const pendingTimer = useRef(null)
+  const lastVisibleSection = useRef(visibleSection)
+
+  useEffect(() => {
+    lastVisibleSection.current = visibleSection
+    if (pendingSection.current && visibleSection !== pendingSection.current)
+      return
+
+    if (pendingTimer.current) clearTimeout(pendingTimer.current)
+    pendingSection.current = null
+    setDisplayedSection(visibleSection)
+  }, [visibleSection])
+
+  useEffect(
+    () => () => {
+      if (pendingTimer.current) clearTimeout(pendingTimer.current)
+    },
+    [],
+  )
+
+  const selectSection = (section) => {
+    if (section === displayedSection) return
+    if (pendingTimer.current) clearTimeout(pendingTimer.current)
+    pendingSection.current = section
+    setDisplayedSection(section)
+    pendingTimer.current = setTimeout(() => {
+      pendingSection.current = null
+      setDisplayedSection(lastVisibleSection.current || section)
+    }, 1600)
+  }
+
   return (
     <Nav>
       <a id="logo" href="#">
@@ -112,16 +155,32 @@ export const NavBar = ({ visibleSection }) => {
         />
       </a>
       <Links>
-        <NavLink href="/#about" active={visibleSection === "about"}>
+        <NavLink
+          href="/#about"
+          active={displayedSection === "about"}
+          onSelect={() => selectSection("about")}
+        >
           WHO WE ARE
         </NavLink>
-        <NavLink href="/#works" active={visibleSection === "works"}>
+        <NavLink
+          href="/#works"
+          active={displayedSection === "works"}
+          onSelect={() => selectSection("works")}
+        >
           WORKS
         </NavLink>
-        <NavLink href="/#people" active={visibleSection === "people"}>
+        <NavLink
+          href="/#people"
+          active={displayedSection === "people"}
+          onSelect={() => selectSection("people")}
+        >
           PEOPLE
         </NavLink>
-        <NavLink href="/#contact" active={visibleSection === "contact"}>
+        <NavLink
+          href="/#contact"
+          active={displayedSection === "contact"}
+          onSelect={() => selectSection("contact")}
+        >
           CONTACT
         </NavLink>
       </Links>

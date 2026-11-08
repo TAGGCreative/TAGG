@@ -32,6 +32,7 @@ const Card = styled.div`
   .text {
     display: flex;
     flex-direction: column;
+    position: relative;
     z-index: 2;
     filter: grayscale(100%);
     transition: all 0.35s ease;
@@ -93,14 +94,14 @@ const Card = styled.div`
   }
 
   .bio-reveal {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 1.05s cubic-bezier(0.65, 0, 0.35, 1);
+    position: relative;
+    width: 100%;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .bio-reveal-inner {
-    min-height: 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   p {
@@ -117,20 +118,28 @@ const Card = styled.div`
   .bio-line {
     display: block;
     opacity: 0;
-    transform: translateY(-0.65em);
+    filter: blur(8px);
+    transform: translate3d(0, 0.7em, 0);
+    will-change: opacity, filter, transform;
     transition:
-      opacity 0.55s ease,
-      transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      filter 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  &:hover {
+  &:hover,
+  &:focus-within {
+    z-index: 8;
+
     .bio-reveal {
-      grid-template-rows: 1fr;
+      visibility: visible;
+      pointer-events: auto;
     }
 
     .bio-line {
       opacity: 1;
-      transform: translateY(0);
+      filter: blur(0);
+      transform: translate3d(0, 0, 0);
       transition-delay: var(--bio-line-delay);
     }
 
@@ -148,14 +157,35 @@ const Card = styled.div`
     }
   }
 
-  @media screen and (max-width: 425px) {
-    .bio-reveal {
-      grid-template-rows: 1fr;
+  &:focus-visible {
+    outline: 1px solid var(--red);
+    outline-offset: 0.5rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bio-line {
+      filter: none;
+      transform: none;
       transition: none;
+    }
+  }
+
+  @media screen and (max-width: 600px) {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    box-sizing: border-box;
+
+    .bio-reveal {
+      width: auto;
+      visibility: visible;
+      pointer-events: auto;
     }
 
     .bio-line {
+      display: inline;
       opacity: 1;
+      filter: none;
       transform: none;
       transition: none;
     }
@@ -172,6 +202,12 @@ const Card = styled.div`
     .text {
       filter: grayscale(0%);
     }
+
+    h3,
+    h4 {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
   }
 `
 
@@ -186,14 +222,18 @@ export default function RosterCard({
   overlayOpacity,
 }) {
   return (
-    <Card overlayOpacity={overlayOpacity}>
+    <Card
+      overlayOpacity={overlayOpacity}
+      tabIndex={bio ? 0 : undefined}
+      aria-label={bio ? `${given} ${sur}, ${role}` : undefined}
+    >
       <div className="image-container">
         <Image
           src={head}
           alt={`Profile of ${given} ${sur}`}
           width={500}
           height={400}
-          sizes="(max-width: 425px) 95vw, 35vw"
+          sizes="(max-width: 600px) calc(100vw - 2rem), 35vw"
         />
         <Image
           src={mask}
@@ -202,7 +242,7 @@ export default function RosterCard({
           aria-hidden="true"
           width={500}
           height={400}
-          sizes="(max-width: 425px) 95vw, 35vw"
+          sizes="(max-width: 600px) calc(100vw - 2rem), 35vw"
         />
       </div>
       <div className="text">
@@ -219,7 +259,7 @@ export default function RosterCard({
                   <span
                     className="bio-line"
                     key={`${index}-${line}`}
-                    style={{ "--bio-line-delay": `${120 + index * 85}ms` }}
+                    style={{ "--bio-line-delay": `${70 + index * 70}ms` }}
                   >
                     {line}
                     {index < lines.length - 1 ? " " : ""}

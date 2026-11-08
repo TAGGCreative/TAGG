@@ -36,10 +36,12 @@ const Content = styled.div`
 
 const HomeSection = forwardRef((props, ref) => {
   const { id, children, HeaderComponent, sectionStyle, contentStyle } = props
+  const header =
+    typeof HeaderComponent === "function" ? HeaderComponent() : HeaderComponent
 
   return (
     <Section id={id} ref={ref} style={sectionStyle}>
-      <HeaderComponent />
+      {header}
       <Content style={contentStyle}>{children}</Content>
     </Section>
   )

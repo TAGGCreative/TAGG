@@ -21,6 +21,7 @@ export default function VideoModalPrototype({ works = [], children }) {
   const [selection, setSelection] = useState(null)
   const [phase, setPhase] = useState("idle")
   const [showPlayer, setShowPlayer] = useState(false)
+  const dialogRef = useRef(null)
   const mediaRef = useRef(null)
   const triggerRef = useRef(null)
   const closeTimerRef = useRef(null)
@@ -108,18 +109,20 @@ export default function VideoModalPrototype({ works = [], children }) {
     media.style.transform = getTransform(selection.origin, finalRect)
     media.style.borderRadius = "10px"
 
+    let secondFrame
     const firstFrame = requestAnimationFrame(() => {
-      const secondFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
         media.style.transition = ""
         media.style.transform = "translate3d(0, 0, 0) scale(1)"
         media.style.borderRadius = "20px"
         setPhase("open")
       })
-
-      return () => cancelAnimationFrame(secondFrame)
     })
 
-    return () => cancelAnimationFrame(firstFrame)
+    return () => {
+      cancelAnimationFrame(firstFrame)
+      if (secondFrame !== undefined) cancelAnimationFrame(secondFrame)
+    }
   }, [phase, selection])
 
   useEffect(() => {
@@ -129,7 +132,30 @@ export default function VideoModalPrototype({ works = [], children }) {
     document.body.classList.remove("video-modal-closing")
 
     const onKeyDown = (event) => {
-      if (event.key === "Escape") closeProjectRef.current?.()
+      if (event.key === "Escape") {
+        if (!document.fullscreenElement) closeProjectRef.current?.()
+        return
+      }
+      if (event.key !== "Tab") return
+
+      const dialog = dialogRef.current
+      if (!dialog) return
+      const controls = Array.from(
+        dialog.querySelectorAll("button:not(:disabled), a[href], [tabindex]"),
+      ).filter(
+        (element) => element.tabIndex >= 0 && element.getClientRects().length,
+      )
+      const first = controls[0]
+      const last = controls.at(-1)
+      const active = document.activeElement
+      if (
+        !dialog.contains(active) ||
+        active === (event.shiftKey ? first : last)
+      ) {
+        event.preventDefault()
+        const target = event.shiftKey ? last : first
+        target?.focus()
+      }
     }
 
     window.addEventListener("keydown", onKeyDown)
@@ -189,6 +215,7 @@ export default function VideoModalPrototype({ works = [], children }) {
         typeof document !== "undefined" &&
         createPortal(
           <div
+            ref={dialogRef}
             className={`${styles.modal} ${styles[phase]}`}
             role="dialog"
             aria-modal="true"
@@ -198,6 +225,7 @@ export default function VideoModalPrototype({ works = [], children }) {
               className={styles.backdrop}
               type="button"
               onClick={closeProject}
+              tabIndex={-1}
               aria-label="Close project"
             />
 
@@ -222,19 +250,21 @@ export default function VideoModalPrototype({ works = [], children }) {
                 </div>
 
                 <div className={styles.mediaFrame} ref={mediaRef}>
-                  <Image
-                    className={`${styles.expandedPoster} ${showPlayer ? styles.posterHidden : ""}`}
-                    src={selection.work.poster.src}
-                    alt=""
-                    fill
-                    sizes="(max-width: 620px) calc(100vw - 32px), 1100px"
-                    priority
-                  />
+                  {selection.work.poster?.src && (
+                    <Image
+                      className={`${styles.expandedPoster} ${showPlayer ? styles.posterHidden : ""}`}
+                      src={selection.work.poster.src}
+                      alt=""
+                      fill
+                      sizes="(max-width: 620px) calc(100vw - 32px), 1100px"
+                      priority
+                    />
+                  )}
                   <div className={styles.playerWrap}>
                     <ModalVideoPlayer
                       source={selection.work.source}
                       title={`${selection.work.client} — ${selection.work.title}`}
-                      poster={selection.work.poster.src}
+                      poster={selection.work.poster?.src}
                       onPlaying={() => setShowPlayer(true)}
                     />
                   </div>

@@ -8,9 +8,9 @@ const ContactSection = styled(HomeSection)`
   margin-top: 25vh;
   margin-bottom: 15vh;
 
-  @media screen and (max-width: 425px) {
-    margin-top: 20vh;
-    margin-bottom: 10vh;
+  @media screen and (max-width: 600px) {
+    margin-top: 6rem;
+    margin-bottom: 6rem;
   }
 `
 
@@ -19,6 +19,10 @@ const Contact = forwardRef(({ contact }, ref) => {
     <ContactSection
       id="contact"
       ref={ref}
+      sectionStyle={{
+        marginTop: "clamp(9rem, 24vh, 18rem)",
+        marginBottom: "clamp(6rem, 15vh, 12rem)",
+      }}
       HeaderComponent={() => (
         <AnimatedHeader id="contact-header">
           <svg

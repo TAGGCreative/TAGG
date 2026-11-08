@@ -13,13 +13,10 @@ function safeReturnTo(value) {
 }
 
 export default function handler(req, res) {
+  if (process.env.TAGG_CMS_ENABLED !== "true") return res.status(404).end()
   if (req.method !== "GET") return res.status(405).end()
   const { token, signature, returnTo } = req.query
-  const secret =
-    process.env.CMS_PREVIEW_SECRET ||
-    (process.env.VERCEL_ENV === "preview"
-      ? "tagg-cms-preview-bridge-v1"
-      : null)
+  const secret = process.env.CMS_PREVIEW_SECRET
   if (!validToken(token) || !secret) {
     return res.status(401).send("Invalid CMS preview link.")
   }

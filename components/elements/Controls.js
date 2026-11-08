@@ -48,11 +48,31 @@ const ButtonStack = styled.div`
   flex-direction: column;
   align-items: center;
   opacity: 0.99;
+
+  @media screen and (max-width: 600px) {
+    margin: 10% 6%;
+  }
 `
 
-export const Controls = ({ next, prev, selected, selectedClips }) => {
+const ControlsOverlay = styled(Overlay)`
+  left: unset;
+  right: 0;
+  width: 50%;
+  z-index: 11;
+  pointer-events: none;
+
+  button {
+    pointer-events: auto;
+  }
+
+  @media screen and (max-width: 600px) {
+    width: 100%;
+  }
+`
+
+export const Controls = ({ next, prev, selected, selectedClips, disabled }) => {
   return (
-    <Overlay style={{ left: "unset", right: 0, width: "50%" }}>
+    <ControlsOverlay>
       <ButtonStack>
         {selectedClips &&
           selectedClips?.map((clip, i) => (
@@ -61,6 +81,7 @@ export const Controls = ({ next, prev, selected, selectedClips }) => {
         <TriangleButton
           type="button"
           aria-label="Previous featured project"
+          disabled={disabled}
           left
           onClick={prev}
           style={{ marginTop: "10px" }}
@@ -68,10 +89,11 @@ export const Controls = ({ next, prev, selected, selectedClips }) => {
         <TriangleButton
           type="button"
           aria-label="Next featured project"
+          disabled={disabled}
           right
           onClick={next}
         />
       </ButtonStack>
-    </Overlay>
+    </ControlsOverlay>
   )
 }

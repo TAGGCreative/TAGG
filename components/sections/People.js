@@ -2,13 +2,19 @@ import HomeSection from "./HomeSection"
 import RosterCard from "../RosterCard"
 import { AnimatedHeader } from "../elements/AnimatedHeader"
 import { StaggerBox } from "../elements/StaggerBox"
-import { css } from "styled-components"
 import styled from "styled-components"
 
 const PeopleStaggerBox = styled(StaggerBox)`
   & > div:nth-child(2) {
     margin-top: -8em !important;
     transform: translateY(-2em);
+  }
+
+  @media screen and (max-width: 600px) {
+    & > div:nth-child(2) {
+      margin-top: 0 !important;
+      transform: none;
+    }
   }
 `
 

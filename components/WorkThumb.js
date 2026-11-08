@@ -14,12 +14,19 @@ const Frame = styled.div`
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 0);
+
+  &:empty {
+    aspect-ratio: 16 / 9;
+    background-color: var(--black);
+  }
 `
 
 const WorkThumb = ({ poster, preview, alt, priority = false }) => {
   const imageSrc = poster?.src
   const width = poster?.width || 960
   const height = poster?.height || 540
+
+  if (!imageSrc) return <Frame aria-hidden="true" />
 
   if (preview) {
     return (

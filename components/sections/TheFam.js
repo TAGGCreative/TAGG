@@ -13,15 +13,23 @@ const FamStaggerBox = styled(StaggerBox)`
     margin-top: -4em !important;
     transform: translateY(-1em);
   }
+
+  @media screen and (max-width: 600px) {
+    & > div:nth-child(2),
+    & > div:nth-child(3) {
+      margin-top: 0 !important;
+      transform: none;
+    }
+  }
 `
 
 const TheFamSection = styled(HomeSection)`
   margin-top: -35vh;
   margin-bottom: 15vh;
 
-  @media screen and (max-width: 425px) {
-    margin-top: -20vh;
-    margin-bottom: 10vh;
+  @media screen and (max-width: 600px) {
+    margin-top: 4rem;
+    margin-bottom: 6rem;
   }
 `
 

@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react"
 import styled from "styled-components"
 
+const completedHeaderAnimations = new Set()
+
 const AnimatedSVG = styled.div`
   width: 100%;
   padding: 0 1em;
@@ -48,7 +50,7 @@ const AnimatedSVG = styled.div`
 
 export const AnimatedHeader = ({ children, id }) => {
   const ref = useRef(null)
-  const hasAnimated = useRef(false)
+  const hasAnimated = useRef(completedHeaderAnimations.has(id))
 
   useEffect(() => {
     const element = ref.current
@@ -59,8 +61,14 @@ export const AnimatedHeader = ({ children, id }) => {
 
     const lock = () => {
       hasAnimated.current = true
+      completedHeaderAnimations.add(id)
       element.classList.remove("animate-paths")
       element.classList.add("animation-locked")
+    }
+
+    if (completedHeaderAnimations.has(id)) {
+      lock()
+      return undefined
     }
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {

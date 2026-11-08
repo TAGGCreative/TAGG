@@ -6,6 +6,8 @@ const CardStyles = styled.div`
   flex-direction: column;
   align-items: center;
   z-index: 2;
+  width: 100%;
+  box-sizing: border-box;
 
   a {
     cursor: pointer;
@@ -45,12 +47,49 @@ const CardStyles = styled.div`
     stroke: var(--red);
     fill: var(--red);
   }
+
+  @media screen and (max-width: 600px) {
+    padding: 0 1rem;
+
+    .email-link {
+      width: 100%;
+      max-width: 100%;
+      text-align: center;
+    }
+
+    .email-link > * {
+      max-width: 100%;
+      margin-bottom: 1.25rem;
+      font-size: clamp(0.9rem, 5vw, 1.35rem);
+      line-height: 1.15;
+      letter-spacing: 0.02em;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    p {
+      max-width: 100%;
+      font-size: clamp(0.78rem, 3.4vw, 1rem);
+      line-height: 1.55;
+    }
+
+    #icons {
+      justify-content: center;
+      gap: clamp(1.5rem, 10vw, 3rem);
+      margin: 2rem 0;
+    }
+
+    #icons svg {
+      height: 1.8rem;
+      margin: 0;
+    }
+  }
 `
 
 export default function ContactCard({ style, contact }) {
   return (
     <CardStyles style={style}>
-      <a href={`mailto:${contact.email}`}>
+      <a className="email-link" href={`mailto:${contact.email}`}>
         <PoppedHeader>{contact.email}</PoppedHeader>
       </a>
       <a href={contact.mapUrl} target="_blank" rel="noreferrer">
