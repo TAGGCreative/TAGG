@@ -7,6 +7,32 @@
   },
   "works": [
     {
+      "id": "1123017366",
+      "source": {
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/1123017366/master.m3u8",
+        "legacyVimeoId": "1123017366"
+      },
+      "client": "Amazon Business",
+      "title": "DamnFine Pizza",
+      "credits": {
+        "Production": "Bright Bay Creative",
+        "Post-Production": "TAGG Creative",
+        "Director / Producer": "Baylee Sinner",
+        "Editorial": "TAGG Creative"
+      },
+      "poster": {
+        "src": "/media/posters/1123017366.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_1123017366.mp4",
+        "webm": "/media/previews/preview_1123017366.webm"
+      }
+    },
+    {
       "id": "perfect-sports-he-man",
       "source": {
         "provider": "hls",
@@ -27,6 +53,40 @@
       "preview": {
         "provider": "static",
         "mp4": "/media/previews/perfect-sports-he-man-v2.mp4"
+      }
+    },
+    {
+      "id": "807636078",
+      "source": {
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/807636078/master.m3u8",
+        "legacyVimeoId": "807636078"
+      },
+      "client": "Microsoft Advertising",
+      "title": "Digital Nomad",
+      "credits": {
+        "Agency / Production": "TAGG Creative",
+        "Director / Producer": "Baylee Sinner",
+        "Director of Photography": "Jordan McGrath",
+        "1st AC": "Bob Webeck",
+        "Gaffer": "Jacob Aaron",
+        "Grip": "Papa Ibrahima Diop",
+        "Location Sound": "Josh Svare",
+        "Editorial": "TAGG Creative",
+        "Animation": "Hein Hamers",
+        "Post-Audio": "Dillon Wong",
+        "Colourist": "Leo Hynes",
+        "Graphic Design": "Sallua"
+      },
+      "poster": {
+        "src": "/media/posters/807636078.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_807636078.mp4",
+        "webm": "/media/previews/preview_807636078.webm"
       }
     },
     {
@@ -51,6 +111,37 @@
       "preview": {
         "provider": "static",
         "mp4": "/media/previews/lunr-v2.mp4"
+      }
+    },
+    {
+      "id": "819967719",
+      "source": {
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/819967719/master.m3u8",
+        "legacyVimeoId": "819967719"
+      },
+      "client": "NBA",
+      "title": "Something's Cooking in the Capital",
+      "credits": {
+        "Production": "LGR Productions",
+        "Editorial": "TAGG Creative Inc.",
+        "Director": "Lachlan Ross",
+        "Producer": "Dylan Simpson",
+        "Director of Photograph": "Ben Izzard",
+        "Editor": "Troy Adam Gordon",
+        "Graphics": "Sean Butler",
+        "Colourist": "Leo Hynes",
+        "Sound Design": "Hussain Hassan"
+      },
+      "poster": {
+        "src": "/media/posters/819967719.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/preview_819967719.mp4",
+        "webm": "/media/previews/preview_819967719.webm"
       }
     },
     {
@@ -144,97 +235,6 @@
       "preview": {
         "provider": "static",
         "mp4": "/media/previews/redwoodai.mp4"
-      }
-    },
-    {
-      "id": "1123017366",
-      "source": {
-        "provider": "hls",
-        "url": "https://media.taggcreative.com/videos/1123017366/master.m3u8",
-        "legacyVimeoId": "1123017366"
-      },
-      "client": "Amazon Business",
-      "title": "DamnFine Pizza",
-      "credits": {
-        "Production": "Bright Bay Creative",
-        "Post-Production": "TAGG Creative",
-        "Director / Producer": "Baylee Sinner",
-        "Editorial": "TAGG Creative"
-      },
-      "poster": {
-        "src": "/media/posters/1123017366.jpg",
-        "width": 960,
-        "height": 540
-      },
-      "preview": {
-        "provider": "static",
-        "mp4": "/media/previews/preview_1123017366.mp4",
-        "webm": "/media/previews/preview_1123017366.webm"
-      }
-    },
-    {
-      "id": "807636078",
-      "source": {
-        "provider": "hls",
-        "url": "https://media.taggcreative.com/videos/807636078/master.m3u8",
-        "legacyVimeoId": "807636078"
-      },
-      "client": "Microsoft Advertising",
-      "title": "Digital Nomad",
-      "credits": {
-        "Agency / Production": "TAGG Creative",
-        "Director / Producer": "Baylee Sinner",
-        "Director of Photography": "Jordan McGrath",
-        "1st AC": "Bob Webeck",
-        "Gaffer": "Jacob Aaron",
-        "Grip": "Papa Ibrahima Diop",
-        "Location Sound": "Josh Svare",
-        "Editorial": "TAGG Creative",
-        "Animation": "Hein Hamers",
-        "Post-Audio": "Dillon Wong",
-        "Colourist": "Leo Hynes",
-        "Graphic Design": "Sallua"
-      },
-      "poster": {
-        "src": "/media/posters/807636078.jpg",
-        "width": 960,
-        "height": 540
-      },
-      "preview": {
-        "provider": "static",
-        "mp4": "/media/previews/preview_807636078.mp4",
-        "webm": "/media/previews/preview_807636078.webm"
-      }
-    },
-    {
-      "id": "819967719",
-      "source": {
-        "provider": "hls",
-        "url": "https://media.taggcreative.com/videos/819967719/master.m3u8",
-        "legacyVimeoId": "819967719"
-      },
-      "client": "NBA",
-      "title": "Something's Cooking in the Capital",
-      "credits": {
-        "Production": "LGR Productions",
-        "Editorial": "TAGG Creative Inc.",
-        "Director": "Lachlan Ross",
-        "Producer": "Dylan Simpson",
-        "Director of Photograph": "Ben Izzard",
-        "Editor": "Troy Adam Gordon",
-        "Graphics": "Sean Butler",
-        "Colourist": "Leo Hynes",
-        "Sound Design": "Hussain Hassan"
-      },
-      "poster": {
-        "src": "/media/posters/819967719.jpg",
-        "width": 960,
-        "height": 540
-      },
-      "preview": {
-        "provider": "static",
-        "mp4": "/media/previews/preview_819967719.mp4",
-        "webm": "/media/previews/preview_819967719.webm"
       }
     },
     {
