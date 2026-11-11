@@ -24,6 +24,15 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    if (process.env.VERCEL_ENV !== "preview") return []
+    return [
+      {
+        source: "/preview-video/:path+",
+        destination: "https://media.taggcreative.com/videos/:path+",
+      },
+    ]
+  },
   async headers() {
     return [
       {
