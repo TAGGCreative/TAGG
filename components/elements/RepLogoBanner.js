@@ -1,5 +1,4 @@
 import Image from "next/image"
-import { useState } from "react"
 import styled from "styled-components"
 
 const rows = [
@@ -17,15 +16,8 @@ const rows = [
     ["Seattle Seahawks", "seahawks.svg", "https://www.seahawks.com/"],
     ["Zappos", "zappos.svg", "https://www.zappos.com/"],
     ["Teekay", "teekay.svg", "https://www.teekay.com/"],
-    ["Cult", "cult.svg", "https://cultideas.com/"],
   ],
   [
-    [
-      "Microsoft for Business",
-      "microsoft.png",
-      "https://www.microsoft.com/en-us/microsoft-365/business",
-      "FOR BUSINESS",
-    ],
     ["Perfect Sports", "perfect-sports.png", "https://perfectsports.com/"],
     ["ESPN", "espn.svg", "https://www.espn.com/"],
     ["Ultramar", "ultramar.svg", "https://www.ultramar.ca/"],
@@ -34,10 +26,33 @@ const rows = [
     ["Spotify", "spotify.svg", "https://www.spotify.com/"],
     ["Intel", "intel.svg", "https://www.intel.com/"],
     ["Hot Wheels", "hotwheels.svg", "https://hotwheels.mattel.com/"],
+    ["Cult", "cult.svg", "https://cultideas.com/"],
   ],
 ]
 
+const dimensions = {
+  "amazon-business.png": [480, 89],
+  "amazon.png": [480, 146],
+  "chevron.png": [197, 220],
+  "cocacola.png": [480, 157],
+  "cult.png": [446, 123],
+  "espn.png": [480, 119],
+  "hotwheels.png": [480, 135],
+  "intel.png": [333, 220],
+  "microsoft.png": [480, 102],
+  "nba.png": [374, 220],
+  "perfect-sports.png": [480, 104],
+  "seahawks.png": [480, 190],
+  "skilled-trades.png": [480, 153],
+  "spotify.png": [480, 145],
+  "teekay.png": [480, 138],
+  "ultramar.png": [201, 220],
+  "underarmour.png": [369, 215],
+  "zappos.png": [480, 120],
+}
+
 const Banner = styled.div`
+  --logo-gap: clamp(1.25rem, 2.7vw, 2.65rem);
   position: relative;
   max-width: 110rem;
   margin: 0 auto;
@@ -48,7 +63,7 @@ const Banner = styled.div`
       transform: translateX(0);
     }
     to {
-      transform: translateX(-50%);
+      transform: translateX(-25%);
     }
   }
 
@@ -81,33 +96,35 @@ const Banner = styled.div`
   .rep-group {
     display: flex;
     flex: none;
-    min-width: min(100vw, 110rem);
-    justify-content: space-around;
+    align-items: center;
+    gap: var(--logo-gap);
+    padding-inline-end: var(--logo-gap);
   }
 
   .rep-logo {
     display: grid;
-    align-content: center;
-    justify-items: center;
+    place-items: center;
     flex: none;
-    width: clamp(9rem, 15vw, 15rem);
-    height: clamp(4.5rem, 7vw, 7.2rem);
-    padding: 0.65rem clamp(0.7rem, 1vw, 1.25rem);
+    min-height: clamp(4.5rem, 7vw, 6.6rem);
     color: white;
   }
 
   .rep-logo img {
-    width: 100%;
-    height: clamp(2.9rem, 4.7vw, 4rem);
-    object-fit: contain;
+    --mark-height: clamp(2.1rem, 3.55vw, 3.45rem);
+    width: min(
+      calc(var(--mark-height) * var(--mark-ratio)),
+      clamp(8.1rem, 14vw, 13.25rem)
+    );
+    height: auto;
     transition: filter 160ms ease;
   }
 
   .rep-logo[data-brand="Chevron"] img,
   .rep-logo[data-brand="Ultramar"] img,
   .rep-logo[data-brand="Under Armour"] img,
-  .rep-logo[data-brand="Intel"] img {
-    height: clamp(2.55rem, 4.2vw, 3.65rem);
+  .rep-logo[data-brand="Intel"] img,
+  .rep-logo[data-brand="NBA"] img {
+    --mark-height: clamp(2.5rem, 4vw, 3.7rem);
   }
 
   .rep-logo:hover img,
@@ -115,40 +132,15 @@ const Banner = styled.div`
     filter: drop-shadow(-3px 3px var(--red));
   }
 
-  .rep-logo span {
-    font:
-      0.62rem Consolas,
-      monospace;
-    letter-spacing: 0.08em;
-  }
-
-  .rep-toggle {
-    display: block;
-    margin: 0.65rem clamp(0.5rem, 3vw, 2rem) 0 auto;
-    padding: 0.5rem;
-    border: 0;
-    background: transparent;
-    color: var(--lightgrey);
-    font:
-      0.68rem Consolas,
-      monospace;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-  }
-
-  &[data-paused="true"] .rep-row,
   .rep-row:has(.rep-logo:focus-visible) {
     mask-image: none;
   }
 
-  &[data-paused="true"] .rep-track,
   .rep-row:has(.rep-logo:focus-visible) .rep-track {
     width: 100%;
     animation: none;
   }
 
-  &[data-paused="true"] .rep-group,
   .rep-row:has(.rep-logo:focus-visible) .rep-group {
     min-width: 0;
     flex-wrap: wrap;
@@ -156,7 +148,6 @@ const Banner = styled.div`
     width: 100%;
   }
 
-  &[data-paused="true"] .rep-repeat,
   .rep-row:has(.rep-logo:focus-visible) .rep-repeat {
     display: none;
   }
@@ -175,59 +166,54 @@ const Banner = styled.div`
       flex-wrap: wrap;
       justify-content: center;
     }
-    .rep-repeat,
-    .rep-toggle {
+    .rep-repeat {
       display: none;
     }
   }
 `
 
 export default function RepLogoBanner() {
-  const [paused, setPaused] = useState(false)
   return (
-    <Banner data-paused={paused}>
+    <Banner>
       {rows.map((logos, index) => (
         <div className="rep-row" key={index}>
           <div className="rep-track">
-            {[false, true].map((repeat) => (
+            {[0, 1, 2, 3].map((copy) => (
               <div
-                className={`rep-group${repeat ? " rep-repeat" : ""}`}
-                key={String(repeat)}
-                aria-hidden={repeat || undefined}
+                className={`rep-group${copy ? " rep-repeat" : ""}`}
+                key={copy}
+                aria-hidden={copy ? true : undefined}
               >
-                {logos.map(([label, logo, href, sublabel]) => (
-                  <a
-                    key={label}
-                    className="rep-logo"
-                    data-brand={label}
-                    tabIndex={repeat ? -1 : undefined}
-                    aria-label={`${label} website`}
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <Image
-                      src={`/clients/knockouts/${logo.replace(/\.[^.]+$/, ".png")}`}
-                      alt=""
-                      width={192}
-                      height={96}
-                      unoptimized
-                    />
-                    {sublabel && <span>{sublabel}</span>}
-                  </a>
-                ))}
+                {logos.map(([label, logo, href]) => {
+                  const file = logo.replace(/\.[^.]+$/, ".png")
+                  const [width, height] = dimensions[file]
+                  return (
+                    <a
+                      key={label}
+                      className="rep-logo"
+                      data-brand={label}
+                      style={{ "--mark-ratio": width / height }}
+                      tabIndex={copy ? -1 : undefined}
+                      aria-label={`${label} website`}
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Image
+                        src={`/clients/knockouts/${file}`}
+                        alt=""
+                        width={width}
+                        height={height}
+                        unoptimized
+                      />
+                    </a>
+                  )
+                })}
               </div>
             ))}
           </div>
         </div>
       ))}
-      <button
-        className="rep-toggle"
-        type="button"
-        onClick={() => setPaused(!paused)}
-      >
-        {paused ? "Resume logo scroll" : "Pause logo scroll"}
-      </button>
     </Banner>
   )
 }

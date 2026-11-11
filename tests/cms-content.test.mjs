@@ -64,5 +64,6 @@ test("editorial fallback covers all CMS surfaces", () => {
   assert.ok(editorial.people.leadership.length > 0)
   assert.ok(editorial.people.extended.length > 0)
   assert.match(editorial.contact.email, /@taggcreative\.com$/)
-  assert.ok(editorial.contact.addressLines.length >= 3)
+  assert.deepEqual(editorial.contact.addressLines, [])
+  assert.equal(editorial.contact.mapUrl, "")
 })

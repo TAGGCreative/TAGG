@@ -50,11 +50,11 @@
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/cibc-journie/master.m3u8"
       },
-      "client": "CIBC × Parkland",
+      "client": "CIBC × Sunoco",
       "title": "JOURNIE Rewards",
       "credits": {},
       "poster": {
-        "src": "/media/posters/cibc-journie.jpg",
+        "src": "/media/posters/cibc-journie-v2.jpg",
         "width": 960,
         "height": 540
       },
@@ -73,7 +73,7 @@
       "title": "Foundry",
       "credits": {},
       "poster": {
-        "src": "/media/posters/microsoft-foundry.jpg",
+        "src": "/media/posters/microsoft-foundry-v2.jpg",
         "width": 960,
         "height": 540
       },
@@ -315,6 +315,7 @@
     },
     {
       "id": "658838914",
+      "showInWorks": false,
       "source": {
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/658838914/master.m3u8",
@@ -340,6 +341,7 @@
     },
     {
       "id": "658838775",
+      "showInWorks": false,
       "source": {
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/658838775/master.m3u8",
@@ -399,6 +401,7 @@
     },
     {
       "id": "658838647",
+      "showInWorks": false,
       "source": {
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/658838647/master.m3u8",
@@ -424,6 +427,7 @@
     },
     {
       "id": "658838629",
+      "showInWorks": false,
       "source": {
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/658838629/master.m3u8",
@@ -449,6 +453,7 @@
     },
     {
       "id": "660724223",
+      "showInWorks": false,
       "source": {
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/660724223/master.m3u8",
@@ -700,125 +705,102 @@
     }
   ],
   "carouselOrder": [
-    "658838914",
-    "658838775",
-    "658838629",
-    "658838647",
-    "660724223",
-    "658838698",
-    "658838893"
+    "perfect-sports-he-man",
+    "lunr",
+    "cibc-journie",
+    "microsoft-foundry",
+    "lir-life-sciences",
+    "redwoodai"
   ],
   "carouselSettings": {},
   "carousels": {
     "desktop": [
       {
-        "id": "571461797",
-        "projectId": "658838914",
+        "id": "perfect-sports-he-man-16x9",
+        "projectId": "perfect-sports-he-man",
         "source": {
           "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/571461797/master.m3u8",
-          "legacyVimeoId": "571461797"
+          "url": "https://media.taggcreative.com/videos/carousel-selects-v2/perfect-sports-he-man/16x9/master.m3u8"
         },
-        "client": "Under Armour",
-        "title": "The Gathering 2020",
+        "client": "Perfect Sports",
+        "title": "Masters of the Universe Collaboration",
         "poster": {
-          "src": "/media/posters/571461797.jpg",
+          "src": "/media/posters/carousel-perfect-sports-he-man-16x9-v2.jpg",
           "width": 960,
           "height": 540
         }
       },
       {
-        "id": "571461663",
-        "projectId": "658838775",
+        "id": "lunr-16x9",
+        "projectId": "lunr",
         "source": {
           "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/571461663/master.m3u8",
-          "legacyVimeoId": "571461663"
+          "url": "https://media.taggcreative.com/videos/carousel-selects-v2/lunr/16x9/master.m3u8"
         },
-        "client": "Seattle Seahawks",
-        "title": "eSports: Jordan Babineaux",
+        "client": "LUNR",
+        "title": "Canada’s Place in the Space Race",
         "poster": {
-          "src": "/media/posters/571461663.jpg",
+          "src": "/media/posters/carousel-lunr-16x9-v2.jpg",
           "width": 960,
           "height": 540
         }
       },
       {
-        "id": "658467184",
-        "projectId": "658838629",
+        "id": "cibc-journie-16x9",
+        "projectId": "cibc-journie",
         "source": {
           "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/658467184/master.m3u8",
-          "legacyVimeoId": "658467184"
+          "url": "https://media.taggcreative.com/videos/carousel-selects-v2/cibc-journie/16x9/master.m3u8"
         },
-        "client": "First United",
-        "title": "A New Home",
+        "client": "CIBC × Sunoco",
+        "title": "JOURNIE Rewards",
         "poster": {
-          "src": "/media/posters/658467184.jpg",
+          "src": "/media/posters/carousel-cibc-journie-16x9-v2.jpg",
           "width": 960,
           "height": 540
         }
       },
       {
-        "id": "658467192",
-        "projectId": "658838647",
+        "id": "microsoft-foundry-16x9",
+        "projectId": "microsoft-foundry",
         "source": {
           "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/658467192/master.m3u8",
-          "legacyVimeoId": "658467192"
+          "url": "https://media.taggcreative.com/videos/carousel-selects-v2/microsoft-foundry/16x9/master.m3u8"
         },
-        "client": "Makara",
-        "title": "People You Know Who Crypto",
+        "client": "Microsoft",
+        "title": "Foundry",
         "poster": {
-          "src": "/media/posters/658467192.jpg",
+          "src": "/media/posters/carousel-microsoft-foundry-16x9-v2.jpg",
           "width": 960,
           "height": 540
         }
       },
       {
-        "id": "571461592",
-        "projectId": "660724223",
+        "id": "lir-life-sciences-16x9",
+        "projectId": "lir-life-sciences",
         "source": {
           "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/571461592/master.m3u8",
-          "legacyVimeoId": "571461592"
+          "url": "https://media.taggcreative.com/videos/carousel-selects-v2/lir-life-sciences/16x9/master.m3u8"
         },
-        "client": "LifeBooster",
-        "title": "Everyday",
+        "client": "LIR Life Sciences",
+        "title": "Tackling Obesity Worldwide",
         "poster": {
-          "src": "/media/posters/571461592.jpg",
+          "src": "/media/posters/carousel-lir-life-sciences-16x9-v2.jpg",
           "width": 960,
           "height": 540
         }
       },
       {
-        "id": "571461532",
-        "projectId": "658838698",
+        "id": "redwoodai-16x9",
+        "projectId": "redwoodai",
         "source": {
           "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/571461532/master.m3u8",
-          "legacyVimeoId": "571461532"
+          "url": "https://media.taggcreative.com/videos/carousel-selects-v2/redwoodai/16x9/master.m3u8"
         },
-        "client": "AGLC",
-        "title": "Do I Need a Licence?",
+        "client": "RedwoodAI",
+        "title": "Chemical Intelligence, Real-World Impact",
         "poster": {
-          "src": "/media/posters/571461532.jpg",
-          "width": 960,
-          "height": 540
-        }
-      },
-      {
-        "id": "571461779",
-        "projectId": "658838893",
-        "source": {
-          "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/571461779/master.m3u8",
-          "legacyVimeoId": "571461779"
-        },
-        "client": "Spotify",
-        "title": "The Gathering 2020",
-        "poster": {
-          "src": "/media/posters/571461779.jpg",
+          "src": "/media/posters/carousel-redwoodai-16x9-v2.jpg",
           "width": 960,
           "height": 540
         }
@@ -826,115 +808,93 @@
     ],
     "mobile": [
       {
-        "id": "629599794",
-        "projectId": "658838914",
+        "id": "perfect-sports-he-man-9x16",
+        "projectId": "perfect-sports-he-man",
         "source": {
           "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/629599794/master.m3u8",
-          "legacyVimeoId": "629599794"
+          "url": "https://media.taggcreative.com/videos/carousel-selects-v2/perfect-sports-he-man/9x16/master.m3u8"
         },
-        "client": "Under Armour",
-        "title": "The Gathering 2020",
+        "client": "Perfect Sports",
+        "title": "Masters of the Universe Collaboration",
         "poster": {
-          "src": "/media/posters/629599794.jpg",
-          "width": 960,
-          "height": 540
+          "src": "/media/posters/carousel-perfect-sports-he-man-9x16-v2.jpg",
+          "width": 540,
+          "height": 960
         }
       },
       {
-        "id": "629599714",
-        "projectId": "658838775",
+        "id": "lunr-9x16",
+        "projectId": "lunr",
         "source": {
           "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/629599714/master.m3u8",
-          "legacyVimeoId": "629599714"
+          "url": "https://media.taggcreative.com/videos/carousel-selects-v2/lunr/9x16/master.m3u8"
         },
-        "client": "Seattle Seahawks",
-        "title": "eSports: Jordan Babineaux",
+        "client": "LUNR",
+        "title": "Canada’s Place in the Space Race",
         "poster": {
-          "src": "/media/posters/629599714.jpg",
-          "width": 960,
-          "height": 540
+          "src": "/media/posters/carousel-lunr-9x16-v2.jpg",
+          "width": 540,
+          "height": 960
         }
       },
       {
-        "id": "658467129",
-        "projectId": "658838629",
+        "id": "cibc-journie-9x16",
+        "projectId": "cibc-journie",
         "source": {
           "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/658467129/master.m3u8",
-          "legacyVimeoId": "658467129"
+          "url": "https://media.taggcreative.com/videos/carousel-selects-v2/cibc-journie/9x16/master.m3u8"
         },
-        "client": "First United",
-        "title": "A New Home",
+        "client": "CIBC × Sunoco",
+        "title": "JOURNIE Rewards",
         "poster": {
-          "src": "/media/posters/658467129.jpg",
-          "width": 960,
-          "height": 540
+          "src": "/media/posters/carousel-cibc-journie-9x16-v2.jpg",
+          "width": 540,
+          "height": 960
         }
       },
       {
-        "id": "658467138",
-        "projectId": "658838647",
+        "id": "microsoft-foundry-9x16",
+        "projectId": "microsoft-foundry",
         "source": {
           "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/658467138/master.m3u8",
-          "legacyVimeoId": "658467138"
+          "url": "https://media.taggcreative.com/videos/carousel-selects-v2/microsoft-foundry/9x16/master.m3u8"
         },
-        "client": "Makara",
-        "title": "People You Know Who Crypto",
+        "client": "Microsoft",
+        "title": "Foundry",
         "poster": {
-          "src": "/media/posters/658467138.jpg",
-          "width": 960,
-          "height": 540
+          "src": "/media/posters/carousel-microsoft-foundry-9x16-v2.jpg",
+          "width": 540,
+          "height": 960
         }
       },
       {
-        "id": "629599676",
-        "projectId": "660724223",
+        "id": "lir-life-sciences-9x16",
+        "projectId": "lir-life-sciences",
         "source": {
           "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/629599676/master.m3u8",
-          "legacyVimeoId": "629599676"
+          "url": "https://media.taggcreative.com/videos/carousel-selects-v2/lir-life-sciences/9x16/master.m3u8"
         },
-        "client": "LifeBooster",
-        "title": "Everyday",
+        "client": "LIR Life Sciences",
+        "title": "Tackling Obesity Worldwide",
         "poster": {
-          "src": "/media/posters/629599676.jpg",
-          "width": 960,
-          "height": 540
+          "src": "/media/posters/carousel-lir-life-sciences-9x16-v2.jpg",
+          "width": 540,
+          "height": 960
         }
       },
       {
-        "id": "629599660",
-        "projectId": "658838698",
+        "id": "redwoodai-9x16",
+        "projectId": "redwoodai",
         "source": {
           "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/629599660/master.m3u8",
-          "legacyVimeoId": "629599660"
+          "url": "https://media.taggcreative.com/videos/carousel-selects-v2/redwoodai/9x16/master.m3u8"
         },
-        "client": "AGLC",
-        "title": "Do I Need a Licence?",
+        "client": "RedwoodAI",
+        "title": "Chemical Intelligence, Real-World Impact",
         "poster": {
-          "src": "/media/posters/629599660.jpg",
-          "width": 960,
-          "height": 540
-        }
-      },
-      {
-        "id": "629599782",
-        "projectId": "658838893",
-        "source": {
-          "provider": "hls",
-          "url": "https://media.taggcreative.com/videos/629599782/master.m3u8",
-          "legacyVimeoId": "629599782"
-        },
-        "client": "Spotify",
-        "title": "The Gathering 2020",
-        "poster": {
-          "src": "/media/posters/629599782.jpg",
-          "width": 960,
-          "height": 540
+          "src": "/media/posters/carousel-redwoodai-9x16-v2.jpg",
+          "width": 540,
+          "height": 960
         }
       }
     ]

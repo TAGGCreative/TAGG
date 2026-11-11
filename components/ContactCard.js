@@ -92,16 +92,18 @@ export default function ContactCard({ style, contact }) {
       <a className="email-link" href={`mailto:${contact.email}`}>
         <PoppedHeader>{contact.email}</PoppedHeader>
       </a>
-      <a href={contact.mapUrl} target="_blank" rel="noreferrer">
-        <p>
-          {contact.addressLines.map((line, index) => (
-            <span key={line}>
-              {index > 0 && <br />}
-              {line}
-            </span>
-          ))}
-        </p>
-      </a>
+      {contact.mapUrl && contact.addressLines?.length > 0 && (
+        <a href={contact.mapUrl} target="_blank" rel="noreferrer">
+          <p>
+            {contact.addressLines.map((line, index) => (
+              <span key={line}>
+                {index > 0 && <br />}
+                {line}
+              </span>
+            ))}
+          </p>
+        </a>
+      )}
       <div id="icons">
         <a
           href={contact.socials.linkedin}

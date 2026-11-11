@@ -113,12 +113,8 @@
   },
   "contact": {
     "email": "info@taggcreative.com",
-    "addressLines": [
-      "128 W Pender St, Suite 1607",
-      "Vancouver, BC, Canada",
-      "V6B 1R8"
-    ],
-    "mapUrl": "https://goo.gl/maps/YuozNgimFFpJ6Wdv5",
+    "addressLines": [],
+    "mapUrl": "",
     "socials": {
       "linkedin": "https://www.linkedin.com/company/tagg-creative-inc./about/",
       "instagram": "https://www.instagram.com/taggcreative/",

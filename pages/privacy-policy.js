@@ -12,11 +12,7 @@ export default function PP() {
         <br />
         Owner and Data Controller
         <br />
-        TAGG Creative 128 W Pender St, Suite 1607
-        <br />
-        Vancouver, BC, Canada
-        <br />
-        V6B 1R8
+        TAGG Creative
         <br />
         Owner contact email: info@taggcreative.com
         <br />
