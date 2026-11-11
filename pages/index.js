@@ -103,7 +103,13 @@ export default function Home({
         <WhoWeAre id="about" content={editorial.sections.whoWeAre} />
         <Core id="core" items={editorial.sections.core} />
         <OurArena id="our-arena" items={editorial.sections.ourArena} />
-        <Works videoList={videoList} id="works" ref={refWorks} />
+        <Works
+          videoList={videoList.filter(
+            (project) => project.showInWorks !== false,
+          )}
+          id="works"
+          ref={refWorks}
+        />
         <People
           id="people"
           people={editorial.people.leadership}

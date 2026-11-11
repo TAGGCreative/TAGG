@@ -7,6 +7,120 @@
   },
   "works": [
     {
+      "id": "perfect-sports-he-man",
+      "source": {
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/perfect-sports-he-man/master.m3u8"
+      },
+      "client": "Perfect Sports",
+      "title": "He-Man Power",
+      "credits": {},
+      "poster": {
+        "src": "/media/posters/perfect-sports-he-man.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/perfect-sports-he-man.mp4"
+      }
+    },
+    {
+      "id": "lunr",
+      "source": {
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/lunr/master.m3u8"
+      },
+      "client": "LUNR",
+      "title": "LUNR",
+      "credits": {},
+      "poster": {
+        "src": "/media/posters/lunr.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/lunr.mp4"
+      }
+    },
+    {
+      "id": "cibc-journie",
+      "source": {
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/cibc-journie/master.m3u8"
+      },
+      "client": "CIBC × JOURNIE Rewards",
+      "title": "Super Save Sundays",
+      "credits": {},
+      "poster": {
+        "src": "/media/posters/cibc-journie.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/cibc-journie.mp4"
+      }
+    },
+    {
+      "id": "microsoft-foundry",
+      "source": {
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/microsoft-foundry/master.m3u8"
+      },
+      "client": "Microsoft",
+      "title": "Foundry",
+      "credits": {},
+      "poster": {
+        "src": "/media/posters/microsoft-foundry.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/microsoft-foundry.mp4"
+      }
+    },
+    {
+      "id": "lir-life-sciences",
+      "source": {
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/lir-life-sciences/master.m3u8"
+      },
+      "client": "LIR Life Sciences",
+      "title": "2026 Update",
+      "credits": {},
+      "poster": {
+        "src": "/media/posters/lir-life-sciences.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/lir-life-sciences.mp4"
+      }
+    },
+    {
+      "id": "redwoodai",
+      "source": {
+        "provider": "hls",
+        "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/redwoodai/master.m3u8"
+      },
+      "client": "RedwoodAI",
+      "title": "RedwoodAI",
+      "credits": {},
+      "poster": {
+        "src": "/media/posters/redwoodai.jpg",
+        "width": 960,
+        "height": 540
+      },
+      "preview": {
+        "provider": "static",
+        "mp4": "/media/previews/redwoodai.mp4"
+      }
+    },
+    {
       "id": "1123017366",
       "source": {
         "provider": "hls",
@@ -177,6 +291,7 @@
     },
     {
       "id": "1051355137",
+      "showInWorks": false,
       "source": {
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/1051355137/master.m3u8",
@@ -258,6 +373,7 @@
     },
     {
       "id": "805408384",
+      "showInWorks": false,
       "source": {
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/805408384/master.m3u8",
@@ -412,6 +528,7 @@
     },
     {
       "id": "658838751",
+      "showInWorks": false,
       "source": {
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/658838751/master.m3u8",
@@ -438,6 +555,7 @@
     },
     {
       "id": "658838676",
+      "showInWorks": false,
       "source": {
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/658838676/master.m3u8",
@@ -463,6 +581,7 @@
     },
     {
       "id": "658838860",
+      "showInWorks": false,
       "source": {
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/658838860/master.m3u8",
@@ -488,6 +607,7 @@
     },
     {
       "id": "658838813",
+      "showInWorks": false,
       "source": {
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/658838813/master.m3u8",
@@ -521,6 +641,7 @@
     },
     {
       "id": "662480133",
+      "showInWorks": false,
       "source": {
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/662480133/master.m3u8",
