@@ -1,3 +1,7 @@
+const localMediaPort = process.env.TAGG_LOCAL_MEDIA_PORT
+const localMedia =
+  /^\d{1,5}$/.test(localMediaPort || "") && !process.env.VERCEL_ENV
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   compiler: {
@@ -13,6 +17,7 @@ const nextConfig = {
   },
   reactStrictMode: true,
   images: {
+    unoptimized: Boolean(localMedia),
     formats: ["image/webp", "image/avif"],
     qualities: [65, 75],
     minimumCacheTTL: 86400,
@@ -22,6 +27,16 @@ const nextConfig = {
         hostname: "media.taggcreative.com",
         pathname: "/**",
       },
+      ...(localMedia
+        ? [
+            {
+              protocol: "http",
+              hostname: "127.0.0.1",
+              port: localMediaPort,
+              pathname: "/videos/**",
+            },
+          ]
+        : []),
     ],
   },
   async rewrites() {

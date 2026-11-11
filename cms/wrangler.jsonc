@@ -25,10 +25,15 @@
       "binding": "MEDIA",
       "bucket_name": "tagg-media",
     },
+    {
+      "binding": "PRIVATE_MEDIA",
+      "bucket_name": "tagg-cms-private",
+    },
   ],
   "vars": {
     "ENVIRONMENT": "production",
     "R2_BUCKET_NAME": "tagg-media",
+    "R2_PRIVATE_BUCKET_NAME": "tagg-cms-private",
     "R2_PUBLIC_BASE_URL": "https://media.taggcreative.com",
     "PUBLIC_SITE_URL": "https://taggcreative.com",
     "ALLOWED_EDITOR_EMAILS": "",

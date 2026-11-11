@@ -32,7 +32,7 @@ export async function getStaticProps({
   })
 
   if (!work || work.visible === false) {
-    return { notFound: true }
+    return { notFound: true, revalidate: 60 }
   }
 
   return {

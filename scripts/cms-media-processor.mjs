@@ -18,6 +18,17 @@ import { pipeline } from "node:stream/promises"
 
 const API = process.env.CMS_API_URL?.replace(/\/$/, "")
 const TOKEN = process.env.CMS_PROCESSOR_TOKEN
+const accessClientId = process.env.CMS_PROCESSOR_ACCESS_CLIENT_ID
+const accessClientSecret = process.env.CMS_PROCESSOR_ACCESS_CLIENT_SECRET
+const processorHeaders = {
+  authorization: `Bearer ${TOKEN}`,
+  ...(accessClientId && accessClientSecret
+    ? {
+        "CF-Access-Client-Id": accessClientId,
+        "CF-Access-Client-Secret": accessClientSecret,
+      }
+    : {}),
+}
 const WORK_ROOT = path.join(process.cwd(), ".cms-media-work")
 const ONCE = process.argv.includes("--once")
 const SELF_TEST = process.argv.includes("--self-test")
@@ -41,8 +52,9 @@ async function api(endpoint, options = {}) {
     try {
       const response = await fetch(`${API}${endpoint}`, {
         ...options,
+        redirect: "error",
         headers: {
-          authorization: `Bearer ${TOKEN}`,
+          ...processorHeaders,
           "content-type": "application/json",
           ...(options.headers || {}),
         },
@@ -57,6 +69,14 @@ async function api(endpoint, options = {}) {
     }
   }
   throw lastError
+}
+
+function jobApi(job, action, body) {
+  return api(`/api/processor/jobs/${job.id}/${action}`, {
+    method: "POST",
+    headers: { "x-tagg-job-attempt": String(job.attempts) },
+    body: JSON.stringify(body),
+  })
 }
 
 function createProgressReporter(job) {
@@ -75,12 +95,7 @@ function createProgressReporter(job) {
     lastSentAt = currentTime
     pending = pending
       .catch(() => {})
-      .then(() =>
-        api(`/api/processor/jobs/${job.id}/progress`, {
-          method: "POST",
-          body: JSON.stringify({ progress }),
-        }),
-      )
+      .then(() => jobApi(job, "progress", { progress }))
     return pending
   }
   return { report, flush: () => pending }
@@ -203,9 +218,8 @@ async function download(job, target, onProgress = () => {}) {
     `${API}/api/processor/`,
   )
   const response = await fetch(job.downloadUrl, {
-    headers: localProcessorDownload
-      ? { authorization: `Bearer ${TOKEN}` }
-      : undefined,
+    headers: localProcessorDownload ? processorHeaders : undefined,
+    redirect: localProcessorDownload ? "error" : "follow",
   })
   if (!response.ok || !response.body)
     throw new Error(`Original download failed (${response.status})`)
@@ -920,7 +934,7 @@ async function createSelectedDerivatives(source, output, dimensions, options) {
     "1",
     poster,
   ])
-  await run("ffmpeg", [
+  const previewBase = [
     "-hide_banner",
     "-loglevel",
     "error",
@@ -936,19 +950,58 @@ async function createSelectedDerivatives(source, output, dimensions, options) {
     dimensions.width < dimensions.height
       ? "scale=-2:960:flags=lanczos"
       : "scale=960:-2:flags=lanczos",
-    "-c:v",
-    "h264_videotoolbox",
-    "-allow_sw",
+  ]
+  const previewTail = ["-movflags", "+faststart", previewMp4]
+  try {
+    await run("ffmpeg", [
+      ...previewBase,
+      "-c:v",
+      "h264_videotoolbox",
+      "-allow_sw",
+      "1",
+      "-prio_speed",
+      "1",
+      "-b:v",
+      "3500k",
+      "-pix_fmt",
+      "nv12",
+      ...previewTail,
+    ])
+  } catch (error) {
+    console.warn(
+      `VideoToolbox preview encode unavailable; retrying with libx264. ${error.message}`,
+    )
+    await run("ffmpeg", [
+      ...previewBase,
+      "-c:v",
+      "libx264",
+      "-preset",
+      "veryfast",
+      "-crf",
+      "21",
+      "-pix_fmt",
+      "yuv420p",
+      ...previewTail,
+    ])
+  }
+}
+
+async function createHeroPoster(source, output, dimensions) {
+  const posterTime = Math.min(1, Math.max(0, dimensions.duration / 2))
+  await run("ffmpeg", [
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-y",
+    "-ss",
+    String(posterTime),
+    "-i",
+    source,
+    "-frames:v",
     "1",
-    "-prio_speed",
+    "-q:v",
     "1",
-    "-b:v",
-    "3500k",
-    "-pix_fmt",
-    "nv12",
-    "-movflags",
-    "+faststart",
-    previewMp4,
+    path.join(output, "poster.jpg"),
   ])
 }
 
@@ -976,20 +1029,22 @@ async function uploadFile(job, file, key) {
   const type = contentType(file)
   const immutable = !file.endsWith(".m3u8")
   const contentLength = (await stat(file)).size
-  const signed = await api(`/api/processor/jobs/${job.id}/upload-url`, {
-    method: "POST",
-    body: JSON.stringify({
-      key,
-      contentType: type,
-      contentLength,
-      cacheControl: immutable
-        ? "public, max-age=31536000, immutable"
-        : "public, max-age=60",
-    }),
+  const signed = await jobApi(job, "upload-url", {
+    key,
+    contentType: type,
+    contentLength,
+    cacheControl: immutable
+      ? "public, max-age=31536000, immutable"
+      : "public, max-age=60",
   })
+  const localOutput = signed.url.startsWith(`${API}/api/processor/jobs/`)
   const response = await fetch(signed.url, {
     method: "PUT",
+    redirect: localOutput ? "error" : "follow",
     headers: {
+      ...(localOutput
+        ? { ...processorHeaders, "x-tagg-job-attempt": String(job.attempts) }
+        : {}),
       "content-length": String(contentLength),
       "content-type": type,
     },
@@ -1021,14 +1076,17 @@ async function uploadOutputs(job, output, progressStart = 70, onProgress) {
 }
 
 async function processJob(job) {
-  const directory = path.join(WORK_ROOT, job.id)
+  const directory = path.join(WORK_ROOT, `${job.id}-attempt-${job.attempts}`)
   const localSource = path.join(directory, "source")
   const output = path.join(directory, "output")
   const selectedDerivatives = job.asset_role === "projectDerivatives"
-  const source = selectedDerivatives ? job.downloadUrl : localSource
+  const heroAsset = ["heroDesktop", "heroMobile"].includes(job.asset_role)
+  const directRead =
+    selectedDerivatives && !job.downloadUrl.startsWith(`${API}/api/processor/`)
+  const source = directRead ? job.downloadUrl : localSource
   const progress = createProgressReporter(job)
   await mkdir(output, { recursive: true })
-  if (!selectedDerivatives)
+  if (!directRead)
     await download(job, localSource, (fraction) =>
       progress.report(1 + fraction * 7),
     )
@@ -1051,29 +1109,28 @@ async function processJob(job) {
       (fraction) => progress.report(8 + fraction * 62),
       job.asset_role === "main",
     )
+    if (heroAsset) await createHeroPoster(source, output, dimensions)
     await progress.report(70, true)
     await uploadOutputs(job, output, 70, progress.report)
   }
   await progress.flush()
   const prefix = job.outputPrefix
-  await api(`/api/processor/jobs/${job.id}/complete`, {
-    method: "POST",
-    body: JSON.stringify({
-      output: {
-        masterKey: selectedDerivatives ? null : `${prefix}/master.m3u8`,
-        scrubKey: job.asset_role === "main" ? `${prefix}/scrub.mp4` : null,
-        posterKey: selectedDerivatives ? `${prefix}/poster.jpg` : null,
-        previewMp4Key: selectedDerivatives ? `${prefix}/preview.mp4` : null,
-        posterTime: selectedDerivatives
-          ? Number(job.options?.posterTime || 0)
-          : null,
-        previewStart: selectedDerivatives
-          ? Number(job.options?.previewStart || 0)
-          : null,
-        width: dimensions.width,
-        height: dimensions.height,
-      },
-    }),
+  await jobApi(job, "complete", {
+    output: {
+      masterKey: selectedDerivatives ? null : `${prefix}/master.m3u8`,
+      scrubKey: job.asset_role === "main" ? `${prefix}/scrub.mp4` : null,
+      posterKey:
+        selectedDerivatives || heroAsset ? `${prefix}/poster.jpg` : null,
+      previewMp4Key: selectedDerivatives ? `${prefix}/preview.mp4` : null,
+      posterTime: selectedDerivatives
+        ? Number(job.options?.posterTime || 0)
+        : null,
+      previewStart: selectedDerivatives
+        ? Number(job.options?.previewStart || 0)
+        : null,
+      width: dimensions.width,
+      height: dimensions.height,
+    },
   })
   await rm(directory, { recursive: true, force: true })
 }
@@ -1084,15 +1141,18 @@ async function tick() {
   console.log(
     `Processing ${job.original_name} for ${job.project_id} (${job.asset_role})`,
   )
+  const heartbeat = setInterval(() => {
+    jobApi(job, "progress", { progress: 0 }).catch(console.error)
+  }, 60_000)
   try {
     await processJob(job)
     console.log(`Completed ${job.id}`)
   } catch (error) {
     console.error(error)
-    await api(`/api/processor/jobs/${job.id}/error`, {
-      method: "POST",
-      body: JSON.stringify({ error: error.message }),
-    }).catch(console.error)
+    await jobApi(job, "error", { error: error.message }).catch(console.error)
+    if (ONCE) process.exitCode = 1
+  } finally {
+    clearInterval(heartbeat)
   }
   return true
 }
@@ -1143,6 +1203,9 @@ if (SELF_TEST) {
     throw new Error(
       "Processor self-test could not ingest an existing HLS master",
     )
+  await createHeroPoster(source, output, dimensions)
+  if (!(await exists(path.join(output, "poster.jpg"))))
+    throw new Error("Processor self-test did not create a carousel poster")
   await createSelectedDerivatives(source, output, dimensions, {
     posterTime: 4,
     previewStart: 8,
@@ -1162,6 +1225,7 @@ if (SELF_TEST) {
   do {
     const worked = await tick().catch((error) => {
       console.error(error)
+      if (ONCE) process.exitCode = 1
       return false
     })
     if (ONCE) break

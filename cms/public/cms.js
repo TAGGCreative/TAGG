@@ -8,6 +8,9 @@ const state = {
   selectedProjectId: null,
   dirty: false,
   saving: false,
+  editVersion: 0,
+  draftETag: null,
+  savePromise: null,
   savedAt: null,
   publishedRevisionId: null,
   drawer: false,
@@ -92,29 +95,42 @@ function setAtPath(path, value) {
 }
 
 function markDirty() {
+  state.editVersion += 1
   state.dirty = true
   clearTimeout(state.saveTimer)
   state.saveTimer = setTimeout(saveDraft, 650)
   updateSaveState()
 }
 
-async function saveDraft() {
-  if (!state.dirty || state.saving) return
+function saveDraft() {
+  if (state.savePromise) return state.savePromise
+  if (!state.dirty) return Promise.resolve(true)
   state.saving = true
   updateSaveState()
-  try {
-    const result = await api("/api/draft", {
-      method: "PUT",
-      body: JSON.stringify(state.content),
-    })
-    state.dirty = false
-    state.savedAt = result.savedAt
-  } catch (error) {
-    notify(error.message, true)
-  } finally {
-    state.saving = false
-    updateSaveState()
-  }
+  state.savePromise = (async () => {
+    try {
+      while (state.dirty) {
+        const version = state.editVersion
+        const result = await api("/api/draft", {
+          method: "PUT",
+          headers: { "If-Match": state.draftETag },
+          body: JSON.stringify(state.content),
+        })
+        state.draftETag = result.etag
+        state.savedAt = result.savedAt
+        state.dirty = state.editVersion !== version
+      }
+      return true
+    } catch (error) {
+      notify(error.message, true)
+      return false
+    } finally {
+      state.saving = false
+      state.savePromise = null
+      updateSaveState()
+    }
+  })()
+  return state.savePromise
 }
 
 function updateSaveState() {
@@ -310,10 +326,8 @@ function normalizeCarouselContent() {
   for (const projectId of media.carouselOrder) {
     const settings = (media.carouselSettings[projectId] ||= {})
     if (typeof settings.approved !== "boolean")
-      settings.approved = ["desktop", "mobile"].every((format) =>
-        media.carousels[format].some(
-          (clip) => clip.projectId === projectId && clip.source,
-        ),
+      settings.approved = media.carousels.desktop.some(
+        (clip) => clip.projectId === projectId && clip.source,
       )
     delete settings.framing
     delete settings.focusBias
@@ -348,13 +362,17 @@ function carouselJob(projectId, format) {
 
 function carouselAsset(project, format) {
   const clip = carouselClip(project.id, format)
+  const desktopClip = carouselClip(project.id, "desktop")
   const job = carouselJob(project.id, format)
   const role = format === "mobile" ? "heroMobile" : "heroDesktop"
-  const ready = Boolean(clip?.source?.url || clip?.source?.id)
+  const isCropFallback =
+    format === "mobile" && !clip?.source && desktopClip?.source
+  const displayClip = clip?.source ? clip : isCropFallback ? desktopClip : clip
+  const ready = Boolean(displayClip?.source?.url || displayClip?.source?.id)
   const [statusClass, status] = statusLabel(job, ready)
   return `<div class="carousel-asset ${format}">
-    <div class="asset-preview" style="${clip?.poster?.src || project.poster?.src ? `background-image:url('${escapeHtml(clip?.poster?.src || project.poster?.src)}')` : ""}"><span>${format === "mobile" ? "9:16" : "16:9"}</span></div>
-    <div class="asset-copy"><strong>${format === "mobile" ? "Mobile from Resolve" : "Desktop carousel"}</strong><span class="status ${statusClass}"><span class="dot"></span>${escapeHtml(job?.error || status)}</span></div>
+    <div class="asset-preview" style="${displayClip?.poster?.src || project.poster?.src ? `background-image:url('${escapeHtml(displayClip?.poster?.src || project.poster?.src)}')` : ""}"><span>${format === "mobile" ? "9:16" : "16:9"}</span></div>
+    <div class="asset-copy"><strong>${format === "mobile" ? "Mobile 9:16" : "Desktop carousel"}</strong><span class="status ${statusClass}"><span class="dot"></span>${escapeHtml(job?.error || (isCropFallback ? "Ready — desktop crop" : status))}</span>${format === "mobile" ? `<small class="fallback-note">${isCropFallback ? "Automatic centre crop. Upload a custom vertical clip any time." : "Custom vertical clip"}</small>` : ""}</div>
     <div class="asset-actions">
       <label class="button small ghost upload-button">Upload custom<input type="file" accept="video/*" data-upload="${escapeHtml(project.id)}:${role}" /></label>
     </div>
@@ -364,9 +382,9 @@ function carouselAsset(project, format) {
 
 function carouselCard(project, index) {
   const settings = state.content.media.carouselSettings[project.id] || {}
-  const readyToReview = ["desktop", "mobile"].every((format) =>
-    Boolean(carouselClip(project.id, format)?.source),
-  )
+  const hasDesktop = Boolean(carouselClip(project.id, "desktop")?.source)
+  const hasMobile = Boolean(carouselClip(project.id, "mobile")?.source)
+  const readyToReview = hasDesktop
   return `<article class="carousel-card" draggable="true" data-carousel-item="${escapeHtml(project.id)}" data-carousel-index="${index}">
     <div class="carousel-card-head">
       <span class="grip" aria-hidden="true">⠿</span>
@@ -383,7 +401,7 @@ function carouselCard(project, index) {
       ${carouselAsset(project, "mobile")}
     </div>
     <div class="approval-row">
-      <span><strong>${readyToReview ? "Ready for your review" : "Waiting for both formats"}</strong><small>${readyToReview ? "Use Preview site below, then approve this project for publishing." : "Approval unlocks after desktop and mobile clips are ready."}</small></span>
+      <span><strong>${readyToReview ? (hasMobile ? "Ready for your review" : "Ready with mobile crop fallback") : "Waiting for desktop clip"}</strong><small>${readyToReview ? "Use Preview site below, then approve this project for publishing." : "Upload the desktop carousel clip to unlock approval. A mobile clip is optional."}</small></span>
       <label class="approval-check"><input type="checkbox" data-carousel-approved="${escapeHtml(project.id)}" ${settings.approved ? "checked" : ""} ${readyToReview ? "" : "disabled"}/> Approved</label>
     </div>
   </article>`
@@ -481,6 +499,7 @@ function revisionsDrawer() {
   if (!state.drawer) return ""
   return `<div class="drawer-backdrop" data-action="close-drawer"></div><aside class="drawer" aria-label="Version history">
     <div class="row" style="justify-content:space-between"><div><span class="eyebrow">Safety net</span><h2>Version history</h2></div><button class="button ghost" data-action="close-drawer">Close</button></div>
+    <button class="button ghost" data-action="refresh-published">Refresh published pages</button>
     ${state.revisions.map((revision) => `<div class="revision"><strong>${escapeHtml(revision.label)}</strong><small>${new Date(revision.created_at).toLocaleString()} · ${escapeHtml(revision.created_by)}${revision.is_published ? " · Live" : ""}</small><button class="button" data-restore="${revision.id}">Restore to draft</button></div>`).join("")}
   </aside>`
 }
@@ -727,7 +746,7 @@ function deleteProject() {
 }
 
 async function preview() {
-  await saveDraft()
+  if (!(await saveDraft())) return
   try {
     const result = await api("/api/preview", { method: "POST", body: "{}" })
     window.open(result.url, "_blank", "noopener")
@@ -737,15 +756,20 @@ async function preview() {
 }
 
 async function publish() {
-  await saveDraft()
+  if (!(await saveDraft())) return
   if (!confirm("Publish this draft to the live TAGG site?")) return
   try {
-    const result = await api("/api/publish", { method: "POST", body: "{}" })
+    const result = await api("/api/publish", {
+      method: "POST",
+      body: "{}",
+      headers: { "If-Match": state.draftETag },
+    })
     state.publishedRevisionId = result.revisionId
     notify(
       result.propagation === "complete"
-        ? "Published. The live site is refreshing now."
-        : `Published; refresh is retrying: ${result.propagation}`,
+        ? "Published. Site pages refreshed."
+        : `Published. Use Refresh published pages in History to retry. ${result.refreshError}`,
+      result.propagation !== "complete",
     )
     await load(false)
   } catch (error) {
@@ -754,6 +778,7 @@ async function publish() {
 }
 
 async function restore(id) {
+  if (!(await saveDraft())) return
   if (
     !confirm(
       "Restore this version into your draft? Nothing goes live until you publish.",
@@ -761,10 +786,31 @@ async function restore(id) {
   )
     return
   try {
-    await api(`/api/revisions/${id}/restore`, { method: "POST", body: "{}" })
+    await api(`/api/revisions/${id}/restore`, {
+      method: "POST",
+      body: "{}",
+      headers: { "If-Match": state.draftETag },
+    })
     state.drawer = false
     await load(false)
     notify("Version restored to draft.")
+  } catch (error) {
+    notify(error.message, true)
+  }
+}
+
+async function retryPublishedRefresh() {
+  try {
+    const result = await api("/api/publish/refresh", {
+      method: "POST",
+      body: "{}",
+    })
+    notify(
+      result.propagation === "complete"
+        ? "Published pages refreshed."
+        : result.refreshError,
+      result.propagation !== "complete",
+    )
   } catch (error) {
     notify(error.message, true)
   }
@@ -1130,6 +1176,7 @@ function bindEvents() {
         "delete-project": deleteProject,
         preview,
         publish,
+        "refresh-published": retryPublishedRefresh,
         history: () => {
           state.drawer = true
           render()
@@ -1150,14 +1197,18 @@ function bindEvents() {
 }
 
 async function load(first = true) {
+  if (!first && (state.dirty || state.saving)) return
+  const version = state.editVersion
   try {
     const data = await api("/api/bootstrap")
+    if (state.editVersion !== version || state.dirty || state.saving) return
     state.content = data.draft
     normalizeCarouselContent()
     state.jobs = data.jobs
     state.revisions = data.revisions
     state.user = data.user
     state.savedAt = data.draftMeta.updatedAt
+    state.draftETag = data.draftMeta.etag
     state.publishedRevisionId = data.publishedRevisionId
     state.selectedProjectId ||= data.draft.media.works[0]?.id
     state.dirty = false
@@ -1196,6 +1247,11 @@ async function refreshActiveJobs() {
 }
 
 load()
+window.addEventListener("beforeunload", (event) => {
+  if (!state.dirty) return
+  event.preventDefault()
+  event.returnValue = true
+})
 setInterval(refreshActiveJobs, 3000)
 setInterval(() => {
   const editing = document.activeElement?.matches?.("input, textarea, select")
