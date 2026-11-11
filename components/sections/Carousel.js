@@ -163,7 +163,7 @@ const DetailsOverlay = styled(Overlay)`
 `
 
 const ClipCarousel = forwardRef(
-  ({ clipsDesktop, clipsMobile, cloudflareCustomerCode }, ref) => {
+  ({ clipsDesktop, clipsMobile, projects, cloudflareCustomerCode }, ref) => {
     const [isStaticVisible, setIsStaticVisible] = useState(false)
     const [isTransitioning, setIsTransitioning] = useState(false)
     const [isPosterVisible, setIsPosterVisible] = useState(true)
@@ -245,7 +245,7 @@ const ClipCarousel = forwardRef(
 
     return (
       <Section ref={ref}>
-        <Frame>
+        <Frame data-featured-frame="">
           {/* static blip between video loads */}
           <Static
             ref={staticRef}
@@ -316,6 +316,9 @@ const ClipCarousel = forwardRef(
                     client={video.client}
                     title={video.title}
                     href={`/works/${video.projectId}`}
+                    project={projects.find(
+                      (project) => project.id === video.projectId,
+                    )}
                     key={video.id}
                   />
                 )

@@ -28,9 +28,10 @@ export default function VideoModalPrototype({ works = [], children }) {
   const closeProjectRef = useRef(null)
   const closeTransitionCleanupRef = useRef(null)
 
-  const openProject = (work, event) => {
+  const openProject = (work, event, featuredFrame) => {
     const trigger = event.currentTarget
-    const thumbnail = trigger.querySelector("[data-modal-thumbnail]")
+    const thumbnail =
+      featuredFrame || trigger.querySelector("[data-modal-thumbnail]")
     const thumbnailAnchor = trigger.querySelector(
       "[data-modal-thumbnail-anchor]",
     )

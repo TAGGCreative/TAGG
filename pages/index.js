@@ -1,6 +1,7 @@
 import { NavBar } from "../components/NavBar"
 import Carousel from "../components/sections/Carousel"
 import Works from "../components/sections/Works"
+import VideoModal from "../components/VideoModal"
 import WhoWeAre from "../components/sections/WhoWeAre"
 import Core from "../components/sections/Core"
 import OurArena from "../components/sections/OurArena"
@@ -71,7 +72,7 @@ export default function Home({
   })
 
   return (
-    <>
+    <VideoModal>
       <NavBar
         visibleSection={
           inViewCarousel || inViewWorks
@@ -95,6 +96,7 @@ export default function Home({
         <Carousel
           clipsDesktop={clipsDesktop}
           clipsMobile={clipsMobile}
+          projects={videoList}
           cloudflareCustomerCode={cloudflareCustomerCode}
           ref={refCarousel}
         />
@@ -112,6 +114,6 @@ export default function Home({
         <Contact id="contact" contact={editorial.contact} ref={refContact} />
         <PrivacyPolicy />
       </main>
-    </>
+    </VideoModal>
   )
 }

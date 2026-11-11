@@ -2,6 +2,7 @@ import styled from "styled-components"
 import Link from "next/link"
 import PoppedHeader from "../PoppedHeader"
 import { ActiveCorners } from "./ActiveCorners"
+import { useVideoModal } from "../VideoModalContext"
 
 const TitleContainer = styled.div`
   position: absolute;
@@ -40,13 +41,34 @@ const WatchButton = () => (
   </ActiveCorners>
 )
 
-export const Slide = ({ client, title, href }) => {
+export const Slide = ({ client, title, href, project }) => {
+  const openProject = useVideoModal()
+
   return (
     <TitleContainer>
       <PoppedHeader style={{ margin: 0 }}>{client}</PoppedHeader>
       <p>{title}</p>
       <Link
         href={href}
+        aria-haspopup={project ? "dialog" : undefined}
+        onClick={(event) => {
+          if (
+            !project ||
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey
+          )
+            return
+          event.preventDefault()
+          openProject(
+            project,
+            event,
+            event.currentTarget.closest("[data-featured-frame]"),
+          )
+        }}
         aria-label={`Watch ${client}: ${title}`}
         style={{
           width: "fit-content",

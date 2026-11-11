@@ -2,7 +2,7 @@ import { forwardRef } from "react"
 import styled from "styled-components"
 
 import WorkThumb from "../WorkThumb"
-import VideoModal, { useVideoModal } from "../VideoModal"
+import { useVideoModal } from "../VideoModal"
 import PoppedHeader from "../PoppedHeader"
 import HomeSection from "./HomeSection"
 import { StaggerBox } from "../elements/StaggerBox"
@@ -157,9 +157,7 @@ const Works = forwardRef(({ videoList }, ref) => {
         </AnimatedHeader>
       )}
     >
-      <VideoModal>
-        <WorksGrid videoList={videoList} />
-      </VideoModal>
+      <WorksGrid videoList={videoList} />
     </WorksSection>
   )
 })
