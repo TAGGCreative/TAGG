@@ -41,7 +41,7 @@ const Banner = styled.div`
   position: relative;
   max-width: 110rem;
   margin: 0 auto;
-  padding: 1rem 0;
+  padding: clamp(2.75rem, 5vw, 4.5rem) 0 1rem;
 
   @keyframes rep-scroll {
     from {
