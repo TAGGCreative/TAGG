@@ -1,18 +1,12 @@
 import assert from "node:assert/strict"
 import { randomUUID } from "node:crypto"
-import { readFileSync } from "node:fs"
 import test from "node:test"
-import { Miniflare } from "miniflare"
+import { createCmsWorker } from "./cms-worker-fixture.mjs"
 
 test("a multipart upload resumes and a lost completion response can be retried", async () => {
-  const mf = new Miniflare({
-    modules: true,
-    script: readFileSync(process.env.TAGG_CMS_WORKER_BUNDLE, "utf8"),
-    compatibilityDate: "2026-07-11",
-    compatibilityFlags: ["nodejs_compat"],
-    d1Databases: ["DB"],
-    r2Buckets: ["MEDIA", "PRIVATE_MEDIA"],
-    bindings: { ENVIRONMENT: "development" },
+  const mf = createCmsWorker({
+    buckets: ["MEDIA", "PRIVATE_MEDIA"],
+    vars: { ENVIRONMENT: "development" },
   })
   try {
     const base = "http://localhost/api"
@@ -77,14 +71,9 @@ test("a multipart upload resumes and a lost completion response can be retried",
 })
 
 test("a reclaimed processing job ignores the previous processor's updates", async () => {
-  const mf = new Miniflare({
-    modules: true,
-    script: readFileSync(process.env.TAGG_CMS_WORKER_BUNDLE, "utf8"),
-    compatibilityDate: "2026-07-11",
-    compatibilityFlags: ["nodejs_compat"],
-    d1Databases: ["DB"],
-    r2Buckets: ["MEDIA"],
-    bindings: {
+  const mf = createCmsWorker({
+    buckets: ["MEDIA"],
+    vars: {
       ENVIRONMENT: "development",
       R2_PUBLIC_BASE_URL: "https://media.example.com",
     },
@@ -172,14 +161,9 @@ test("a reclaimed processing job ignores the previous processor's updates", asyn
 test("production Worker denies expired private snapshots and development credentials", async () => {
   const secret = "synthetic-server-preview-secret"
   const processor = "synthetic-server-processor-secret"
-  const mf = new Miniflare({
-    modules: true,
-    script: readFileSync(process.env.TAGG_CMS_WORKER_BUNDLE, "utf8"),
-    compatibilityDate: "2026-07-11",
-    compatibilityFlags: ["nodejs_compat"],
-    d1Databases: ["DB"],
-    r2Buckets: ["PRIVATE_MEDIA"],
-    bindings: {
+  const mf = createCmsWorker({
+    buckets: ["PRIVATE_MEDIA"],
+    vars: {
       ENVIRONMENT: "production",
       ALLOWED_EDITOR_EMAILS: "editor@example.com",
       PREVIEW_SECRET: secret,

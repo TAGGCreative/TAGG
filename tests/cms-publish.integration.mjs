@@ -1,17 +1,11 @@
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
 import test from "node:test"
-import { Miniflare } from "miniflare"
+import { createCmsWorker } from "./cms-worker-fixture.mjs"
 
 test("publish commits one reviewed draft and restore leaves the current revision live until republished", async () => {
-  const mf = new Miniflare({
-    modules: true,
-    script: readFileSync(process.env.TAGG_CMS_WORKER_BUNDLE, "utf8"),
-    compatibilityDate: "2026-07-11",
-    compatibilityFlags: ["nodejs_compat"],
-    d1Databases: ["DB"],
-    r2Buckets: ["PRIVATE_MEDIA"],
-    bindings: { ENVIRONMENT: "development" },
+  const mf = createCmsWorker({
+    buckets: ["PRIVATE_MEDIA"],
+    vars: { ENVIRONMENT: "development" },
   })
   try {
     const base = "http://localhost/api"

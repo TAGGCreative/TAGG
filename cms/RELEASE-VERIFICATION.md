@@ -63,7 +63,7 @@ The previous bundled Worker returned 200 and marked a poster ready even after it
 
 The staging template uses separate public and private staging buckets, an unset disposable database ID, and no default route or checked-in preview credentials. Production and staging Worker dry runs both passed. Lint, eight CMS tests, five bundled Worker integration tests, the FFmpeg self-test, and the 32-page production build passed.
 
-The production dependency audit reports one low advisory for transitive `deepmerge`. The full audit reports eight high, seven moderate and one low advisory, with the high and moderate advisories outside the production dependency graph. The staging operator procedure is in the README.
+The initial full dependency audit reported eight high, seven moderate and one low advisory. A non-forced npm audit update removed all eight high advisories. The remaining full audit reports seven moderate findings in the development lint dependency graph and one low finding for transitive `deepmerge`. The production audit reports the low finding only. The Worker integration fixture was updated for the newer Miniflare API and passed all five bundled tests. The staging operator procedure is in the README.
 
 ## Required evidence before release
 
