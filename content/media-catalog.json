@@ -117,7 +117,7 @@
       "id": "819967719",
       "source": {
         "provider": "hls",
-        "url": "https://media.taggcreative.com/videos/819967719/master.m3u8",
+        "url": "https://media.taggcreative.com/videos/819967719/main/1080p/index.m3u8",
         "legacyVimeoId": "819967719"
       },
       "client": "NBA",
@@ -220,7 +220,7 @@
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/redwoodai/master.m3u8"
       },
-      "client": "Redwood Space AI",
+      "client": "Redwood AI",
       "title": "Chemical Intelligence, Real-World Impact",
       "credits": {
         "Agency / Production": "TAGG Creative",
@@ -823,7 +823,7 @@
           "provider": "hls",
           "url": "https://media.taggcreative.com/videos/carousel-selects-v2/redwoodai/16x9/master.m3u8"
         },
-        "client": "Redwood Space AI",
+        "client": "Redwood AI",
         "title": "Chemical Intelligence, Real-World Impact",
         "poster": {
           "src": "/media/posters/carousel-redwoodai-16x9-v2.jpg",
@@ -915,7 +915,7 @@
           "provider": "hls",
           "url": "https://media.taggcreative.com/videos/carousel-selects-v2/redwoodai/9x16/master.m3u8"
         },
-        "client": "Redwood Space AI",
+        "client": "Redwood AI",
         "title": "Chemical Intelligence, Real-World Impact",
         "poster": {
           "src": "/media/posters/carousel-redwoodai-9x16-v2.jpg",
