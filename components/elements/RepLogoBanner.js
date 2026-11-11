@@ -5,6 +5,7 @@ const rows = [
   [
     ["Microsoft", "microsoft.png", "https://www.microsoft.com/"],
     ["NBA", "nba.svg", "https://www.nba.com/"],
+    ["Sunoco", "sunoco.png", "https://www.sunocolp.com/"],
     ["Amazon", "amazon.svg", "https://aws.amazon.com/"],
     [
       "Skilled Trades College",
@@ -12,17 +13,20 @@ const rows = [
       "https://www.skilledtradescollege.ca/",
     ],
     ["Coca-Cola", "cocacola.svg", "https://www.coca-cola.com/"],
-    ["Chevron", "chevron.svg", "https://www.chevron.com/"],
     ["Seattle Seahawks", "seahawks.svg", "https://www.seahawks.com/"],
-    ["Zappos", "zappos.svg", "https://www.zappos.com/"],
-    ["Teekay", "teekay.svg", "https://www.teekay.com/"],
   ],
   [
     ["Perfect Sports", "perfect-sports.png", "https://perfectsports.com/"],
     ["ESPN", "espn.svg", "https://www.espn.com/"],
-    ["Ultramar", "ultramar.svg", "https://www.ultramar.ca/"],
+    ["Doritos", "doritos.png", "https://www.doritos.com/"],
     ["Amazon Business", "amazon-business.png", "https://business.amazon.com/"],
     ["Under Armour", "underarmour.svg", "https://www.underarmour.com/"],
+    ["Zappos", "zappos.svg", "https://www.zappos.com/"],
+    ["Teekay", "teekay.svg", "https://www.teekay.com/"],
+  ],
+  [
+    ["The Leukemia & Lymphoma Society", "lls.png", "https://www.lls.org/"],
+    ["Chevron", "chevron.svg", "https://www.chevron.com/"],
     ["Spotify", "spotify.svg", "https://www.spotify.com/"],
     ["Intel", "intel.svg", "https://www.intel.com/"],
     ["Hot Wheels", "hotwheels.svg", "https://hotwheels.mattel.com/"],
@@ -36,9 +40,12 @@ const dimensions = {
   "chevron.png": [197, 220],
   "cocacola.png": [480, 157],
   "cult.png": [446, 123],
+  // White knockout adapted from commons.wikimedia.org/wiki/File:Logo_Doritos.png (CC BY 4.0).
+  "doritos.png": [288, 220],
   "espn.png": [480, 119],
   "hotwheels.png": [480, 135],
   "intel.png": [333, 220],
+  "lls.png": [467, 220],
   "microsoft.png": [480, 102],
   "nba.png": [374, 220],
   "perfect-sports.png": [480, 104],
@@ -46,7 +53,7 @@ const dimensions = {
   "skilled-trades.png": [480, 153],
   "spotify.png": [480, 145],
   "teekay.png": [480, 138],
-  "ultramar.png": [201, 220],
+  "sunoco.png": [480, 62],
   "underarmour.png": [369, 215],
   "zappos.png": [480, 120],
 }
@@ -84,9 +91,13 @@ const Banner = styled.div`
     animation: rep-scroll 44s linear infinite;
   }
 
-  .rep-row + .rep-row .rep-track {
+  .rep-row:nth-child(even) .rep-track {
     animation-direction: reverse;
     animation-duration: 48s;
+  }
+
+  .rep-row:nth-child(3) .rep-track {
+    animation-duration: 40s;
   }
 
   .rep-row:hover .rep-track {
@@ -120,7 +131,8 @@ const Banner = styled.div`
   }
 
   .rep-logo[data-brand="Chevron"] img,
-  .rep-logo[data-brand="Ultramar"] img,
+  .rep-logo[data-brand="Doritos"] img,
+  .rep-logo[data-brand="The Leukemia & Lymphoma Society"] img,
   .rep-logo[data-brand="Under Armour"] img,
   .rep-logo[data-brand="Intel"] img,
   .rep-logo[data-brand="NBA"] img {
