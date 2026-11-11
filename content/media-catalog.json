@@ -13,16 +13,16 @@
         "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/perfect-sports-he-man/master.m3u8"
       },
       "client": "Perfect Sports",
-      "title": "He-Man Power",
+      "title": "Masters of the Universe Collaboration",
       "credits": {},
       "poster": {
-        "src": "/media/posters/perfect-sports-he-man.jpg",
+        "src": "/media/posters/perfect-sports-he-man-v2.jpg",
         "width": 960,
         "height": 540
       },
       "preview": {
         "provider": "static",
-        "mp4": "/media/previews/perfect-sports-he-man.mp4"
+        "mp4": "/media/previews/perfect-sports-he-man-v2.mp4"
       }
     },
     {
@@ -32,7 +32,7 @@
         "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/lunr/master.m3u8"
       },
       "client": "LUNR",
-      "title": "LUNR",
+      "title": "Canada’s Place in the Space Race",
       "credits": {},
       "poster": {
         "src": "/media/posters/lunr.jpg",
@@ -41,7 +41,7 @@
       },
       "preview": {
         "provider": "static",
-        "mp4": "/media/previews/lunr.mp4"
+        "mp4": "/media/previews/lunr-v2.mp4"
       }
     },
     {
@@ -50,8 +50,8 @@
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/cibc-journie/master.m3u8"
       },
-      "client": "CIBC × JOURNIE Rewards",
-      "title": "Super Save Sundays",
+      "client": "CIBC × Parkland",
+      "title": "JOURNIE Rewards",
       "credits": {},
       "poster": {
         "src": "/media/posters/cibc-journie.jpg",
@@ -89,7 +89,7 @@
         "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/lir-life-sciences/master.m3u8"
       },
       "client": "LIR Life Sciences",
-      "title": "2026 Update",
+      "title": "Tackling Obesity Worldwide",
       "credits": {},
       "poster": {
         "src": "/media/posters/lir-life-sciences.jpg",
@@ -108,7 +108,7 @@
         "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/redwoodai/master.m3u8"
       },
       "client": "RedwoodAI",
-      "title": "RedwoodAI",
+      "title": "Chemical Intelligence, Real-World Impact",
       "credits": {},
       "poster": {
         "src": "/media/posters/redwoodai.jpg",

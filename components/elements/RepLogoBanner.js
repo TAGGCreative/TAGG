@@ -90,29 +90,29 @@ const Banner = styled.div`
     align-content: center;
     justify-items: center;
     flex: none;
-    width: clamp(6.5rem, 11vw, 12rem);
-    height: clamp(4.25rem, 7vw, 7.2rem);
-    padding: 0.5rem clamp(0.7rem, 1.5vw, 1.4rem);
-    color: var(--lightgrey);
+    width: clamp(9rem, 15vw, 15rem);
+    height: clamp(4.5rem, 7vw, 7.2rem);
+    padding: 0.65rem clamp(0.7rem, 1vw, 1.25rem);
+    color: white;
   }
 
   .rep-logo img {
     width: 100%;
-    height: 100%;
-    max-height: clamp(2.75rem, 5.5vw, 5.3rem);
+    height: clamp(2.9rem, 4.7vw, 4rem);
     object-fit: contain;
-    filter: var(--logo-tone, brightness(0) invert(0.83));
     transition: filter 160ms ease;
   }
 
-  .rep-logo[data-brand="NBA"] {
-    --logo-tone: grayscale(1) brightness(1.35);
+  .rep-logo[data-brand="Chevron"] img,
+  .rep-logo[data-brand="Ultramar"] img,
+  .rep-logo[data-brand="Under Armour"] img,
+  .rep-logo[data-brand="Intel"] img {
+    height: clamp(2.55rem, 4.2vw, 3.65rem);
   }
 
   .rep-logo:hover img,
   .rep-logo:focus-visible img {
-    filter: var(--logo-tone, brightness(0) invert(0.96))
-      drop-shadow(-3px 3px var(--red));
+    filter: drop-shadow(-3px 3px var(--red));
   }
 
   .rep-logo span {
@@ -207,7 +207,7 @@ export default function RepLogoBanner() {
                     rel="noreferrer"
                   >
                     <Image
-                      src={`/clients/${logo}`}
+                      src={`/clients/knockouts/${logo.replace(/\.[^.]+$/, ".png")}`}
                       alt=""
                       width={192}
                       height={96}
