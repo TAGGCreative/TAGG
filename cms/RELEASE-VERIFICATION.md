@@ -65,9 +65,15 @@ The staging template uses separate public and private staging buckets, an unset 
 
 The initial full dependency audit reported eight high, seven moderate and one low advisory. A non-forced npm audit update removed all eight high advisories. The remaining full audit reports seven moderate findings in the development lint dependency graph and one low finding for transitive `deepmerge`. The production audit reports the low finding only. The Worker integration fixture was updated for the newer Miniflare API and passed all five bundled tests. The staging operator procedure is in the README.
 
+## Feed outage and HLS readiness
+
+- `node --test tests/cms-refresh.integration.mjs` starts a production-mode Next server and a disposable content feed. An HTTP 503 from the feed made signed refresh return 502 for both the homepage and work route. Both routes continued returning 200 with the previous title. After restoring the feed, retry returned 200 and both routes served the new title.
+- The previous Worker accepted an HLS master whose rendition was missing. The regression now verifies 409 for a missing rendition, 409 for a missing media segment, and successful completion once the master, rendition, initialization file and segment exist.
+- A fresh disposable Wrangler Worker on port 8808 accepted real FFmpeg output for a synthetic main film, desktop hero and mobile hero. All three reached ready and served HLS master playlists from local R2. The five bundled Worker integrations and the Next outage integration passed.
+
 ## Required evidence before release
 
 - Verify Cloudflare Access policies and credentials through the isolated staging edge, including the editor, CMS-fetch service and processor. Wrangler reports the available OAuth session has expired and cannot refresh in the current noninteractive session. An owner needs to renew the Cloudflare login or supply a staging-scoped credential through their usual secret management.
 - Verify the staging bucket has no public access. Before any migration of an existing CMS, inventory its legacy public video originals and previews, verify the private copies, and remove the old exposed copies without breaking referenced public images.
-- Repeat the verified local lifecycle through staging with disposable resources and confirm the staging Vercel routes refresh. Verify publication gating and recovery if the staging feed temporarily fails.
+- Repeat the verified local lifecycle through staging with disposable resources and confirm the staging Vercel routes refresh. The feed failure and recovery behavior has passed locally against production-mode Next.
 - Verify the staging storage and revalidation configuration. Owner setup for the production Cloudflare Access app, database, secrets, storage and processing Mac remains subject to the deployment steps in the repository README.

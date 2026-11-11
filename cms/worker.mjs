@@ -978,6 +978,67 @@ async function readLocalPublicMedia(request, env, key) {
   return new Response(object.body, { headers })
 }
 
+async function readPlaylist(bucket, key) {
+  const object = await bucket.get(key)
+  if (!object) return null
+  if (object.size > 8 * 1024 * 1024) {
+    await object.body.cancel()
+    return null
+  }
+  const lines = (await object.text())
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+  return lines[0] === "#EXTM3U" ? lines : null
+}
+
+async function hasReadyRendition(bucket, prefix) {
+  const lines = await readPlaylist(bucket, `${prefix}index.m3u8`)
+  if (
+    !lines?.includes("#EXT-X-ENDLIST") ||
+    !lines.includes('#EXT-X-MAP:URI="init.mp4"')
+  )
+    return false
+  const segments = lines.filter((line) => !line.startsWith("#"))
+  if (
+    !segments.length ||
+    segments.some((name) => !/^segment_\d+\.m4s$/.test(name))
+  )
+    return false
+  const missing = new Set(
+    ["init.mp4", ...segments].map((name) => prefix + name),
+  )
+  let cursor
+  do {
+    const page = await bucket.list({ prefix, cursor })
+    for (const object of page.objects) {
+      if (object.size > 0) missing.delete(object.key)
+    }
+    cursor = page.truncated ? page.cursor : undefined
+  } while (cursor && missing.size)
+  return missing.size === 0
+}
+
+async function hasReadyStream(bucket, prefix) {
+  const lines = await readPlaylist(bucket, `${prefix}/master.m3u8`)
+  const variants = lines?.filter((line) => !line.startsWith("#"))
+  if (
+    !variants?.length ||
+    variants.length > 4 ||
+    variants.some((line) => !/^(1080|720|540|360)p\/index\.m3u8$/.test(line))
+  )
+    return false
+  const ready = await Promise.all(
+    variants.map((line) =>
+      hasReadyRendition(
+        bucket,
+        `${prefix}/${line.slice(0, line.indexOf("/") + 1)}`,
+      ),
+    ),
+  )
+  return ready.every(Boolean)
+}
+
 async function updateProcessorJob(request, env, job, action) {
   const id = job.id
   const input = await request.json().catch(() => ({}))
@@ -1028,7 +1089,10 @@ async function updateProcessorJob(request, env, job, action) {
         (await env.MEDIA.head(output[field]))?.size > 0,
     ),
   )
-  if (ready.some((file) => !file))
+  if (
+    ready.some((file) => !file) ||
+    (requiredFiles.masterKey && !(await hasReadyStream(env.MEDIA, prefix)))
+  )
     return json({ error: "The processing output is incomplete." }, 409)
   return completeProcessorJob(env, job, output)
 }

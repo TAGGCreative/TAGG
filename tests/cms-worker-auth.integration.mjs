@@ -115,8 +115,22 @@ test("a reclaimed processing job ignores the previous processor's updates", asyn
     const output = { masterKey, scrubKey }
     assert.equal((await update(2, "complete", { output })).status, 409)
     const media = await mf.getR2Bucket("MEDIA")
-    await media.put(masterKey, "#EXTM3U\n")
+    await media.put(
+      masterKey,
+      "#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100\n360p/index.m3u8\n",
+    )
     await media.put(scrubKey, "synthetic bytes")
+    assert.equal((await update(2, "complete", { output })).status, 409)
+    await media.put(
+      `${job.outputPrefix}/360p/index.m3u8`,
+      '#EXTM3U\n#EXT-X-MAP:URI="init.mp4"\n#EXTINF:1.0,\nsegment_00000.m4s\n#EXT-X-ENDLIST\n',
+    )
+    await media.put(`${job.outputPrefix}/360p/init.mp4`, "synthetic init")
+    assert.equal((await update(2, "complete", { output })).status, 409)
+    await media.put(
+      `${job.outputPrefix}/360p/segment_00000.m4s`,
+      "synthetic segment",
+    )
     const getDraft = () =>
       mf.dispatchFetch("http://localhost/api/bootstrap").then((r) => r.json())
     const title = "Concurrent editorial change"
