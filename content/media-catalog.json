@@ -14,7 +14,11 @@
       },
       "client": "Perfect Sports",
       "title": "Masters of the Universe Collaboration",
-      "credits": {},
+      "credits": {
+        "Agency / Production": "Dear Combat",
+        "Editorial": "TAGG Creative",
+        "AI VFX": "TAGG Creative"
+      },
       "poster": {
         "src": "/media/posters/perfect-sports-he-man-v2.jpg",
         "width": 960,
@@ -31,9 +35,14 @@
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/lunr/master.m3u8"
       },
-      "client": "LUNR",
+      "client": "LUNR Aerospace",
       "title": "Canada’s Place in the Space Race",
-      "credits": {},
+      "credits": {
+        "Agency / Production": "TAGG Creative",
+        "Director of Photography (Denver)": "Carlos Malache",
+        "Director of Photography (Toronto)": "Gabriel Shubat",
+        "Editorial / Post-Production": "TAGG Creative"
+      },
       "poster": {
         "src": "/media/posters/lunr.jpg",
         "width": 960,
@@ -52,7 +61,10 @@
       },
       "client": "CIBC × Sunoco",
       "title": "JOURNIE Rewards",
-      "credits": {},
+      "credits": {
+        "Agency": "TRGR",
+        "Animation / Editorial": "TAGG Creative"
+      },
       "poster": {
         "src": "/media/posters/cibc-journie-v2.jpg",
         "width": 960,
@@ -71,7 +83,12 @@
       },
       "client": "Microsoft",
       "title": "Foundry",
-      "credits": {},
+      "credits": {
+        "Agency / Production": "Agency NOIR",
+        "Producer": "Baylee Sinner",
+        "Editorial": "TAGG Creative",
+        "VFX": "Christopher Zeischegg"
+      },
       "poster": {
         "src": "/media/posters/microsoft-foundry-v2.jpg",
         "width": 960,
@@ -90,7 +107,12 @@
       },
       "client": "LIR Life Sciences",
       "title": "Tackling Obesity Worldwide",
-      "credits": {},
+      "credits": {
+        "Agency / Production": "TAGG Creative",
+        "Director of Photography": "Kenny Choi",
+        "Gaffer / Key Grip": "Michael Goyert",
+        "Editorial / Post Production": "TAGG Creative"
+      },
       "poster": {
         "src": "/media/posters/lir-life-sciences.jpg",
         "width": 960,
@@ -107,9 +129,13 @@
         "provider": "hls",
         "url": "https://media.taggcreative.com/videos/portfolio-refresh-2026/redwoodai/master.m3u8"
       },
-      "client": "RedwoodAI",
+      "client": "Redwood Space AI",
       "title": "Chemical Intelligence, Real-World Impact",
-      "credits": {},
+      "credits": {
+        "Agency / Production": "TAGG Creative",
+        "Director of Photography": "Kenny Choi",
+        "Editorial / Post Production": "TAGG Creative"
+      },
       "poster": {
         "src": "/media/posters/redwoodai.jpg",
         "width": 960,
@@ -737,7 +763,7 @@
           "provider": "hls",
           "url": "https://media.taggcreative.com/videos/carousel-selects-v2/lunr/16x9/master.m3u8"
         },
-        "client": "LUNR",
+        "client": "LUNR Aerospace",
         "title": "Canada’s Place in the Space Race",
         "poster": {
           "src": "/media/posters/carousel-lunr-16x9-v2.jpg",
@@ -797,7 +823,7 @@
           "provider": "hls",
           "url": "https://media.taggcreative.com/videos/carousel-selects-v2/redwoodai/16x9/master.m3u8"
         },
-        "client": "RedwoodAI",
+        "client": "Redwood Space AI",
         "title": "Chemical Intelligence, Real-World Impact",
         "poster": {
           "src": "/media/posters/carousel-redwoodai-16x9-v2.jpg",
@@ -829,7 +855,7 @@
           "provider": "hls",
           "url": "https://media.taggcreative.com/videos/carousel-selects-v2/lunr/9x16/master.m3u8"
         },
-        "client": "LUNR",
+        "client": "LUNR Aerospace",
         "title": "Canada’s Place in the Space Race",
         "poster": {
           "src": "/media/posters/carousel-lunr-9x16-v2.jpg",
@@ -889,7 +915,7 @@
           "provider": "hls",
           "url": "https://media.taggcreative.com/videos/carousel-selects-v2/redwoodai/9x16/master.m3u8"
         },
-        "client": "RedwoodAI",
+        "client": "Redwood Space AI",
         "title": "Chemical Intelligence, Real-World Impact",
         "poster": {
           "src": "/media/posters/carousel-redwoodai-9x16-v2.jpg",
