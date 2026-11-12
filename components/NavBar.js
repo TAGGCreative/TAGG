@@ -64,12 +64,13 @@ const Links = styled.div`
   justify-content: space-around;
 `
 
-const Logo = styled.img`
+const Logo = styled.span`
   position: relative;
   z-index: 1;
   margin: 0;
   height: 35px;
-  width: auto;
+  aspect-ratio: 500 / 496;
+  background: url("/images/taggSpray.png") center / contain no-repeat;
   transition: transform 0.2s ease-in-out;
   filter: invert(20%) sepia(45%) saturate(6941%) hue-rotate(329deg)
     brightness(95%) contrast(94%);
@@ -105,8 +106,9 @@ const Logo = styled.img`
 
   @media screen and (max-width: 425px) {
     height: 25px;
-    width: auto;
-    margin: 0;
+    background: var(--red);
+    mask: url("/images/taggSpray.png") center / contain no-repeat;
+    filter: none;
   }
 `
 
@@ -146,13 +148,8 @@ export const NavBar = ({ visibleSection }) => {
 
   return (
     <Nav>
-      <a id="logo" href="#">
-        <Logo
-          src="/images/taggSpray.png"
-          alt="TAGG Creative — back to top"
-          width="500"
-          height="496"
-        />
+      <a id="logo" href="#" aria-label="TAGG Creative — back to top">
+        <Logo aria-hidden="true" />
       </a>
       <Links>
         <NavLink
