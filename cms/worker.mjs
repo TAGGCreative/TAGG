@@ -736,15 +736,17 @@ async function completeUpload(request, env) {
   let object = await bucket.head(key)
   if (!object) {
     try {
-      object = await bucket
+      await bucket
         .resumeMultipartUpload(key, uploadId)
         .complete(parts.map(({ etag, partNumber }) => ({ etag, partNumber })))
     } catch (error) {
       object = await bucket.head(key)
       if (!object) throw error
     }
+    // Verify the stored object because the completion receipt may omit metadata.
+    object ??= await bucket.head(key)
   }
-  if (object.customMetadata?.jobId !== jobId || object.size !== job.size_bytes)
+  if (object?.customMetadata?.jobId !== jobId || object?.size !== job.size_bytes)
     return json(
       { error: "Stored file does not match this upload session." },
       409,

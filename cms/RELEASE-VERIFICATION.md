@@ -79,9 +79,13 @@ The initial full dependency audit reported eight high, seven moderate and one lo
 - The renewed Wrangler session could list Access applications. Creating the owner-only rehearsal Access application returned HTTP 403, Cloudflare error 1010. The staging hostname has not been connected to the Worker. The Access applications and service credentials must be configured through an account session with write access before the real edge rehearsal.
 - The signed-in Cloudflare dashboard subsequently created the rehearsal editor application with exactly one Allow policy for `troy@taggcreative.com`. Worker version `d1970eef-0f72-4ac7-9e6c-a67a91416b00` connected `cms-rehearsal.taggcreative.com` and uses that application's audience to validate editor tokens. Anonymous requests to both `/` and `/api/bootstrap` returned 302 to the TAGG Access sign-in. The browser reached the email-code prompt. A successful authenticated editor session and the service policies remain to be verified.
 
+## Signed-in staging draft and uploads
+
+The owner signed in through Cloudflare Access. A synthetic project saved through the editor and survived a full reload. The first master upload committed its bytes to private R2 but completion rejected the upload receipt. An authenticated R2 download matched the source byte for byte. The Worker now verifies metadata by reading the committed object. Version `b6329c77-c7e3-463b-baa6-f82e07b90ce7` queued the original browser session on retry and queued a fresh desktop hero upload. Lint and the three bundled Worker recovery and authorization tests passed.
+
 ## Required evidence before release
 
-- Verify Cloudflare Access through the isolated staging edge. Complete the editor email sign-in, then configure and verify the CMS-fetch service and processor credentials.
+- Configure and verify the CMS-fetch service and processor credentials through the isolated staging edge. The editor email sign-in, draft save and reload, and synthetic uploads passed in the actual staging browser.
 - Verify the staging bucket has no public access. Before any migration of an existing CMS, inventory its legacy public video originals and previews, verify the private copies, and remove the old exposed copies without breaking referenced public images.
 - Repeat the verified local lifecycle through staging with disposable resources and confirm the staging Vercel routes refresh. The feed failure and recovery behavior has passed locally against production-mode Next.
 - Verify the staging storage and revalidation configuration. Owner setup for the production Cloudflare Access app, database, secrets, storage and processing Mac remains subject to the deployment steps in the repository README.
