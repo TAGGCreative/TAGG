@@ -77,10 +77,11 @@ The initial full dependency audit reported eight high, seven moderate and one lo
 - Worker version `8295af42-5261-4ddd-891f-e3255618cef1` deployed as `tagg-cms-rehearsal` with no public route. Its three resource bindings point to the rehearsal database and buckets.
 - Wrangler reported that the private bucket has its public development URL disabled and has no custom domains. An authenticated synthetic MP4 upload and download matched byte for byte.
 - The renewed Wrangler session could list Access applications. Creating the owner-only rehearsal Access application returned HTTP 403, Cloudflare error 1010. The staging hostname has not been connected to the Worker. The Access applications and service credentials must be configured through an account session with write access before the real edge rehearsal.
+- The signed-in Cloudflare dashboard subsequently created the rehearsal editor application with exactly one Allow policy for `troy@taggcreative.com`. Worker version `d1970eef-0f72-4ac7-9e6c-a67a91416b00` connected `cms-rehearsal.taggcreative.com` and uses that application's audience to validate editor tokens. Anonymous requests to both `/` and `/api/bootstrap` returned 302 to the TAGG Access sign-in. The browser reached the email-code prompt. A successful authenticated editor session and the service policies remain to be verified.
 
 ## Required evidence before release
 
-- Verify Cloudflare Access policies and credentials through the isolated staging edge, including the editor, CMS-fetch service and processor. The owner needs to enable Access application and policy setup using an authorized account session.
+- Verify Cloudflare Access through the isolated staging edge. Complete the editor email sign-in, then configure and verify the CMS-fetch service and processor credentials.
 - Verify the staging bucket has no public access. Before any migration of an existing CMS, inventory its legacy public video originals and previews, verify the private copies, and remove the old exposed copies without breaking referenced public images.
 - Repeat the verified local lifecycle through staging with disposable resources and confirm the staging Vercel routes refresh. The feed failure and recovery behavior has passed locally against production-mode Next.
 - Verify the staging storage and revalidation configuration. Owner setup for the production Cloudflare Access app, database, secrets, storage and processing Mac remains subject to the deployment steps in the repository README.
