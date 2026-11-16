@@ -1,4 +1,5 @@
-import Head from "next/head"
+import Seo from "./Seo"
+import { projectMetadata } from "../lib/seo.mjs"
 import PoppedHeader from "./PoppedHeader"
 import styled from "styled-components"
 import { FullPlayer } from "./elements/Player"
@@ -143,13 +144,7 @@ export default function WorkPage({ videos, videoId, cloudflareCustomerCode }) {
 
   return (
     <>
-      <Head>
-        <title>{`${clientName} — ${title} | TAGG Creative`}</title>
-        <meta
-          name="description"
-          content={`${title}, created for ${clientName} by TAGG Creative.`}
-        />
-      </Head>
+      <Seo {...projectMetadata(video)} />
       <Content>
         <CloseButton
           type="button"

@@ -16,7 +16,7 @@ export default function ModalLab({ works, customerCode }) {
     <>
       <Head>
         <title>Video Modal Lab | TAGG Creative</title>
-        <meta name="robots" content="noindex, nofollow" />
+        <meta name="robots" content="noindex, nofollow" key="robots" />
       </Head>
       <main className="modal-lab-page">
         <div className="modal-lab-intro">

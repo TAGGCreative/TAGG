@@ -14,6 +14,8 @@ import { getSiteContent } from "../lib/siteContent"
 import { useInView } from "../utils/useInView"
 import { BackgroundStatic1 } from "../components/elements/BackgroundStatic1"
 import Link from "next/link"
+import Head from "next/head"
+import { organizationData, serializeJsonLd } from "../lib/seo.mjs"
 
 export async function getStaticProps({ preview = false, previewData = {} }) {
   const content = await getSiteContent({
@@ -73,6 +75,17 @@ export default function Home({
 
   return (
     <VideoModal>
+      {!isPreview && (
+        <Head>
+          <script
+            type="application/ld+json"
+            key="organization-jsonld"
+            dangerouslySetInnerHTML={{
+              __html: serializeJsonLd(organizationData(editorial)),
+            }}
+          />
+        </Head>
+      )}
       <NavBar
         visibleSection={
           inViewCarousel || inViewWorks
